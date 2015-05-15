@@ -13,6 +13,30 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="头文件\Triangulation">
+      <UniqueIdentifier>{1ed00173-2678-465c-a1fc-6ac369542176}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Triangulation">
+      <UniqueIdentifier>{20021d4f-b052-464a-a3f7-ecc48f683418}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Graph">
+      <UniqueIdentifier>{683d00d0-3500-4155-97d7-34f08918a8a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Graph">
+      <UniqueIdentifier>{2da384d6-cdfd-42b5-9d07-638fe1d782cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\DCEL">
+      <UniqueIdentifier>{10237910-419f-4eb5-bcaa-a124a146ebb7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\DCEL">
+      <UniqueIdentifier>{e3b29310-9403-4b22-9182-3cdda7a1358d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Math2d">
+      <UniqueIdentifier>{0c1fbd1b-a90b-405e-8857-4b48583f702a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Math2d">
+      <UniqueIdentifier>{89b3c4d1-8bb9-459a-b34b-28878ca83fa1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
