@@ -4,6 +4,7 @@
 
 Rendering::Rendering()
 {
+	int a = 3;
 }
 
 
