@@ -37,6 +37,18 @@
     <Filter Include="源文件\Math2d">
       <UniqueIdentifier>{89b3c4d1-8bb9-459a-b34b-28878ca83fa1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\Triangulation\common">
+      <UniqueIdentifier>{35a382a8-a89e-4172-93c0-bdfc4a4bb42e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Triangulation\sweep">
+      <UniqueIdentifier>{2c28fcbd-ceb5-459a-ac56-862961162d12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Triangulation\common">
+      <UniqueIdentifier>{b07b830e-615c-4755-b037-bafea65984d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Triangulation\sweep">
+      <UniqueIdentifier>{696bbf20-b061-451d-a8da-9b405b815f86}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -63,6 +75,27 @@
     <ClInclude Include="Rendering.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="shapes.h">
+      <Filter>头文件\Triangulation\common</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>头文件\Triangulation\common</Filter>
+    </ClInclude>
+    <ClInclude Include="advancing_front.h">
+      <Filter>头文件\Triangulation\sweep</Filter>
+    </ClInclude>
+    <ClInclude Include="cdt.h">
+      <Filter>头文件\Triangulation\sweep</Filter>
+    </ClInclude>
+    <ClInclude Include="sweep.h">
+      <Filter>头文件\Triangulation\sweep</Filter>
+    </ClInclude>
+    <ClInclude Include="sweep_context.h">
+      <Filter>头文件\Triangulation\sweep</Filter>
+    </ClInclude>
+    <ClInclude Include="poly2tri.h">
+      <Filter>头文件\Triangulation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PlanarSight.cpp">
@@ -79,6 +112,21 @@
     </ClCompile>
     <ClCompile Include="Rendering.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="shapes.cpp">
+      <Filter>源文件\Triangulation\common</Filter>
+    </ClCompile>
+    <ClCompile Include="sweep_context.cpp">
+      <Filter>源文件\Triangulation\sweep</Filter>
+    </ClCompile>
+    <ClCompile Include="sweep.cpp">
+      <Filter>源文件\Triangulation\sweep</Filter>
+    </ClCompile>
+    <ClCompile Include="cdt.cpp">
+      <Filter>源文件\Triangulation\sweep</Filter>
+    </ClCompile>
+    <ClCompile Include="advancing_front.cpp">
+      <Filter>源文件\Triangulation\sweep</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

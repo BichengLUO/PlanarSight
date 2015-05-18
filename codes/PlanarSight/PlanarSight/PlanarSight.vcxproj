@@ -103,23 +103,35 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="advancing_front.h" />
+    <ClInclude Include="cdt.h" />
     <ClInclude Include="OpenGL.h" />
     <ClInclude Include="PlanarSight.h" />
     <ClInclude Include="PlanarSightDlg.h" />
+    <ClInclude Include="poly2tri.h" />
     <ClInclude Include="Rendering.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="shapes.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="sweep.h" />
+    <ClInclude Include="sweep_context.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="advancing_front.cpp" />
+    <ClCompile Include="cdt.cpp" />
     <ClCompile Include="OpenGL.cpp" />
     <ClCompile Include="PlanarSight.cpp" />
     <ClCompile Include="PlanarSightDlg.cpp" />
     <ClCompile Include="Rendering.cpp" />
+    <ClCompile Include="shapes.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="sweep.cpp" />
+    <ClCompile Include="sweep_context.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PlanarSight.rc" />
