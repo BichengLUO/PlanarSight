@@ -43,6 +43,49 @@ void Graph::printGraph()
 	}
 }
 
+// A recursive function used by topologicalSort
+void Graph::topologicalSortUtil(int v, bool visited[], std::stack<int> &Stack)
+{
+	// Mark the current node as visited.
+	visited[v] = true;
+
+	// Recur for all the vertices adjacent to this vertex
+	AdjListNode* pCrawl = array[v].head;
+	while (pCrawl)
+	{
+		if (!visited[pCrawl->dest])
+			topologicalSortUtil(pCrawl->dest, visited, Stack);
+		pCrawl = pCrawl->next;
+	}
+
+	// Push current vertex to stack which stores result
+	Stack.push(v);
+}
+
+// The function to do Topological Sort. It uses recursive topologicalSortUtil()
+void Graph::topologicalSort(std::vector<int> &sortedList)
+{
+	std::stack<int> Stack;
+
+	// Mark all the vertices as not visited
+	bool *visited = new bool[count];
+	for (int i = 0; i < count; i++)
+		visited[i] = false;
+
+	// Call the recursive helper function to store Topological Sort
+	// starting from all vertices one by one
+	for (int i = 0; i < count; i++)
+	if (visited[i] == false)
+		topologicalSortUtil(i, visited, Stack);
+
+	// Print contents of stack
+	while (Stack.empty() == false)
+	{
+		sortedList.push_back(Stack.top());
+		Stack.pop();
+	}
+}
+
 Graph::~Graph()
 {
 	for (int i = 0; i < allListNodes.size(); i++)

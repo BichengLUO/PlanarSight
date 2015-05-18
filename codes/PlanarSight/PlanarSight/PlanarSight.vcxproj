@@ -105,6 +105,7 @@
   <ItemGroup>
     <ClInclude Include="advancing_front.h" />
     <ClInclude Include="cdt.h" />
+    <ClInclude Include="Graph.h" />
     <ClInclude Include="OpenGL.h" />
     <ClInclude Include="PlanarSight.h" />
     <ClInclude Include="PlanarSightDlg.h" />
@@ -121,6 +122,7 @@
   <ItemGroup>
     <ClCompile Include="advancing_front.cpp" />
     <ClCompile Include="cdt.cpp" />
+    <ClCompile Include="Graph.cpp" />
     <ClCompile Include="OpenGL.cpp" />
     <ClCompile Include="PlanarSight.cpp" />
     <ClCompile Include="PlanarSightDlg.cpp" />

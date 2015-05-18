@@ -2,6 +2,7 @@
 #define _GRAPH_H
 
 #include <vector>
+#include <stack>
 
 // A structure to represent an adjacency list node
 typedef struct _AdjListNode
@@ -25,12 +26,14 @@ public:
 	Graph(int ct);
 	void addEdge(int src, int dest);
 	void printGraph();
+	void topologicalSort(std::vector<int> &sortedList);
 	~Graph();
 
 protected:
 	int count;
 	AdjList* array;
 	std::vector<AdjListNode*> allListNodes;
+	void topologicalSortUtil(int v, bool visited[], std::stack<int> &Stack);
 };
 
 #endif

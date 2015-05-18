@@ -96,6 +96,9 @@
     <ClInclude Include="poly2tri.h">
       <Filter>头文件\Triangulation</Filter>
     </ClInclude>
+    <ClInclude Include="Graph.h">
+      <Filter>头文件\Graph</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PlanarSight.cpp">
@@ -127,6 +130,9 @@
     </ClCompile>
     <ClCompile Include="advancing_front.cpp">
       <Filter>源文件\Triangulation\sweep</Filter>
+    </ClCompile>
+    <ClCompile Include="Graph.cpp">
+      <Filter>源文件\Graph</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
