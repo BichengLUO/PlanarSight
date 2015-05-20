@@ -63,6 +63,12 @@
     <ClInclude Include="Rendering.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Point.h">
+      <Filter>头文件\Math2d</Filter>
+    </ClInclude>
+    <ClInclude Include="Polygon.h">
+      <Filter>头文件\Math2d</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PlanarSight.cpp">
@@ -79,6 +85,12 @@
     </ClCompile>
     <ClCompile Include="Rendering.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Point.cpp">
+      <Filter>源文件\Math2d</Filter>
+    </ClCompile>
+    <ClCompile Include="Polygon.cpp">
+      <Filter>源文件\Math2d</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
