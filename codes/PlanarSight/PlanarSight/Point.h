@@ -1,4 +1,4 @@
-// Point.h: ¶¨ÒåÆ½ÃæÉÏµãµÄÊı¾İ½á¹¹
+// Point.h: å®šä¹‰å¹³é¢ä¸Šç‚¹çš„æ•°æ®ç»“æ„
 
 #pragma once
 #include <vector>

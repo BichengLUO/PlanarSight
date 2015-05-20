@@ -1,4 +1,4 @@
-// ¶¨Òå¶à±ßÐÎ¼°ÆäÖÐ°üº¬µÄÊý¾Ý½á¹¹
+// å®šä¹‰å¤šè¾¹å½¢åŠå…¶ä¸­åŒ…å«çš„æ•°æ®ç»“æž„
 
 #pragma once
 #include "Point.h"
