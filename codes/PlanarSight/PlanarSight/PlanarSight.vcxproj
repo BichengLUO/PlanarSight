@@ -49,7 +49,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -74,7 +74,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -109,8 +109,9 @@
     <ClInclude Include="OpenGL.h" />
     <ClInclude Include="PlanarSight.h" />
     <ClInclude Include="PlanarSightDlg.h" />
-    <ClInclude Include="MeshUpdate.h" />
+    <ClInclude Include="Point.h" />
     <ClInclude Include="poly2tri.h" />
+    <ClInclude Include="Polygon.h" />
     <ClInclude Include="Rendering.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="shapes.h" />
@@ -127,7 +128,8 @@
     <ClCompile Include="OpenGL.cpp" />
     <ClCompile Include="PlanarSight.cpp" />
     <ClCompile Include="PlanarSightDlg.cpp" />
-    <ClCompile Include="MeshUpdate.cpp" />
+    <ClCompile Include="Point.cpp" />
+    <ClCompile Include="Polygon.cpp" />
     <ClCompile Include="Rendering.cpp" />
     <ClCompile Include="shapes.cpp" />
     <ClCompile Include="stdafx.cpp">

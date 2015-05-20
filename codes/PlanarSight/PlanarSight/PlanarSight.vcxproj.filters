@@ -75,6 +75,12 @@
     <ClInclude Include="Rendering.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Point.h">
+      <Filter>头文件\Math2d</Filter>
+    </ClInclude>
+    <ClInclude Include="Polygon.h">
+      <Filter>头文件\Math2d</Filter>
+    </ClInclude>
     <ClInclude Include="shapes.h">
       <Filter>头文件\Triangulation\common</Filter>
     </ClInclude>
@@ -99,9 +105,6 @@
     <ClInclude Include="Graph.h">
       <Filter>头文件\Graph</Filter>
     </ClInclude>
-    <ClInclude Include="MeshUpdate.h">
-      <Filter>头文件\Triangulation</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PlanarSight.cpp">
@@ -119,26 +122,29 @@
     <ClCompile Include="Rendering.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="shapes.cpp">
-      <Filter>源文件\Triangulation\common</Filter>
+    <ClCompile Include="Point.cpp">
+      <Filter>源文件\Math2d</Filter>
     </ClCompile>
-    <ClCompile Include="sweep_context.cpp">
-      <Filter>源文件\Triangulation\sweep</Filter>
+    <ClCompile Include="Polygon.cpp">
+      <Filter>源文件\Math2d</Filter>
     </ClCompile>
-    <ClCompile Include="sweep.cpp">
+    <ClCompile Include="advancing_front.cpp">
       <Filter>源文件\Triangulation\sweep</Filter>
     </ClCompile>
     <ClCompile Include="cdt.cpp">
       <Filter>源文件\Triangulation\sweep</Filter>
     </ClCompile>
-    <ClCompile Include="advancing_front.cpp">
+    <ClCompile Include="sweep.cpp">
       <Filter>源文件\Triangulation\sweep</Filter>
+    </ClCompile>
+    <ClCompile Include="sweep_context.cpp">
+      <Filter>源文件\Triangulation\sweep</Filter>
+    </ClCompile>
+    <ClCompile Include="shapes.cpp">
+      <Filter>源文件\Triangulation\common</Filter>
     </ClCompile>
     <ClCompile Include="Graph.cpp">
       <Filter>源文件\Graph</Filter>
-    </ClCompile>
-    <ClCompile Include="MeshUpdate.cpp">
-      <Filter>源文件\Triangulation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
