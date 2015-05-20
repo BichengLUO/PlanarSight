@@ -11,18 +11,18 @@ void Loop::addPoint(int id)
 	pointIDArray.push_back(id);
 }
 
-Polygon::~Polygon()
+CPolygon::~CPolygon()
 {
 	pointArray.clear();
 	loopArray.clear();
 }
 
-void Polygon::addPoint(Point& p)
+void CPolygon::addPoint(Point& p)
 {
 	pointArray.push_back(p);
 }
 
-void Polygon::addLoop(PointArray& pa)
+void CPolygon::addLoop(PointArray& pa)
 {
 	int pointID = pointArray.size();
 	int loopSize = pa.size();
@@ -38,7 +38,7 @@ void Polygon::addLoop(PointArray& pa)
 	loopArray.push_back(l);
 }
 
-bool Polygon::addOuterLoop(PointArray& pa)
+bool CPolygon::addOuterLoop(PointArray& pa)
 {
 	if (loopArray.size() != 0)
 		return false;
@@ -47,7 +47,7 @@ bool Polygon::addOuterLoop(PointArray& pa)
 	return true;
 }
 
-bool Polygon::addInnerLoop(PointArray& pa)
+bool CPolygon::addInnerLoop(PointArray& pa)
 {
 	if (loopArray.size() == 0)
 		return false;
@@ -56,7 +56,7 @@ bool Polygon::addInnerLoop(PointArray& pa)
 	return true;
 }
 
-bool Polygon::pointInLoopTest(Point& p, int loopID)
+bool CPolygon::pointInLoopTest(Point& p, int loopID)
 {
 	Loop* lPtr;
 	lPtr = &(loopArray[loopID]);
@@ -83,7 +83,7 @@ bool Polygon::pointInLoopTest(Point& p, int loopID)
 		return true;
 }
 
-bool Polygon::pointInPolygonTest(Point& p)
+bool CPolygon::pointInPolygonTest(Point& p)
 {
 	if (!pointInLoopTest(p, 0))
 		return false;

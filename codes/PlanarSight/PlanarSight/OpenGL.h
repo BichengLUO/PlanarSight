@@ -17,6 +17,8 @@ protected:
 	HGLRC hglrc;
 	int MySetPixelFormat(HDC hdc);
 	void RenderScene();
+
+public:
 	Rendering *rendering;
 
 public:

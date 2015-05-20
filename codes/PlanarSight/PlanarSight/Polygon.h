@@ -3,14 +3,14 @@
 #pragma once
 #include "Point.h"
 
-class Polygon;
+class CPolygon;
 
 class Segment
 {
 public:
 	int aID;
 	int bID;
-	Polygon* polygon;
+	CPolygon* polygon;
 
 public:
 	Segment(){}
@@ -20,7 +20,7 @@ class Loop
 {
 public:
 	IntArray pointIDArray;
-	Polygon* polygon;
+	CPolygon* polygon;
 
 public:
 	Loop(){}
@@ -30,15 +30,15 @@ public:
 };
 typedef vector<Loop> LoopArray;
 
-class Polygon
+class CPolygon
 {
 public:
 	PointArray pointArray;
 	LoopArray loopArray;
 
 public:
-	Polygon(){}
-	~Polygon();
+	CPolygon(){}
+	~CPolygon();
 
 	void addPoint(Point& p);
 	void addLoop(PointArray& pa);
@@ -47,3 +47,4 @@ public:
 	bool pointInLoopTest(Point& p, int loopID);
 	bool pointInPolygonTest(Point& p);
 };
+typedef vector<CPolygon> PolygonArray;
