@@ -99,6 +99,9 @@
     <ClInclude Include="Graph.h">
       <Filter>头文件\Graph</Filter>
     </ClInclude>
+    <ClInclude Include="MeshUpdate.h">
+      <Filter>头文件\Triangulation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PlanarSight.cpp">
@@ -133,6 +136,9 @@
     </ClCompile>
     <ClCompile Include="Graph.cpp">
       <Filter>源文件\Graph</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshUpdate.cpp">
+      <Filter>源文件\Triangulation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

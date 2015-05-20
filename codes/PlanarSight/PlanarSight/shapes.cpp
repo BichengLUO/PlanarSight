@@ -41,6 +41,7 @@ Triangle::Triangle(Point& a, Point& b, Point& c)
   constrained_edge[0] = constrained_edge[1] = constrained_edge[2] = false;
   delaunay_edge[0] = delaunay_edge[1] = delaunay_edge[2] = false;
   interior_ = false;
+  mark_to_be_splited = false;
 }
 
 // Update neighbor pointers

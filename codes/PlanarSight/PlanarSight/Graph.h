@@ -12,7 +12,7 @@ typedef struct _AdjListNode
 	_AdjListNode(int d) : dest(d), next(NULL) {}
 } AdjListNode;
 
-// A structure to represent an adjacency liat
+// A structure to represent an adjacency list
 typedef struct _AdjList
 {
 	AdjListNode *head;  // pointer to head node of list

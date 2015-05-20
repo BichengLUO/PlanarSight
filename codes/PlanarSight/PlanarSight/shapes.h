@@ -157,6 +157,7 @@ Triangle(Point& a, Point& b, Point& c);
 bool constrained_edge[3];
 /// Flags to determine if an edge is a Delauney edge
 bool delaunay_edge[3];
+bool mark_to_be_splited;
 
 Point* GetPoint(const int& index);
 Point* PointCW(Point& point);

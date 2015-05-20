@@ -109,6 +109,7 @@
     <ClInclude Include="OpenGL.h" />
     <ClInclude Include="PlanarSight.h" />
     <ClInclude Include="PlanarSightDlg.h" />
+    <ClInclude Include="MeshUpdate.h" />
     <ClInclude Include="poly2tri.h" />
     <ClInclude Include="Rendering.h" />
     <ClInclude Include="Resource.h" />
@@ -126,6 +127,7 @@
     <ClCompile Include="OpenGL.cpp" />
     <ClCompile Include="PlanarSight.cpp" />
     <ClCompile Include="PlanarSightDlg.cpp" />
+    <ClCompile Include="MeshUpdate.cpp" />
     <ClCompile Include="Rendering.cpp" />
     <ClCompile Include="shapes.cpp" />
     <ClCompile Include="stdafx.cpp">
