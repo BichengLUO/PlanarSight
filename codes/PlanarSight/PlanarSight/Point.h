@@ -1,4 +1,4 @@
-﻿// Point.h: 定义平面上点的数据结构
+// Point.h: 定义平面上点的数据结构
 
 #pragma once
 #include <vector>
