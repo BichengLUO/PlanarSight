@@ -20,6 +20,10 @@ protected:
 
 public:
 	Rendering *rendering;
+	CRect frame; 
+	CWnd* outterWallBtn;
+	CWnd* innerWallBtn;
+	CWnd* monsterBtn;
 
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);

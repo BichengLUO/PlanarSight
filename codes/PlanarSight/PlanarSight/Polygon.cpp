@@ -63,6 +63,7 @@ bool CPolygon::pointInLoopTest(Point& p, int loopID)
 	int pointSize = lPtr->pointIDArray.size();
 	Vector v1, v2;
 	double angle;
+	double direction;
 	double sum = 0;
 
 	for (int i = 0; i < pointSize - 1; i++)
@@ -70,12 +71,20 @@ bool CPolygon::pointInLoopTest(Point& p, int loopID)
 		v1 = pointArray[lPtr->pointIDArray[i]] - p;
 		v2 = pointArray[lPtr->pointIDArray[i + 1]] - p;
 		angle = calAngle(v1, v2);
-		sum += angle;
+		direction = v1 ^ v2;
+		if (direction > 0)
+			sum += angle;
+		else
+			sum -= angle;
 	}
 	v1 = pointArray[lPtr->pointIDArray[pointSize - 1]] - p;
 	v2 = pointArray[lPtr->pointIDArray[0]] - p;
 	angle = calAngle(v1, v2);
-	sum += angle;
+	direction = v1 ^ v2;
+	if (direction > 0)
+		sum += angle;
+	else
+		sum -= angle;
 
 	if (equalZero(sum))
 		return false;
@@ -96,4 +105,10 @@ bool CPolygon::pointInPolygonTest(Point& p)
 	}
 
 	return true;
+}
+
+void CPolygon::clear()
+{
+	pointArray.clear();
+	loopArray.clear();
 }

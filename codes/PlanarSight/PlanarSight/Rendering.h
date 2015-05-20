@@ -9,6 +9,10 @@ public:
 	CPolygon* basePolygon;
 	PolygonArray visPolygons;
 	PointArray loopBuf;
+	PointArray monsters;
+	bool drawOuterWall;
+	bool drawInnerWall;
+	bool drawMonster;
 
 public:
 	Rendering();
@@ -17,5 +21,11 @@ public:
 	void drawPolygon(CPolygon& p);
 	void drawLoop(CPolygon& p, int loopID);
 	void drawUnfinishedLoop(PointArray& pa);
+	void drawPoint(Point& p);
+	void drawPoint(Point& p, double size);
+	bool loopFinished();
+	void drawMonsters(PointArray& pa);
+	bool addMonster(Point& p);
+	void clear();
 };
 
