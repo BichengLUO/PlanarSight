@@ -46,5 +46,8 @@ public:
 	bool addInnerLoop(PointArray& pa);
 	bool pointInLoopTest(Point& p, int loopID);
 	bool pointInPolygonTest(Point& p);
+	bool loopCCWTest(int loopID);
+	void reverseLoop(int loopID);
+	void clear();
 };
 typedef vector<CPolygon> PolygonArray;
