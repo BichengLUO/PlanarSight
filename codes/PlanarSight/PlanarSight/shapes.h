@@ -159,6 +159,9 @@ bool constrained_edge[3];
 bool delaunay_edge[3];
 bool mark_to_be_splited;
 
+/// Neighbor list
+Triangle* neighbors_[3];
+
 Point* GetPoint(const int& index);
 Point* PointCW(Point& point);
 Point* PointCCW(Point& point);
@@ -210,8 +213,6 @@ private:
 
 /// Triangle points
 Point* points_[3];
-/// Neighbor list
-Triangle* neighbors_[3];
 
 /// Has this triangle been marked as an interior triangle?
 bool interior_;
