@@ -2,7 +2,13 @@
 #define _MESH_UPDATE_H
 
 #include <vector>
-#include "shapes.h"
+#include "poly2tri.h"
+#include "Polygon.h"
+
+std::vector<p2t::Triangle*> buildInitialMesh(const CPolygon &basePolygon);
+std::vector<p2t::Triangle*> buildMeshFromPolygon(const CPolygon &basePolygon);
+std::vector<p2t::Triangle*> buildMeshFromInnerLoop(const Loop &loop);
+std::vector<p2t::Triangle*> buildMeshFromOuterLoop(const Loop &loop);
 
 std::vector<p2t::Triangle*> insertPointToUpdateTriangles(std::vector<p2t::Triangle*> &mesh, const p2t::Point &p);
 int findEdgePointStands(p2t::Triangle &tri, const p2t::Point &p);

@@ -1,11 +1,14 @@
 #pragma once
 #include "Polygon.h"
+#include "shapes.h"
+#include "MeshUpdate.h"
 
 class Rendering
 {
 protected:
 
 public:
+	std::vector<p2t::Triangle*> initialMesh;
 	CPolygon* basePolygon;
 	PolygonArray visPolygons;
 	PointArray loopBuf;
@@ -27,5 +30,6 @@ public:
 	void drawMonsters(PointArray& pa);
 	bool addMonster(Point& p);
 	void clear();
+	void drawTrianglesMesh(const std::vector<p2t::Triangle*> &mesh);
 };
 

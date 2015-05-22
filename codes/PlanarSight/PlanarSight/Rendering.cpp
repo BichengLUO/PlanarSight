@@ -32,6 +32,8 @@ void Rendering::draw()
 		drawUnfinishedLoop(loopBuf);
 	}
 
+	if (initialMesh.size() > 0)
+		drawTrianglesMesh(initialMesh);
 	drawPolygon(*basePolygon);
 	drawMonsters(monsters);
 }
@@ -123,6 +125,7 @@ bool Rendering::addMonster(Point& p)
 		return false;
 
 	monsters.push_back(p);
+	initialMesh = insertPointToUpdateTriangles(initialMesh, p2t::Point(p.x, p.y));
 	return true;
 }
 
@@ -131,7 +134,13 @@ void Rendering::drawMonsters(PointArray& pa)
 	int pointSize = pa.size();
 	glColor3d(0, 1, 1);
 	for (int i = 0; i < pointSize; i++)
+	{
 		drawPoint(pa[i], 5);
+		glBegin(GL_LINES);
+		glVertex2d(pa[i].x, pa[i].y);
+		glVertex2d(pa[i].x, 700);
+		glEnd();
+	}
 }
 
 void Rendering::clear()
@@ -141,7 +150,28 @@ void Rendering::clear()
 		visPolygons[i].clear();
 	loopBuf.clear();
 	monsters.clear();
+	initialMesh.clear();
 	drawOuterWall = false;
 	drawInnerWall = false;
 	drawMonster = false;
+}
+
+void Rendering::drawTrianglesMesh(const std::vector<p2t::Triangle*> &mesh)
+{
+	std::vector<p2t::Triangle*>::const_iterator it;
+	for (it = mesh.begin(); it != mesh.end(); ++it)
+	{
+		const p2t::Point *p1 = (*it)->GetPoint(0);
+		const p2t::Point *p2 = (*it)->GetPoint(1);
+		const p2t::Point *p3 = (*it)->GetPoint(2);
+
+		glBegin(GL_POLYGON);
+		glColor3d((p1->x + p2->x + p3->x) / (3.0 * 800),
+			(p1->y + p2->y + p3->y) / (3.0 * 700),
+			0.8);
+		glVertex2d(p1->x, p1->y);
+		glVertex2d(p2->x, p2->y);
+		glVertex2d(p3->x, p3->y);
+		glEnd();
+	}
 }
