@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MeshUpdate.h"
+#include "ConvexHull.h"
 
 std::vector<p2t::Triangle*> buildInitialMesh(const CPolygon &basePolygon)
 {
@@ -9,38 +10,58 @@ std::vector<p2t::Triangle*> buildInitialMesh(const CPolygon &basePolygon)
 		std::vector<p2t::Triangle*> holeMesh = buildMeshFromInnerLoop(basePolygon.loopArray[i]);
 		initialMesh.insert(initialMesh.end(), holeMesh.begin(), holeMesh.end());
 	}
-	addEarsForOuterLoop(initialMesh, basePolygon.loopArray[0]);
+	std::vector<Loop> ears = getEarsFromOuterLoop(basePolygon.loopArray[0]);
+	for (int i = 0; i < ears.size(); i++)
+	{
+		std::vector<p2t::Triangle*> earMesh = buildMeshFromInnerLoop(ears[i]);
+		initialMesh.insert(initialMesh.end(), earMesh.begin(), earMesh.end());
+	}
 	rebuildTrianglesRelationship(initialMesh);
 	return initialMesh;
 }
 
-void addEarsForOuterLoop(std::vector<p2t::Triangle*> &mesh, const Loop &loop)
+std::vector<Loop> getEarsFromOuterLoop(const Loop &loop)
 {
-	IntArray pointIDArray = loop.pointIDArray;
-	for (int i = 0; i < pointIDArray.size(); i++)
+	std::vector<Loop> ears;
+	Loop ch = convexHull(loop);
+	IntArray::const_iterator it = std::find(loop.pointIDArray.begin(), loop.pointIDArray.end(), ch.pointIDArray[0]);
+	int j = 0;
+	int k = it - loop.pointIDArray.begin();
+	bool lastEqual = true;
+	for (int i = 0; i < loop.pointIDArray.size(); i++)
 	{
-		Point p1 = loop.polygon->pointArray[pointIDArray[(i - 1 + pointIDArray.size()) % pointIDArray.size()]];
-		Point p2 = loop.polygon->pointArray[pointIDArray[(i + pointIDArray.size()) % pointIDArray.size()]];
-		Point p3 = loop.polygon->pointArray[pointIDArray[(i + 1 + pointIDArray.size()) % pointIDArray.size()]];
-
-		double dp = (p2.x - p1.x) * (p3.y - p2.y) - (p2.y - p1.y) * (p3.x - p2.x);
-		if (dp < 0 && ((p1.x >= p2.x && p3.x >= p2.x) || (p1.x <= p2.x && p3.x <= p2.x)))
+		if (loop.pointIDArray[k] == ch.pointIDArray[j])
 		{
-			p2t::Point *np1 = new p2t::Point(p1.x, p1.y);
-			p2t::Point *np2 = new p2t::Point(p2.x, p2.y);
-			p2t::Point *np3 = new p2t::Point(p3.x, p3.y);
-
-			p2t::Triangle *ear = new p2t::Triangle(*np1, *np3, *np2);
-			mesh.push_back(ear);
-
-			pointIDArray.erase(pointIDArray.begin() + i);
-			i -= 2;
+			if (!lastEqual)
+				ears[ears.size() - 1].pointIDArray.push_back(loop.pointIDArray[k]);
+			j++;
+			j = j % ch.pointIDArray.size();
+			lastEqual = true;
 		}
+		else
+		{
+			if (lastEqual)
+			{
+				Loop ear;
+				ear.polygon = loop.polygon;
+				ears.push_back(ear);
+				int prev_k = (k - 1 + loop.pointIDArray.size()) % loop.pointIDArray.size();
+				ears[ears.size() - 1].pointIDArray.push_back(loop.pointIDArray[prev_k]);
+			}
+			ears[ears.size() - 1].pointIDArray.push_back(loop.pointIDArray[k]);
+			lastEqual = false;
+		}
+		k++;
+		k = k % loop.pointIDArray.size();
 	}
+	return ears;
 }
 
 std::vector<p2t::Triangle*> buildMeshFromPolygon(const CPolygon &basePolygon)
 {
+	std::vector<p2t::Triangle*> initialMesh;
+	if (basePolygon.loopArray.size() == 0)
+		return initialMesh;
 	vector<p2t::Point*> polyline;
 	for (int i = 0; i < basePolygon.loopArray[0].pointIDArray.size(); i++)
 	{
@@ -61,7 +82,7 @@ std::vector<p2t::Triangle*> buildMeshFromPolygon(const CPolygon &basePolygon)
 		cdt->AddHole(hole);
 	}
 	cdt->Triangulate();
-	std::vector<p2t::Triangle*> initialMesh = cdt->GetTriangles();
+	initialMesh = cdt->GetTriangles();
 	return initialMesh;
 }
 
@@ -95,7 +116,7 @@ std::vector<p2t::Triangle*> buildMeshFromOuterLoop(const Loop &loop)
 	return mesh;
 }
 
-std::vector<p2t::Triangle*> insertPointToUpdateTriangles(std::vector<p2t::Triangle*> &mesh, const p2t::Point &p)
+std::vector<p2t::Triangle*> insertPointToUpdateTriangles(const std::vector<p2t::Triangle*> &mesh, const p2t::Point &p)
 {
 	std::vector<p2t::Triangle*> splitedMesh;
 	int ind = findPointInTriangles(mesh, p);
@@ -180,7 +201,7 @@ std::vector<p2t::Triangle*> insertPointToUpdateTriangles(std::vector<p2t::Triang
 					if (abs(p2t::Cross(t2 - t1, t3 - t1)) <= 1e-6)
 						delete t[i];
 					else
-						mesh.push_back(t[i]);
+						splitedMesh.push_back(t[i]);
 				}
 			}
 			next_tri = nextTriangleCandidate;
@@ -188,7 +209,7 @@ std::vector<p2t::Triangle*> insertPointToUpdateTriangles(std::vector<p2t::Triang
 		}
 	}
 
-	std::vector<p2t::Triangle*>::iterator it;
+	std::vector<p2t::Triangle*>::const_iterator it;
 	for (it = mesh.begin(); it != mesh.end(); ++it)
 	{
 		if (!(*it)->mark_to_be_splited)

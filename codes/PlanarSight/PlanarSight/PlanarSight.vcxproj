@@ -105,6 +105,7 @@
   <ItemGroup>
     <ClInclude Include="advancing_front.h" />
     <ClInclude Include="cdt.h" />
+    <ClInclude Include="ConvexHull.h" />
     <ClInclude Include="DisjointSet.h" />
     <ClInclude Include="Graph.h" />
     <ClInclude Include="MeshUpdate.h" />
@@ -126,6 +127,7 @@
   <ItemGroup>
     <ClCompile Include="advancing_front.cpp" />
     <ClCompile Include="cdt.cpp" />
+    <ClCompile Include="ConvexHull.cpp" />
     <ClCompile Include="DisjointSet.cpp" />
     <ClCompile Include="Graph.cpp" />
     <ClCompile Include="MeshUpdate.cpp" />

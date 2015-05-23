@@ -33,7 +33,9 @@ void Rendering::draw()
 		drawUnfinishedLoop(loopBuf);
 	}
 
-	if (initialMesh.size() > 0)
+	if (splitedMesh.size() > 0)
+		drawTrianglesMesh(splitedMesh);
+	else if (initialMesh.size() > 0)
 		drawTrianglesMesh(initialMesh);
 	drawPolygon(*basePolygon);
 	drawMonsters(monsters);
@@ -126,7 +128,7 @@ bool Rendering::addMonster(Point& p)
 		return false;
 
 	monsters.push_back(p);
-	initialMesh = insertPointToUpdateTriangles(initialMesh, p2t::Point(p.x, p.y));
+	splitedMesh = insertPointToUpdateTriangles(initialMesh, p2t::Point(p.x, p.y));
 	return true;
 }
 
@@ -147,6 +149,7 @@ void Rendering::clear()
 	loopBuf.clear();
 	monsters.clear();
 	initialMesh.clear();
+	splitedMesh.clear();
 	drawOuterWall = false;
 	drawInnerWall = false;
 	drawMonster = false;
@@ -267,7 +270,7 @@ CPolygon Rendering::calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& 
 	return cp;
 }
 
-bool calcLineLineIntersection(Point& result, Point& a1, double polar, Point& b1, Point& b2)
+bool Rendering::calcLineLineIntersection(Point& result, Point& a1, double polar, Point& b1, Point& b2)
 {
 	Point a2;
 	a2.x = 200 * cos(polar);
@@ -349,11 +352,16 @@ void Rendering::drawTrianglesMesh(const std::vector<p2t::Triangle*> &mesh)
 		glVertex2d(p2->x, p2->y);
 		glVertex2d(p3->x, p3->y);
 		glEnd();
+
+		glPushAttrib(GL_ENABLE_BIT);
+		glLineStipple(1, 0xF0F0);
+		glEnable(GL_LINE_STIPPLE);
 		glBegin(GL_LINE_LOOP);
-		glColor3d(0.6, 0.6, 0.8);
+		glColor3d(0.5, 0.5, 0.5);
 		glVertex2d(p1->x, p1->y);
 		glVertex2d(p2->x, p2->y);
 		glVertex2d(p3->x, p3->y);
 		glEnd();
+		glPopAttrib();
 	}
 }

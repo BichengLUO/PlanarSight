@@ -10,6 +10,7 @@ protected:
 
 public:
 	std::vector<p2t::Triangle*> initialMesh;
+	std::vector<p2t::Triangle*> splitedMesh;
 	CPolygon* basePolygon;
 	PolygonArray visPolygons;
 	PointArray loopBuf;

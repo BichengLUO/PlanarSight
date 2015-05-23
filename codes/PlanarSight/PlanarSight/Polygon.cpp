@@ -143,16 +143,8 @@ bool CPolygon::loopCCWTest(int loopID)
 
 void CPolygon::reverseLoop(int loopID)
 {
-	Loop* lPtr;
-	lPtr = &(loopArray[loopID]);
-	int pointSize = lPtr->pointIDArray.size();
-	int tmp;
-	for (int i = 0; i < pointSize / 2; i++)
-	{
-		tmp = lPtr->pointIDArray[i];
-		lPtr->pointIDArray[i] = lPtr->pointIDArray[pointSize - 1 - i];
-		lPtr->pointIDArray[pointSize - 1 - i] = tmp;
-	}
+	Loop* lPtr = &(loopArray[loopID]);
+	std::reverse(lPtr->pointIDArray.begin(), lPtr->pointIDArray.end());
 }
 
 void CPolygon::clear()

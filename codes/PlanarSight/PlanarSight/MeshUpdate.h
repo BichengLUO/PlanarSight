@@ -6,12 +6,12 @@
 #include "Polygon.h"
 
 std::vector<p2t::Triangle*> buildInitialMesh(const CPolygon &basePolygon);
-void addEarsForOuterLoop(std::vector<p2t::Triangle*> &mesh, const Loop &loop);
+std::vector<Loop> getEarsFromOuterLoop(const Loop &loop);
 std::vector<p2t::Triangle*> buildMeshFromPolygon(const CPolygon &basePolygon);
 std::vector<p2t::Triangle*> buildMeshFromInnerLoop(const Loop &loop);
 std::vector<p2t::Triangle*> buildMeshFromOuterLoop(const Loop &loop);
 
-std::vector<p2t::Triangle*> insertPointToUpdateTriangles(std::vector<p2t::Triangle*> &mesh, const p2t::Point &p);
+std::vector<p2t::Triangle*> insertPointToUpdateTriangles(const std::vector<p2t::Triangle*> &mesh, const p2t::Point &p);
 int findEdgePointStands(p2t::Triangle &tri, const p2t::Point &p);
 void rayIntersectTriangle(p2t::Triangle &tri, const p2t::Point &p, p2t::Point *p1p2, p2t::Point *p2p3, p2t::Point *p3p1);
 void rebuildTrianglesRelationship(std::vector<p2t::Triangle*> &mesh);

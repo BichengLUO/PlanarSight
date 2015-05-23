@@ -1,4 +1,4 @@
-// 定义不相交集的数据机构以及相应的功能
+// 瀹氫箟涓嶇浉浜ら泦鐨勬暟鎹満鏋勪互鍙婄浉搴旂殑鍔熻兘
 
 #pragma once
 #include "Point.h"
