@@ -28,7 +28,7 @@ std::vector<Loop> getEarsFromOuterLoop(const Loop &loop)
 	int j = 0;
 	int k = it - loop.pointIDArray.begin();
 	bool lastEqual = true;
-	for (int i = 0; i < loop.pointIDArray.size(); i++)
+	for (int i = 0; i < loop.pointIDArray.size() || !lastEqual; i++)
 	{
 		if (loop.pointIDArray[k] == ch.pointIDArray[j])
 		{
@@ -226,28 +226,49 @@ int findEdgePointStands(p2t::Triangle &tri, const p2t::Point &p)
 	const p2t::Point *p2 = tri.GetPoint(1);
 	const p2t::Point *p3 = tri.GetPoint(2);
 
+	if (p1->x == p.x && p1->y == p.y)
+	{
+		if (p2->y > p3->y)
+			return 2;
+		else
+			return 1;
+	}
+	if (p2->x == p.x && p2->y == p.y)
+	{
+		if (p1->y > p3->y)
+			return 2;
+		else
+			return 0;
+	}
+	if (p3->x == p.x && p3->y == p.y)
+	{
+		if (p1->y > p2->y)
+			return 1;
+		else
+			return 0;
+	}
 	if (p1->x == p2->x && p1->x == p.x)
 		return 2;
 	if (p2->x == p3->x && p2->x == p.x)
 		return 0;
 	if (p3->x == p1->x && p1->x == p.x)
 		return 1;
-	if ((p1->x <= p.x && p2->x > p.x) || (p2->x < p.x && p1->x >= p.x))
+	if ((p1->x < p.x && p2->x > p.x) || (p2->x < p.x && p1->x > p.x))
 	{
 		double ny = p1->y + (p2->y - p1->y) * ((p.x - p1->x) / (p2->x - p1->x));
-		if (((p1->y <= ny && p2->y > ny) || (p2->y < ny && p1->y >= ny)) && ny == p.y)
+		if (((p1->y < ny && p2->y > ny) || (p2->y < ny && p1->y > ny)) && ny == p.y)
 			return 2;
 	}
-	if ((p2->x <= p.x && p3->x > p.x) || (p3->x < p.x && p2->x >= p.x))
+	if ((p2->x < p.x && p3->x > p.x) || (p3->x < p.x && p2->x > p.x))
 	{
 		double ny = p2->y + (p3->y - p2->y) * ((p.x - p2->x) / (p3->x - p2->x));
-		if (((p2->y <= ny && p3->y > ny) || (p3->y < ny && p2->y >= ny)) && ny == p.y)
+		if (((p2->y < ny && p3->y > ny) || (p3->y < ny && p2->y > ny)) && ny == p.y)
 			return 0;
 	}
-	if ((p3->x <= p.x && p1->x > p.x) || (p1->x < p.x && p3->x >= p.x))
+	if ((p3->x < p.x && p1->x > p.x) || (p1->x < p.x && p3->x > p.x))
 	{
 		double ny = p3->y + (p1->y - p3->y) * ((p.x - p3->x) / (p1->x - p3->x));
-		if (((p3->y <= ny && p1->y > ny) || (p1->y < ny && p3->y >= ny)) && ny == p.y)
+		if (((p3->y < ny && p1->y > ny) || (p1->y < ny && p3->y > ny)) && ny == p.y)
 			return 1;
 	}
 }
