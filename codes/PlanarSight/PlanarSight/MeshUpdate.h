@@ -6,6 +6,7 @@
 #include "Polygon.h"
 
 std::vector<p2t::Triangle*> buildInitialMesh(const CPolygon &basePolygon);
+void addEarsForOuterLoop(std::vector<p2t::Triangle*> &mesh, const Loop &loop);
 std::vector<p2t::Triangle*> buildMeshFromPolygon(const CPolygon &basePolygon);
 std::vector<p2t::Triangle*> buildMeshFromInnerLoop(const Loop &loop);
 std::vector<p2t::Triangle*> buildMeshFromOuterLoop(const Loop &loop);

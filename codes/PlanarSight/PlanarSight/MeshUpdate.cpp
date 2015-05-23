@@ -9,8 +9,34 @@ std::vector<p2t::Triangle*> buildInitialMesh(const CPolygon &basePolygon)
 		std::vector<p2t::Triangle*> holeMesh = buildMeshFromInnerLoop(basePolygon.loopArray[i]);
 		initialMesh.insert(initialMesh.end(), holeMesh.begin(), holeMesh.end());
 	}
+	addEarsForOuterLoop(initialMesh, basePolygon.loopArray[0]);
 	rebuildTrianglesRelationship(initialMesh);
 	return initialMesh;
+}
+
+void addEarsForOuterLoop(std::vector<p2t::Triangle*> &mesh, const Loop &loop)
+{
+	IntArray pointIDArray = loop.pointIDArray;
+	for (int i = 0; i < pointIDArray.size(); i++)
+	{
+		Point p1 = loop.polygon->pointArray[pointIDArray[(i - 1 + pointIDArray.size()) % pointIDArray.size()]];
+		Point p2 = loop.polygon->pointArray[pointIDArray[(i + pointIDArray.size()) % pointIDArray.size()]];
+		Point p3 = loop.polygon->pointArray[pointIDArray[(i + 1 + pointIDArray.size()) % pointIDArray.size()]];
+
+		double dp = (p2.x - p1.x) * (p3.y - p2.y) - (p2.y - p1.y) * (p3.x - p2.x);
+		if (dp < 0 && ((p1.x >= p2.x && p3.x >= p2.x) || (p1.x <= p2.x && p3.x <= p2.x)))
+		{
+			p2t::Point *np1 = new p2t::Point(p1.x, p1.y);
+			p2t::Point *np2 = new p2t::Point(p2.x, p2.y);
+			p2t::Point *np3 = new p2t::Point(p3.x, p3.y);
+
+			p2t::Triangle *ear = new p2t::Triangle(*np1, *np3, *np2);
+			mesh.push_back(ear);
+
+			pointIDArray.erase(pointIDArray.begin() + i);
+			i -= 2;
+		}
+	}
 }
 
 std::vector<p2t::Triangle*> buildMeshFromPolygon(const CPolygon &basePolygon)

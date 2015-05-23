@@ -134,13 +134,7 @@ void Rendering::drawMonsters(PointArray& pa)
 	int pointSize = pa.size();
 	glColor3d(0, 1, 1);
 	for (int i = 0; i < pointSize; i++)
-	{
 		drawPoint(pa[i], 5);
-		glBegin(GL_LINES);
-		glVertex2d(pa[i].x, pa[i].y);
-		glVertex2d(pa[i].x, 700);
-		glEnd();
-	}
 }
 
 void Rendering::clear()
@@ -169,6 +163,12 @@ void Rendering::drawTrianglesMesh(const std::vector<p2t::Triangle*> &mesh)
 		glColor3d((p1->x + p2->x + p3->x) / (3.0 * 800),
 			(p1->y + p2->y + p3->y) / (3.0 * 700),
 			0.8);
+		glVertex2d(p1->x, p1->y);
+		glVertex2d(p2->x, p2->y);
+		glVertex2d(p3->x, p3->y);
+		glEnd();
+		glBegin(GL_LINE_LOOP);
+		glColor3d(0.6, 0.6, 0.8);
 		glVertex2d(p1->x, p1->y);
 		glVertex2d(p2->x, p2->y);
 		glVertex2d(p3->x, p3->y);
