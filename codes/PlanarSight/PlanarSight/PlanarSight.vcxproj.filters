@@ -108,6 +108,9 @@
     <ClInclude Include="MeshUpdate.h">
       <Filter>头文件\Triangulation</Filter>
     </ClInclude>
+    <ClInclude Include="DisjointSet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PlanarSight.cpp">
@@ -151,6 +154,9 @@
     </ClCompile>
     <ClCompile Include="MeshUpdate.cpp">
       <Filter>源文件\Triangulation</Filter>
+    </ClCompile>
+    <ClCompile Include="DisjointSet.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

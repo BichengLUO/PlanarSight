@@ -1,5 +1,6 @@
 #pragma once
 #include "Polygon.h"
+#include "DisjointSet.h"
 
 class Rendering
 {
@@ -27,5 +28,8 @@ public:
 	void drawMonsters(PointArray& pa);
 	bool addMonster(Point& p);
 	void clear();
+	CPolygon calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& sOrder, IntArray& pPolarPos, DoubleArray& pPolarValues, IntArray& pPolarOrder, double rangeMin, double rangeMax);
+	bool calcLineLineIntersection(Point& result, Point& a1, double polar, Point& a3, Point& a4);
+	void Test();
 };
 

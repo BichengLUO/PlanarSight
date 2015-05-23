@@ -18,12 +18,14 @@ public:
 	Point(){}
 	Point(double px, double py) : x(px), y(py) {}
 
-	void operator=(Point& p);
-	Point operator+(Point& p);
-	Point operator-(Point& p);
+	//void operator=(Point& p);
+	void operator=(const Point& p);
+	Point operator+(const Point& p);
+	void operator+=(const Point& p);
+	Point operator-(const Point& p);
 	Point operator*(double d);
-	double operator*(Point& p);
-	double operator^(Point& p);
+	double operator*(const Point& p);
+	double operator^(const Point& p);
 
 	double length();
 	void normalize();
@@ -33,6 +35,7 @@ typedef Point Vector;
 typedef vector<Point> PointArray;
 typedef vector<Vector> VectorArray;
 typedef vector<int> IntArray;
+typedef vector<double> DoubleArray;
 
 double calAngle(Vector& v1, Vector& v2);
 bool equalZero(double d);

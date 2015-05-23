@@ -1,12 +1,19 @@
 #include "Point.h"
 
-void Point::operator=(Point& p)
+//void Point::operator=(Point& p)
+//{
+//	x = p.x;
+//	y = p.y;
+//}
+
+void Point::operator=(const Point& p)
 {
 	x = p.x;
 	y = p.y;
+
 }
 
-Point Point::operator+(Point& p)
+Point Point::operator+(const Point& p)
 {
 	Point pp;
 	pp.x = x + p.x;
@@ -14,7 +21,13 @@ Point Point::operator+(Point& p)
 	return pp;
 }
 
-Point Point::operator-(Point& p)
+void Point::operator+=(const Point& p)
+{
+	x += p.x;
+	y += p.y;
+}
+
+Point Point::operator-(const Point& p)
 {
 	Point pp;
 	pp.x = x - p.x;
@@ -30,13 +43,13 @@ Point Point::operator*(double d)
 	return pp;
 }
 
-double Point::operator*(Point& p)
+double Point::operator*(const Point& p)
 {
 	double d = x * p.x + y * p.y;
 	return d;
 }
 
-double Point::operator^(Point& p)
+double Point::operator^(const Point& p)
 {
 	double d = x * p.y - y * p.x;
 	return d;

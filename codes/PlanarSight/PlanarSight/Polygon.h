@@ -10,11 +10,10 @@ class Segment
 public:
 	int aID;
 	int bID;
-	CPolygon* polygon;
-
 public:
 	Segment(){}
 };
+typedef vector<Segment> SegmentArray;
 
 class Loop
 {
