@@ -1,12 +1,15 @@
 #pragma once
 #include "Polygon.h"
 #include "DisjointSet.h"
+#include "shapes.h"
+#include "MeshUpdate.h"
 
 class Rendering
 {
 protected:
 
 public:
+	std::vector<p2t::Triangle*> initialMesh;
 	CPolygon* basePolygon;
 	PolygonArray visPolygons;
 	PointArray loopBuf;
@@ -31,5 +34,6 @@ public:
 	CPolygon calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& sOrder, IntArray& pPolarPos, DoubleArray& pPolarValues, IntArray& pPolarOrder, double rangeMin, double rangeMax);
 	bool calcLineLineIntersection(Point& result, Point& a1, double polar, Point& a3, Point& a4);
 	void Test();
+	void drawTrianglesMesh(const std::vector<p2t::Triangle*> &mesh);
 };
 

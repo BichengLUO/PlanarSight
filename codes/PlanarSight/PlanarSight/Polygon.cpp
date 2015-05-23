@@ -117,52 +117,28 @@ bool CPolygon::loopCCWTest(int loopID)
 {
 	Loop* lPtr;
 	lPtr = &(loopArray[loopID]);
-	int pointSize = lPtr->pointIDArray.size();
-	int upMostID;
-	double upMost = 0;
-	double yFlag;
-	Point p;
-	int p1ID, p2ID;
-	Vector v1, v2;
-	double angle;
-	double sum = 0;
-	double direction;
-
-	for (int i = 0; i < pointSize; i++)
+	double max_y = 0;
+	int max_y_point_id = 0;
+	int loopPointsSize = lPtr->pointIDArray.size();
+	for (int i = 0; i < loopPointsSize; i++)
 	{
-		yFlag = pointArray[lPtr->pointIDArray[i]].y;
-		if (yFlag > upMost)
+		if (pointArray[lPtr->pointIDArray[i]].y > max_y)
 		{
-			upMost = yFlag;
-			upMostID = i;
+			max_y = pointArray[lPtr->pointIDArray[i]].y;
+			max_y_point_id = i;
 		}
 	}
-	p = pointArray[lPtr->pointIDArray[upMostID]];
+	Point p1 = pointArray[(max_y_point_id - 1 + loopPointsSize) % loopPointsSize];
+	Point p2 = pointArray[max_y_point_id];
+	Point p3 = pointArray[(max_y_point_id + 1) % loopPointsSize];
 
-	p1ID = upMostID + 1;
-	for (int i = 0; i < pointSize; i++)
-	{
-		if (p1ID >= pointSize)
-			p1ID = 0;
-
-		p2ID = p1ID + 1;
-		if (p2ID >= pointSize)
-			p2ID = 0;
-
-		v1 = pointArray[lPtr->pointIDArray[p1ID]] - p;
-		v2 = pointArray[lPtr->pointIDArray[p2ID]] - p;
-		angle = calAngle(v1, v2);
-		direction = v1 ^ v2;
-		if (direction > 0)
-			sum += angle;
-		else
-			sum -= angle;
-	}
-
-	if (sum > 0)
-		return true;
-	else
+	double dp = (p2.x - p1.x) * (p3.y - p2.y) - (p2.y - p1.y) * (p3.x - p2.x);
+	if (dp < 0)
 		return false;
+	else if (dp == 0)
+		return p1.x > p2.x && p2.x > p3.x;
+	else
+		return true;
 }
 
 void CPolygon::reverseLoop(int loopID)
@@ -171,7 +147,7 @@ void CPolygon::reverseLoop(int loopID)
 	lPtr = &(loopArray[loopID]);
 	int pointSize = lPtr->pointIDArray.size();
 	int tmp;
-	for (int i = 0; i < pointSize; i++)
+	for (int i = 0; i < pointSize / 2; i++)
 	{
 		tmp = lPtr->pointIDArray[i];
 		lPtr->pointIDArray[i] = lPtr->pointIDArray[pointSize - 1 - i];
