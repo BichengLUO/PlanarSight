@@ -114,6 +114,9 @@
     <ClInclude Include="ConvexHull.h">
       <Filter>头文件\Triangulation</Filter>
     </ClInclude>
+    <ClInclude Include="DCEL.h">
+      <Filter>头文件\DCEL</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PlanarSight.cpp">
@@ -163,6 +166,9 @@
     </ClCompile>
     <ClCompile Include="ConvexHull.cpp">
       <Filter>源文件\Triangulation</Filter>
+    </ClCompile>
+    <ClCompile Include="DCEL.cpp">
+      <Filter>源文件\DCEL</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
