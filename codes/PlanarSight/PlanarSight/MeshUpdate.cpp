@@ -2,6 +2,8 @@
 #include "MeshUpdate.h"
 #include "ConvexHull.h"
 
+#define DOUBLE_EQUAL(a,b) (abs((a)-(b))<=1e-6)
+
 std::vector<p2t::Triangle*> buildInitialMesh(const CPolygon &basePolygon)
 {
 	std::vector<p2t::Triangle*> initialMesh = buildMeshFromPolygon(basePolygon);
@@ -181,7 +183,7 @@ std::vector<p2t::Triangle*> insertPointToUpdateTriangles(const std::vector<p2t::
 				t[0] = new p2t::Triangle(*p1, *p2, *next_p);
 				t[1] = new p2t::Triangle(*p2, *p3, *next_p);
 				t[2] = new p2t::Triangle(*p3, *p1, *next_p);
-				t[4] = NULL;
+				t[3] = NULL;
 
 				delete p1p2;
 				delete p2p3;
@@ -198,8 +200,11 @@ std::vector<p2t::Triangle*> insertPointToUpdateTriangles(const std::vector<p2t::
 					p2t::Point t2 = *t[i]->GetPoint(1);
 					p2t::Point t3 = *t[i]->GetPoint(2);
 
-					if (abs(p2t::Cross(t2 - t1, t3 - t1)) <= 1e-6)
+					if (DOUBLE_EQUAL(p2t::Cross(t2 - t1, t3 - t1), 0))
+					{
+
 						delete t[i];
+					}
 					else
 						splitedMesh.push_back(t[i]);
 				}
@@ -256,19 +261,19 @@ int findEdgePointStands(p2t::Triangle &tri, const p2t::Point &p)
 	if ((p1->x < p.x && p2->x > p.x) || (p2->x < p.x && p1->x > p.x))
 	{
 		double ny = p1->y + (p2->y - p1->y) * ((p.x - p1->x) / (p2->x - p1->x));
-		if (((p1->y < ny && p2->y > ny) || (p2->y < ny && p1->y > ny)) && ny == p.y)
+		if (((p1->y < ny && p2->y > ny) || (p2->y < ny && p1->y > ny)) && DOUBLE_EQUAL(ny, p.y))
 			return 2;
 	}
 	if ((p2->x < p.x && p3->x > p.x) || (p3->x < p.x && p2->x > p.x))
 	{
 		double ny = p2->y + (p3->y - p2->y) * ((p.x - p2->x) / (p3->x - p2->x));
-		if (((p2->y < ny && p3->y > ny) || (p3->y < ny && p2->y > ny)) && ny == p.y)
+		if (((p2->y < ny && p3->y > ny) || (p3->y < ny && p2->y > ny)) && DOUBLE_EQUAL(ny, p.y))
 			return 0;
 	}
 	if ((p3->x < p.x && p1->x > p.x) || (p1->x < p.x && p3->x > p.x))
 	{
 		double ny = p3->y + (p1->y - p3->y) * ((p.x - p3->x) / (p1->x - p3->x));
-		if (((p3->y < ny && p1->y > ny) || (p1->y < ny && p3->y > ny)) && ny == p.y)
+		if (((p3->y < ny && p1->y > ny) || (p1->y < ny && p3->y > ny)) && DOUBLE_EQUAL(ny, p.y))
 			return 1;
 	}
 }
