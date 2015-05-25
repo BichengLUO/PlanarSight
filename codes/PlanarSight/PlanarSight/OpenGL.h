@@ -24,12 +24,16 @@ public:
 	CWnd* outterWallBtn;
 	CWnd* innerWallBtn;
 	CWnd* monsterBtn;
+	CWnd* startBtn;
+	CWnd* endBtn;
 
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 };
 
 

@@ -108,14 +108,14 @@
     <ClInclude Include="MeshUpdate.h">
       <Filter>头文件\Triangulation</Filter>
     </ClInclude>
-    <ClInclude Include="DisjointSet.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="ConvexHull.h">
       <Filter>头文件\Triangulation</Filter>
     </ClInclude>
     <ClInclude Include="DCEL.h">
       <Filter>头文件\DCEL</Filter>
+    </ClInclude>
+    <ClInclude Include="DisjointSet.h">
+      <Filter>头文件\Math2d</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -161,14 +161,14 @@
     <ClCompile Include="MeshUpdate.cpp">
       <Filter>源文件\Triangulation</Filter>
     </ClCompile>
-    <ClCompile Include="DisjointSet.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="ConvexHull.cpp">
       <Filter>源文件\Triangulation</Filter>
     </ClCompile>
     <ClCompile Include="DCEL.cpp">
       <Filter>源文件\DCEL</Filter>
+    </ClCompile>
+    <ClCompile Include="DisjointSet.cpp">
+      <Filter>源文件\Math2d</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -8,8 +8,14 @@ Rendering::Rendering()
 	drawOuterWall = false;
 	drawInnerWall = false;
 	drawMonster = false;
+	showVisPolygon = false;
+	gameStart = false;
+	player.x = 370;
+	player.y = 310;
+	moving = false;
 }
 
+int Rendering::playerSpeed = 3;
 
 Rendering::~Rendering()
 {
@@ -33,12 +39,21 @@ void Rendering::draw()
 		drawUnfinishedLoop(loopBuf);
 	}
 
-	if (splitedMesh.size() > 0)
+	/*if (splitedMesh.size() > 0)
 		drawTrianglesMesh(splitedMesh);
 	else if (initialMesh.size() > 0)
-		drawTrianglesMesh(initialMesh);
+		drawTrianglesMesh(initialMesh);*/
+
 	drawPolygon(*basePolygon);
 	drawMonsters(monsters);
+	drawPlayer(player);
+
+	if (showVisPolygon)
+	{
+		int size = visPolygons.size();
+		for (int i = 0; i < size; i++)
+			drawPolygon(visPolygons[i]);
+	}
 }
 
 void Rendering::drawPolygon(CPolygon& p)
@@ -138,6 +153,47 @@ void Rendering::drawMonsters(PointArray& pa)
 	glColor3d(0, 1, 1);
 	for (int i = 0; i < pointSize; i++)
 		drawPoint(pa[i], 5);
+}
+
+void Rendering::drawPlayer(Point& p)
+{
+	glColor3d(1, 1, 0);
+	drawPoint(player, 7);
+}
+
+void Rendering::playerWalk(int keyFlag)
+{
+	cout << keyFlag << endl;
+	Point p = player;
+	switch (keyFlag)
+	{
+	case 'A':
+		p.x -= playerSpeed;
+		break;
+	case 'W':
+		p.y += playerSpeed;
+		break;
+	case 'D':
+		p.x += playerSpeed;
+		break;
+	case 'S':
+		p.y -= playerSpeed;
+		break;
+	}
+
+	if (basePolygon->pointInPolygonTest(p))
+		player = p;
+}
+
+bool Rendering::playerMoveTo(Point& p)
+{
+	if (basePolygon->pointInPolygonTest(p))
+	{
+		player = p;
+		return true;
+	}
+	else
+		return false;
 }
 
 void Rendering::clear()
