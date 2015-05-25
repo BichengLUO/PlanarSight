@@ -3,6 +3,7 @@
 #include "DisjointSet.h"
 #include "shapes.h"
 #include "MeshUpdate.h"
+#include <iostream>
 
 class Rendering
 {
@@ -15,9 +16,14 @@ public:
 	PolygonArray visPolygons;
 	PointArray loopBuf;
 	PointArray monsters;
+	Point player;
+	static int playerSpeed;
 	bool drawOuterWall;
 	bool drawInnerWall;
 	bool drawMonster;
+	bool showVisPolygon;
+	bool gameStart;
+	bool moving;
 
 public:
 	Rendering();
@@ -31,6 +37,9 @@ public:
 	bool loopFinished();
 	void drawMonsters(PointArray& pa);
 	bool addMonster(Point& p);
+	void drawPlayer(Point& p);
+	void playerWalk(int flag);
+	bool playerMoveTo(Point& p);
 	void clear();
 	CPolygon calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& sOrder, IntArray& pPolarPos, DoubleArray& pPolarValues, IntArray& pPolarOrder, double rangeMin, double rangeMax);
 	bool calcLineLineIntersection(Point& result, Point& a1, double polar, Point& a3, Point& a4);
