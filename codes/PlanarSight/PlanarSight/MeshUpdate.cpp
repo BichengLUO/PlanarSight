@@ -3,19 +3,20 @@
 #include "ConvexHull.h"
 
 #define DOUBLE_EQUAL(a,b) (abs((a)-(b))<=1e-6)
+#define DOUBLE_GREATER(a,b) ((a)-(b)>1e-6)
 
-std::vector<p2t::Triangle*> buildInitialMesh(const CPolygon &basePolygon)
+Mesh buildInitialMesh(const CPolygon &basePolygon)
 {
-	std::vector<p2t::Triangle*> initialMesh = buildMeshFromPolygon(basePolygon);
+	Mesh initialMesh = buildMeshFromPolygon(basePolygon);
 	for (int i = 1; i < basePolygon.loopArray.size(); i++)
 	{
-		std::vector<p2t::Triangle*> holeMesh = buildMeshFromInnerLoop(basePolygon.loopArray[i]);
+		Mesh holeMesh = buildMeshFromInnerLoop(basePolygon.loopArray[i]);
 		initialMesh.insert(initialMesh.end(), holeMesh.begin(), holeMesh.end());
 	}
 	std::vector<Loop> ears = getEarsFromOuterLoop(basePolygon.loopArray[0]);
 	for (int i = 0; i < ears.size(); i++)
 	{
-		std::vector<p2t::Triangle*> earMesh = buildMeshFromInnerLoop(ears[i]);
+		Mesh earMesh = buildMeshFromInnerLoop(ears[i]);
 		initialMesh.insert(initialMesh.end(), earMesh.begin(), earMesh.end());
 	}
 	rebuildTrianglesRelationship(initialMesh);
@@ -59,9 +60,9 @@ std::vector<Loop> getEarsFromOuterLoop(const Loop &loop)
 	return ears;
 }
 
-std::vector<p2t::Triangle*> buildMeshFromPolygon(const CPolygon &basePolygon)
+Mesh buildMeshFromPolygon(const CPolygon &basePolygon)
 {
-	std::vector<p2t::Triangle*> initialMesh;
+	Mesh initialMesh;
 	if (basePolygon.loopArray.size() == 0)
 		return initialMesh;
 	vector<p2t::Point*> polyline;
@@ -88,7 +89,7 @@ std::vector<p2t::Triangle*> buildMeshFromPolygon(const CPolygon &basePolygon)
 	return initialMesh;
 }
 
-std::vector<p2t::Triangle*> buildMeshFromInnerLoop(const Loop &loop)
+Mesh buildMeshFromInnerLoop(const Loop &loop)
 {
 	vector<p2t::Point*> polyline;
 	for (int i = loop.pointIDArray.size() - 1; i >= 0; i--)
@@ -99,11 +100,11 @@ std::vector<p2t::Triangle*> buildMeshFromInnerLoop(const Loop &loop)
 	}
 	p2t::CDT *cdt = new p2t::CDT(polyline);
 	cdt->Triangulate();
-	std::vector<p2t::Triangle*> mesh = cdt->GetTriangles();
+	Mesh mesh = cdt->GetTriangles();
 	return mesh;
 }
 
-std::vector<p2t::Triangle*> buildMeshFromOuterLoop(const Loop &loop)
+Mesh buildMeshFromOuterLoop(const Loop &loop)
 {
 	vector<p2t::Point*> polyline;
 	for (int i = 0; i < loop.pointIDArray.size(); i++)
@@ -114,18 +115,19 @@ std::vector<p2t::Triangle*> buildMeshFromOuterLoop(const Loop &loop)
 	}
 	p2t::CDT *cdt = new p2t::CDT(polyline);
 	cdt->Triangulate();
-	std::vector<p2t::Triangle*> mesh = cdt->GetTriangles();
+	Mesh mesh = cdt->GetTriangles();
 	return mesh;
 }
 
-std::vector<p2t::Triangle*> insertPointToUpdateTriangles(const std::vector<p2t::Triangle*> &mesh, const p2t::Point &p)
+Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 {
-	std::vector<p2t::Triangle*> splitedMesh;
+	Mesh splitedMesh;
 	int ind = findPointInTriangles(mesh, p);
 	if (ind != -1)
 	{
 		p2t::Triangle *next_tri = mesh[ind];
 		p2t::Point *next_p = new p2t::Point(p.x, p.y);
+		firstTriangleBackwardSplit(splitedMesh, *next_tri, *next_p);
 		while (next_tri != NULL)
 		{
 			next_tri->mark_to_be_splited = true;
@@ -201,10 +203,7 @@ std::vector<p2t::Triangle*> insertPointToUpdateTriangles(const std::vector<p2t::
 					p2t::Point t3 = *t[i]->GetPoint(2);
 
 					if (DOUBLE_EQUAL(p2t::Cross(t2 - t1, t3 - t1), 0))
-					{
-
 						delete t[i];
-					}
 					else
 						splitedMesh.push_back(t[i]);
 				}
@@ -214,7 +213,7 @@ std::vector<p2t::Triangle*> insertPointToUpdateTriangles(const std::vector<p2t::
 		}
 	}
 
-	std::vector<p2t::Triangle*>::const_iterator it;
+	Mesh::const_iterator it;
 	for (it = mesh.begin(); it != mesh.end(); ++it)
 	{
 		if (!(*it)->mark_to_be_splited)
@@ -225,39 +224,95 @@ std::vector<p2t::Triangle*> insertPointToUpdateTriangles(const std::vector<p2t::
 	return splitedMesh;
 }
 
+void firstTriangleBackwardSplit(Mesh &splitedMesh, p2t::Triangle &tri, p2t::Point &p)
+{
+	int edge = -1;
+	edge = findEdgePointStands(tri, p);
+	if (edge != -1)
+	{
+		const p2t::Point *p1 = tri.GetPoint(0);
+		const p2t::Point *p2 = tri.GetPoint(1);
+		const p2t::Point *p3 = tri.GetPoint(2);
+		if ((p1->x != p.x || p1->y != p.y) &&
+			(p2->x != p.x || p2->y != p.y) &&
+			(p3->x != p.x || p3->y != p.y))
+		{
+			bool downEdge = false;
+			if (edge == 0)
+				downEdge = p2->x == p3->x || ((p2->x < p3->x) ^ (p2t::Cross(*p3 - *p2, *p1 - *p3) < 0));
+			else if (edge == 1)
+				downEdge = p1->x == p3->x || ((p1->x < p3->x) ^ (p2t::Cross(*p3 - *p1, *p2 - *p3) < 0));
+			else if (edge == 2)
+				downEdge = p1->x == p2->x || ((p1->x < p2->x) ^ (p2t::Cross(*p2 - *p1, *p3 - *p2) < 0));
+			if (downEdge)
+			{
+				tri.neighbors_[edge]->mark_to_be_splited = true;
+				p2t::Point *n1 = tri.neighbors_[edge]->GetPoint(0);
+				p2t::Point *n2 = tri.neighbors_[edge]->GetPoint(1);
+				p2t::Point *n3 = tri.neighbors_[edge]->GetPoint(2);
+				p2t::Triangle *t1;
+				p2t::Triangle *t2;
+				if (tri.neighbors_[edge]->neighbors_[0] == &tri)
+				{
+					t1 = new p2t::Triangle(*n1, p, *n3);
+					t2 = new p2t::Triangle(*n1, *n2, p);
+				}
+				else if (tri.neighbors_[edge]->neighbors_[1] == &tri)
+				{
+					t1 = new p2t::Triangle(*n2, p, *n1);
+					t2 = new p2t::Triangle(*n2, *n3, p);
+				}
+				else if (tri.neighbors_[edge]->neighbors_[2] == &tri)
+				{
+					t1 = new p2t::Triangle(*n3, p, *n2);
+					t2 = new p2t::Triangle(*n3, *n1, p);
+				}
+				splitedMesh.push_back(t1);
+				splitedMesh.push_back(t2);
+			}
+		}
+	}
+}
+
 int findEdgePointStands(p2t::Triangle &tri, const p2t::Point &p)
 {
 	const p2t::Point *p1 = tri.GetPoint(0);
 	const p2t::Point *p2 = tri.GetPoint(1);
 	const p2t::Point *p3 = tri.GetPoint(2);
 
-	if (p1->x == p.x && p1->y == p.y)
-	{
-		if (p2->y > p3->y)
-			return 2;
-		else
-			return 1;
-	}
-	if (p2->x == p.x && p2->y == p.y)
-	{
-		if (p1->y > p3->y)
-			return 2;
-		else
-			return 0;
-	}
-	if (p3->x == p.x && p3->y == p.y)
-	{
-		if (p1->y > p2->y)
-			return 1;
-		else
-			return 0;
-	}
 	if (p1->x == p2->x && p1->x == p.x)
 		return 2;
 	if (p2->x == p3->x && p2->x == p.x)
 		return 0;
 	if (p3->x == p1->x && p1->x == p.x)
 		return 1;
+	if (p1->x == p.x && p1->y == p.y)
+	{
+		bool right = p2->x > p1->x && p3->x > p1->x;
+		bool ccw = p2t::Cross(*p2 - *p1, *p3 - *p1) > 0;
+		if (right ^ ccw)
+			return 2;
+		else
+			return 1;
+	}
+	if (p2->x == p.x && p2->y == p.y)
+	{
+		bool right = p1->x > p2->x && p3->x > p2->x;
+		bool ccw = p2t::Cross(*p1 - *p2, *p3 - *p2) > 0;
+		if (right ^ ccw)
+			return 2;
+		else
+			return 0;
+	}
+	if (p3->x == p.x && p3->y == p.y)
+	{
+		bool right = p1->x > p3->x && p2->x > p3->x;
+		bool ccw = p2t::Cross(*p1 - *p3, *p2 - *p3) > 0;
+		if (right ^ ccw)
+			return 1;
+		else
+			return 0;
+	}
 	if ((p1->x < p.x && p2->x > p.x) || (p2->x < p.x && p1->x > p.x))
 	{
 		double ny = p1->y + (p2->y - p1->y) * ((p.x - p1->x) / (p2->x - p1->x));
@@ -276,6 +331,7 @@ int findEdgePointStands(p2t::Triangle &tri, const p2t::Point &p)
 		if (((p3->y < ny && p1->y > ny) || (p1->y < ny && p3->y > ny)) && DOUBLE_EQUAL(ny, p.y))
 			return 1;
 	}
+	return -1;
 }
 
 void rayIntersectTriangle(p2t::Triangle &tri, const p2t::Point &p, p2t::Point *p1p2, p2t::Point *p2p3, p2t::Point *p3p1)
@@ -305,7 +361,7 @@ void rayIntersectTriangle(p2t::Triangle &tri, const p2t::Point &p, p2t::Point *p
 	if ((p1->x <= p.x && p2->x > p.x) || (p2->x < p.x && p1->x >= p.x))
 	{
 		double ny = p1->y + (p2->y - p1->y) * ((p.x - p1->x) / (p2->x - p1->x));
-		if (((p1->y <= ny && p2->y > ny) || (p2->y < ny && p1->y >= ny)) && ny > p.y)
+		if (((p1->y <= ny && p2->y > ny) || (p2->y < ny && p1->y >= ny)) && DOUBLE_GREATER(ny, p.y))
 		{
 			p1p2->x = p.x;
 			p1p2->y = ny;
@@ -315,7 +371,7 @@ void rayIntersectTriangle(p2t::Triangle &tri, const p2t::Point &p, p2t::Point *p
 	if ((p2->x <= p.x && p3->x > p.x) || (p3->x < p.x && p2->x >= p.x))
 	{
 		double ny = p2->y + (p3->y - p2->y) * ((p.x - p2->x) / (p3->x - p2->x));
-		if (((p2->y <= ny && p3->y > ny) || (p3->y < ny && p2->y >= ny)) && ny > p.y)
+		if (((p2->y <= ny && p3->y > ny) || (p3->y < ny && p2->y >= ny)) && DOUBLE_GREATER(ny, p.y))
 		{
 			p2p3->x = p.x;
 			p2p3->y = ny;
@@ -325,7 +381,7 @@ void rayIntersectTriangle(p2t::Triangle &tri, const p2t::Point &p, p2t::Point *p
 	if ((p3->x <= p.x && p1->x > p.x) || (p1->x < p.x && p3->x >= p.x))
 	{
 		double ny = p3->y + (p1->y - p3->y) * ((p.x - p3->x) / (p1->x - p3->x));
-		if (((p3->y <= ny && p1->y > ny) || (p1->y < ny && p3->y >= ny)) && ny > p.y)
+		if (((p3->y <= ny && p1->y > ny) || (p1->y < ny && p3->y >= ny)) && DOUBLE_GREATER(ny, p.y))
 		{
 			p3p1->x = p.x;
 			p3p1->y = ny;
@@ -334,7 +390,7 @@ void rayIntersectTriangle(p2t::Triangle &tri, const p2t::Point &p, p2t::Point *p
 	}
 }
 
-void rebuildTrianglesRelationship(std::vector<p2t::Triangle*> &mesh)
+void rebuildTrianglesRelationship(Mesh &mesh)
 {
 	for (int i = 0; i < mesh.size(); i++)
 	{
@@ -376,9 +432,9 @@ void rebuildTrianglesRelationship(std::vector<p2t::Triangle*> &mesh)
 	}
 }
 
-int findPointInTriangles(const std::vector<p2t::Triangle*> &mesh, const p2t::Point &p)
+int findPointInTriangles(const Mesh &mesh, const p2t::Point &p)
 {
-	std::vector<p2t::Triangle*>::const_iterator it;
+	Mesh::const_iterator it;
 	int ind = 0;
 	for (it = mesh.begin(); it != mesh.end(); ++it)
 	{
