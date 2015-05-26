@@ -161,6 +161,8 @@ bool mark_to_be_splited;
 
 /// Neighbor list
 Triangle* neighbors_[3];
+/// Edge label
+int edges[3];
 
 Point* GetPoint(const int& index);
 Point* PointCW(Point& point);
