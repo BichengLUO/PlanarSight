@@ -212,24 +212,41 @@ void Rendering::monsterWalk(int monsterID)
 	Monster* mPtr;
 	mPtr = &(monsters[monsterID]);
 	double rd = randomDouble();
-	double angle = mPtr->direction - mPtr->range + 2 * mPtr->range * rd;
+	double angleNew = mPtr->walkDirection - mPtr->range + 2 * mPtr->range * rd;
+	double angle = angleNew * 0.3 + mPtr->walkDirection * 0.7;
+	double turn;
 	Vector direction(Monster::speed * cos(angle), Monster::speed * sin(angle));
 	Point p = mPtr->pos + direction;
 	if (basePolygon->pointInPolygonTest(p))
 	{
 		mPtr->pos = p;
-		mPtr->direction = angle;
+		mPtr->walkDirection = angle;
+		turn = angle - mPtr->viewDirection;
+		if (abs(turn) > PI)
+		{
+			if (turn > 0)
+				turn -= DOUBLE_PI;
+			else
+				turn += DOUBLE_PI;
+		}
+		mPtr->viewDirection += turn / 50;
 	}
 	else
 	{
 		p = mPtr->pos - direction;
 		mPtr->pos = p;
-		mPtr->direction = angle + PI;
+		mPtr->viewDirection = angle + PI;
+		mPtr->walkDirection = angle + PI;
 	}
-	if (mPtr->direction > DOUBLE_PI)
-		mPtr->direction -= DOUBLE_PI;
-	else if (mPtr->direction < 0)
-		mPtr->direction += DOUBLE_PI;
+	if (mPtr->walkDirection > DOUBLE_PI)
+		mPtr->walkDirection -= DOUBLE_PI;
+	else if (mPtr->walkDirection < 0)
+		mPtr->walkDirection += DOUBLE_PI;
+
+	if (mPtr->viewDirection > DOUBLE_PI)
+		mPtr->viewDirection -= DOUBLE_PI;
+	else if (mPtr->viewDirection < 0)
+		mPtr->viewDirection += DOUBLE_PI;
 }
 
 void Rendering::clear()
@@ -387,8 +404,8 @@ void Rendering::calcVisPolygon()
 		visPolygons[i].clear();
 		PointArray pa;
 		Point p = it->pos;
-		Vector v1(Monster::viewDistance * cos(it->direction - it->range), Monster::viewDistance * sin(it->direction - it->range));
-		Vector v2(Monster::viewDistance * cos(it->direction + it->range), Monster::viewDistance * sin(it->direction + it->range));
+		Vector v1(Monster::viewDistance * cos(it->viewDirection - it->range), Monster::viewDistance * sin(it->viewDirection - it->range));
+		Vector v2(Monster::viewDistance * cos(it->viewDirection + it->range), Monster::viewDistance * sin(it->viewDirection + it->range));
 		pa.push_back(p);
 		pa.push_back(p + v1);
 		pa.push_back(p + v2);
