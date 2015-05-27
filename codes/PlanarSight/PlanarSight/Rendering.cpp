@@ -9,6 +9,7 @@ Rendering::Rendering()
 	drawInnerWall = false;
 	drawMonster = false;
 	showVisPolygon = false;
+	showTriangulation = false;
 	gameStart = false;
 	player.x = 370;
 	player.y = 310;
@@ -31,6 +32,12 @@ void Rendering::draw()
 	if (drawOuterWall || drawInnerWall)
 		drawUnfinishedLoop(loopBuf);
 
+	if (gameStart)
+	{
+		clearSplitedMeshMemory();
+		splitedMesh = insertPointToUpdateTriangles(initialMesh, p2t::Point(monsters[0].pos.x, monsters[0].pos.y));
+	}
+	if (showTriangulation)
 	if (splitedMesh.size() > 0)
 		drawTrianglesMesh(splitedMesh);
 	else if (initialMesh.size() > 0)
@@ -153,8 +160,6 @@ bool Rendering::addMonster(Point& p)
 	CPolygon cp;
 	visPolygons.push_back(cp);
 
-	clearSplitedMeshMemory();
-	splitedMesh = insertPointToUpdateTriangles(initialMesh, p2t::Point(p.x, p.y));
 	return true;
 }
 

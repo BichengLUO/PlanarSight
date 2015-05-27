@@ -64,6 +64,7 @@ void CPlanarSightDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_VISI_POLYGON, vis_pol_check);
+	DDX_Control(pDX, IDC_SHOW_TRIANGULATION, showTriangulation);
 }
 
 BEGIN_MESSAGE_MAP(CPlanarSightDlg, CDialogEx)
@@ -80,6 +81,7 @@ BEGIN_MESSAGE_MAP(CPlanarSightDlg, CDialogEx)
 //	ON_WM_KEYDOWN()
 ON_WM_KEYDOWN()
 ON_WM_KEYUP()
+ON_BN_CLICKED(IDC_SHOW_TRIANGULATION, &CPlanarSightDlg::OnBnClickedShowTriangulation)
 END_MESSAGE_MAP()
 
 
@@ -308,4 +310,14 @@ void CPlanarSightDlg::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 	// TODO:  在此添加消息处理程序代码和/或调用默认值
 	MessageBox(_T("key"), NULL, MB_OK);
 	CDialogEx::OnKeyUp(nChar, nRepCnt, nFlags);
+}
+
+
+void CPlanarSightDlg::OnBnClickedShowTriangulation()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	if (showTriangulation.GetCheck() == 0)
+		m_pDisplay->rendering->showTriangulation = false;
+	else
+		m_pDisplay->rendering->showTriangulation = true;
 }

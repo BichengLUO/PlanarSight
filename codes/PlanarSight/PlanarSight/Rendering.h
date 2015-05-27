@@ -23,6 +23,7 @@ public:
 	bool drawInnerWall;
 	bool drawMonster;
 	bool showVisPolygon;
+	bool showTriangulation;
 	bool gameStart;
 	bool moving;
 	bool preprocessFinished;
