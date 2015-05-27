@@ -86,3 +86,8 @@ bool equalZero(double d)
 	else
 		return false;
 }
+
+double randomDouble()
+{
+	return (double)rand() / RAND_MAX;
+}

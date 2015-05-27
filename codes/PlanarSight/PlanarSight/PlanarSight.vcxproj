@@ -110,6 +110,7 @@
     <ClInclude Include="DisjointSet.h" />
     <ClInclude Include="Graph.h" />
     <ClInclude Include="MeshUpdate.h" />
+    <ClInclude Include="Monster.h" />
     <ClInclude Include="OpenGL.h" />
     <ClInclude Include="PlanarSight.h" />
     <ClInclude Include="PlanarSightDlg.h" />
@@ -133,6 +134,7 @@
     <ClCompile Include="DisjointSet.cpp" />
     <ClCompile Include="Graph.cpp" />
     <ClCompile Include="MeshUpdate.cpp" />
+    <ClCompile Include="Monster.cpp" />
     <ClCompile Include="OpenGL.cpp" />
     <ClCompile Include="PlanarSight.cpp" />
     <ClCompile Include="PlanarSightDlg.cpp" />

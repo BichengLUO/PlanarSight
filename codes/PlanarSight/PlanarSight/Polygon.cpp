@@ -132,7 +132,7 @@ bool CPolygon::loopCCWTest(int loopID)
 	Point p2 = pointArray[max_y_point_id];
 	Point p3 = pointArray[(max_y_point_id + 1) % loopPointsSize];
 
-	double dp = (p2.x - p1.x) * (p3.y - p2.y) - (p2.y - p1.y) * (p3.x - p2.x);
+	double dp = (p2 - p1) ^ (p3 - p2);
 	if (dp < 0)
 		return false;
 	else if (dp == 0)

@@ -2,6 +2,8 @@
 
 #pragma once
 #include <vector>
+#include <stdlib.h>
+#include <time.h>
 using namespace std;
 
 #define TOLERANCE	1e-7
@@ -39,6 +41,7 @@ typedef vector<double> DoubleArray;
 
 double calAngle(Vector& v1, Vector& v2);
 bool equalZero(double d);
+double randomDouble();
 
 
 

@@ -13,6 +13,8 @@ Rendering::Rendering()
 	player.x = 370;
 	player.y = 310;
 	moving = false;
+
+	srand((unsigned)time(0));
 }
 
 int Rendering::playerSpeed = 3;
@@ -45,8 +47,16 @@ void Rendering::draw()
 		drawTrianglesMesh(initialMesh);*/
 
 	drawPolygon(*basePolygon);
-	drawMonsters(monsters);
 	drawPlayer(player);
+
+	if (gameStart)
+	{
+		int monsterSize = monsters.size();
+		for (int i = 0; i < monsterSize; i++)
+			monsterWalk(i);
+	}
+	drawMonsters(monsters);
+	calcVisPolygon();
 
 	if (showVisPolygon)
 	{
@@ -142,17 +152,20 @@ bool Rendering::addMonster(Point& p)
 	if (!basePolygon->pointInPolygonTest(p))
 		return false;
 
-	monsters.push_back(p);
+	Monster m(p);
+	monsters.push_back(m);
+	CPolygon cp;
+	visPolygons.push_back(cp);
 	splitedMesh = insertPointToUpdateTriangles(initialMesh, p2t::Point(p.x, p.y));
 	return true;
 }
 
-void Rendering::drawMonsters(PointArray& pa)
+void Rendering::drawMonsters(MonsterArray& ma)
 {
-	int pointSize = pa.size();
+	int pointSize = ma.size();
 	glColor3d(0, 1, 1);
 	for (int i = 0; i < pointSize; i++)
-		drawPoint(pa[i], 5);
+		drawPoint(ma[i].pos, 5);
 }
 
 void Rendering::drawPlayer(Point& p)
@@ -194,6 +207,31 @@ bool Rendering::playerMoveTo(Point& p)
 	}
 	else
 		return false;
+}
+
+void Rendering::monsterWalk(int monsterID)
+{
+	Monster* mPtr;
+	mPtr = &(monsters[monsterID]);
+	double rd = randomDouble();
+	double angle = mPtr->direction - mPtr->range + 2 * mPtr->range * rd;
+	Vector direction(Monster::speed * cos(angle), Monster::speed * sin(angle));
+	Point p = mPtr->pos + direction;
+	if (basePolygon->pointInPolygonTest(p))
+	{
+		mPtr->pos = p;
+		mPtr->direction = angle;
+	}
+	else
+	{
+		p = mPtr->pos - direction;
+		mPtr->pos = p;
+		mPtr->direction = angle + PI;
+	}
+	if (mPtr->direction > DOUBLE_PI)
+		mPtr->direction -= DOUBLE_PI;
+	else if (mPtr->direction < 0)
+		mPtr->direction += DOUBLE_PI;
 }
 
 void Rendering::clear()
@@ -283,10 +321,10 @@ CPolygon Rendering::calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& 
 	int xFlag;
 	int preY, curY;
 	double polar;
-	pointBuf.push_back(monsters[monsterID]);
+	pointBuf.push_back(monsters[monsterID].pos);
 
 	//计算可视范围左边界与线段集的交点
-	calcLineLineIntersection(pLeft, monsters[monsterID], rangeMin, pa[sOrder[rangeLeftY].aID], pa[sOrder[rangeLeftY].bID]);
+	calcLineLineIntersection(pLeft, monsters[monsterID].pos, rangeMin, pa[sOrder[rangeLeftY].aID], pa[sOrder[rangeLeftY].bID]);
 	pointBuf.push_back(pLeft);
 	preY = rangeLeftY;
 
@@ -301,7 +339,7 @@ CPolygon Rendering::calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& 
 		if (curY > preY)
 		{
 			polar = pPolarVal[sOrder[preY].bID];
-			calcLineLineIntersection(pMid, monsters[monsterID], polar, pa[sOrder[curY].aID], pa[sOrder[curY].bID]);
+			calcLineLineIntersection(pMid, monsters[monsterID].pos, polar, pa[sOrder[curY].aID], pa[sOrder[curY].bID]);
 			pointBuf.push_back(pa[sOrder[preY].bID]);
 			pointBuf.push_back(pMid);
 		}
@@ -309,7 +347,7 @@ CPolygon Rendering::calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& 
 		else if (curY < preY)
 		{
 			polar = pPolarVal[sOrder[curY].aID];
-			calcLineLineIntersection(pMid, monsters[monsterID], polar, pa[sOrder[preY].aID], pa[sOrder[preY].bID]);
+			calcLineLineIntersection(pMid, monsters[monsterID].pos, polar, pa[sOrder[preY].aID], pa[sOrder[preY].bID]);
 			pointBuf.push_back(pMid);
 			pointBuf.push_back(pa[sOrder[curY].aID]);
 		}
@@ -319,7 +357,7 @@ CPolygon Rendering::calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& 
 	}
 
 	//计算可视范围右边界与线段集的交点
-	calcLineLineIntersection(pRight, monsters[monsterID], rangeMax, pa[sOrder[rangeRightY].aID], pa[sOrder[rangeRightY].bID]);
+	calcLineLineIntersection(pRight, monsters[monsterID].pos, rangeMax, pa[sOrder[rangeRightY].aID], pa[sOrder[rangeRightY].bID]);
 	pointBuf.push_back(pRight);
 
 	cp.addLoop(pointBuf);
@@ -339,6 +377,26 @@ bool Rendering::calcLineLineIntersection(Point& result, Point& a1, double polar,
 	double t = (b1a1 ^ b1b2) / (b1b2 ^ a1a2);
 	result = a1 + (a1a2 * t);
 	return true;
+}
+
+void Rendering::calcVisPolygon()
+{
+	int monsterSize = monsters.size();
+	vector<Monster>::iterator it = monsters.begin();
+	for (int i = 0; i < monsterSize; i++)
+	{
+		visPolygons[i].clear();
+		PointArray pa;
+		Point p = it->pos;
+		Vector v1(Monster::viewDistance * cos(it->direction - it->range), Monster::viewDistance * sin(it->direction - it->range));
+		Vector v2(Monster::viewDistance * cos(it->direction + it->range), Monster::viewDistance * sin(it->direction + it->range));
+		pa.push_back(p);
+		pa.push_back(p + v1);
+		pa.push_back(p + v2);
+		visPolygons[i].addLoop(pa);
+		
+		it++;
+	}
 }
 
 void Rendering::Test()
