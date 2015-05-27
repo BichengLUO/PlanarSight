@@ -274,6 +274,7 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 							else t[1]->edges[0] = next_tri->edges[status];
 						else
 						{
+							if (ot[0] != NULL && ot[1] != NULL)
 							if (*ot[0]->GetPoint(0) == t1)
 							{
 								ot[0]->edges[2] = t[i]->edges[1];
@@ -472,7 +473,7 @@ void rayIntersectTriangle(p2t::Triangle &tri, const p2t::Point &p, p2t::Point *p
 	if ((p1->x <= p.x && p2->x > p.x) || (p2->x < p.x && p1->x >= p.x))
 	{
 		double ny = p1->y + (p2->y - p1->y) * ((p.x - p1->x) / (p2->x - p1->x));
-		if (((p1->y <= ny && p2->y > ny) || (p2->y < ny && p1->y >= ny)) && DOUBLE_GREATER(ny, p.y))
+		if (DOUBLE_GREATER(ny, p.y))
 		{
 			p1p2->x = p.x;
 			p1p2->y = ny;
@@ -482,7 +483,7 @@ void rayIntersectTriangle(p2t::Triangle &tri, const p2t::Point &p, p2t::Point *p
 	if ((p2->x <= p.x && p3->x > p.x) || (p3->x < p.x && p2->x >= p.x))
 	{
 		double ny = p2->y + (p3->y - p2->y) * ((p.x - p2->x) / (p3->x - p2->x));
-		if (((p2->y <= ny && p3->y > ny) || (p3->y < ny && p2->y >= ny)) && DOUBLE_GREATER(ny, p.y))
+		if (DOUBLE_GREATER(ny, p.y))
 		{
 			p2p3->x = p.x;
 			p2p3->y = ny;
@@ -492,7 +493,7 @@ void rayIntersectTriangle(p2t::Triangle &tri, const p2t::Point &p, p2t::Point *p
 	if ((p3->x <= p.x && p1->x > p.x) || (p1->x < p.x && p3->x >= p.x))
 	{
 		double ny = p3->y + (p1->y - p3->y) * ((p.x - p3->x) / (p1->x - p3->x));
-		if (((p3->y <= ny && p1->y > ny) || (p1->y < ny && p3->y >= ny)) && DOUBLE_GREATER(ny, p.y))
+		if (DOUBLE_GREATER(ny, p.y))
 		{
 			p3p1->x = p.x;
 			p3p1->y = ny;
