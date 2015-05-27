@@ -2,13 +2,15 @@
 
 double Monster::maxViewAngle = PI / 6;
 double Monster::minViewAngle = PI / 8;
-double Monster::speed = 1;
+double Monster::speed = 0.8;
 double Monster::viewDistance = 100;
 
 Monster::Monster(Point p) : pos(p)
 {
 	double rd = randomDouble();
-	direction = rd * DOUBLE_PI;
+	walkDirection = rd * DOUBLE_PI;
+	viewDirection = walkDirection;
 	rd = randomDouble();
 	range = minViewAngle + rd * (maxViewAngle - minViewAngle);
+	//range = PI / 20;
 }

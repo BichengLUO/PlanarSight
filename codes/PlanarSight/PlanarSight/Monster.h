@@ -6,7 +6,8 @@ class Monster
 {
 public:
 	Point pos;
-	double direction;
+	double walkDirection;
+	double viewDirection;
 	double range;
 	static double maxViewAngle;
 	static double minViewAngle;
