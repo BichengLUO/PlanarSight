@@ -4,9 +4,18 @@
 
 #define DOUBLE_EQUAL(a,b) (abs((a)-(b))<=1e-6)
 #define DOUBLE_GREATER(a,b) ((a)-(b)>1e-6)
+#define POINT_EQUAL(a,b) (abs((a).x-(b).x)<=1e-6&&abs((a).y-(b).y)<=1e-6)
+
+int edgeLabelsCount = 0;
+int initialEdgeLablesCount;
+
+std::vector<p2t::Point*> initialMeshPointsMemory;
+std::vector<p2t::Point*> splitedMeshPointsMemory;
+std::vector<p2t::Triangle*> splitedMeshTrianglesMemory;
 
 Mesh buildInitialMesh(const CPolygon &basePolygon)
 {
+	edgeLabelsCount = 0;
 	Mesh initialMesh = buildMeshFromPolygon(basePolygon);
 	for (int i = 1; i < basePolygon.loopArray.size(); i++)
 	{
@@ -70,9 +79,11 @@ Mesh buildMeshFromPolygon(const CPolygon &basePolygon)
 	{
 		int pointID = basePolygon.loopArray[0].pointIDArray[i];
 		Point p = basePolygon.pointArray[pointID];
-		polyline.push_back(new p2t::Point(p.x, p.y));
+		p2t::Point *np = new p2t::Point(p.x, p.y);
+		polyline.push_back(np);
+		initialMeshPointsMemory.push_back(np);
 	}
-	p2t::CDT *cdt = new p2t::CDT(polyline);
+	p2t::CDT cdt(polyline);
 	for (int i = 1; i < basePolygon.loopArray.size(); i++)
 	{
 		vector<p2t::Point*> hole;
@@ -80,12 +91,14 @@ Mesh buildMeshFromPolygon(const CPolygon &basePolygon)
 		{
 			int pointID = basePolygon.loopArray[i].pointIDArray[j];
 			Point p = basePolygon.pointArray[pointID];
-			hole.push_back(new p2t::Point(p.x, p.y));
+			p2t::Point *np = new p2t::Point(p.x, p.y);
+			hole.push_back(np);
+			initialMeshPointsMemory.push_back(np);
 		}
-		cdt->AddHole(hole);
+		cdt.AddHole(hole);
 	}
-	cdt->Triangulate();
-	initialMesh = cdt->GetTriangles();
+	cdt.Triangulate();
+	initialMesh = cdt.GetTriangles();
 	return initialMesh;
 }
 
@@ -96,11 +109,13 @@ Mesh buildMeshFromInnerLoop(const Loop &loop)
 	{
 		int pointID = loop.pointIDArray[i];
 		Point p = loop.polygon->pointArray[pointID];
-		polyline.push_back(new p2t::Point(p.x, p.y));
+		p2t::Point *np = new p2t::Point(p.x, p.y);
+		polyline.push_back(np);
+		initialMeshPointsMemory.push_back(np);
 	}
-	p2t::CDT *cdt = new p2t::CDT(polyline);
-	cdt->Triangulate();
-	Mesh mesh = cdt->GetTriangles();
+	p2t::CDT cdt(polyline);
+	cdt.Triangulate();
+	Mesh mesh = cdt.GetTriangles();
 	return mesh;
 }
 
@@ -111,23 +126,29 @@ Mesh buildMeshFromOuterLoop(const Loop &loop)
 	{
 		int pointID = loop.pointIDArray[i];
 		Point p = loop.polygon->pointArray[pointID];
-		polyline.push_back(new p2t::Point(p.x, p.y));
+		p2t::Point *np = new p2t::Point(p.x, p.y);
+		polyline.push_back(np);
+		initialMeshPointsMemory.push_back(np);
 	}
-	p2t::CDT *cdt = new p2t::CDT(polyline);
-	cdt->Triangulate();
-	Mesh mesh = cdt->GetTriangles();
+	p2t::CDT cdt(polyline);
+	cdt.Triangulate();
+	Mesh mesh = cdt.GetTriangles();
 	return mesh;
 }
 
 Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 {
+	initialEdgeLablesCount = edgeLabelsCount;
 	Mesh splitedMesh;
 	int ind = findPointInTriangles(mesh, p);
 	if (ind != -1)
 	{
 		p2t::Triangle *next_tri = mesh[ind];
 		p2t::Point *next_p = new p2t::Point(p.x, p.y);
-		firstTriangleBackwardSplit(splitedMesh, *next_tri, *next_p);
+		splitedMeshPointsMemory.push_back(next_p);
+		p2t::Triangle *ot[2];
+
+		firstTriangleBackwardSplit(splitedMesh, *next_tri, *next_p, ot);
 		while (next_tri != NULL)
 		{
 			next_tri->mark_to_be_splited = true;
@@ -144,48 +165,84 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 			p2t::Point *nextPointCandidate;
 			p2t::Triangle *nextTriangleCandidate;
 			p2t::Triangle *t[4];
+			int status = -1;
 			if (p1p2->x != -1 && p1p2->y != -1)
 			{
+				status = 0;
 				t[0] = new p2t::Triangle(*p1, *p1p2, *next_p);
 				t[1] = new p2t::Triangle(*p1p2, *p2, *next_p);
 				t[2] = new p2t::Triangle(*p2, *p3, *next_p);
 				t[3] = new p2t::Triangle(*p3, *p1, *next_p);
 
+				t[2]->edges[2] = next_tri->edges[0];
+				t[3]->edges[2] = next_tri->edges[1];
+				t[0]->edges[0] = t[1]->edges[1] = initialEdgeLablesCount++;
+				t[1]->edges[0] = t[2]->edges[1] = initialEdgeLablesCount++;
+				t[2]->edges[0] = t[3]->edges[1] = initialEdgeLablesCount++;
+				t[3]->edges[0] = t[0]->edges[1] = initialEdgeLablesCount++;
+
 				delete p2p3;
 				delete p3p1;
+				splitedMeshPointsMemory.push_back(p1p2);
 				nextPointCandidate = p1p2;
 				nextTriangleCandidate = next_tri->neighbors_[2];
 			}
 			else if (p2p3->x != -1 && p2p3->y != -1)
 			{
+				status = 1;
 				t[0] = new p2t::Triangle(*p2, *p2p3, *next_p);
 				t[1] = new p2t::Triangle(*p2p3, *p3, *next_p);
 				t[2] = new p2t::Triangle(*p3, *p1, *next_p);
 				t[3] = new p2t::Triangle(*p1, *p2, *next_p);
 
+				t[2]->edges[2] = next_tri->edges[1];
+				t[3]->edges[2] = next_tri->edges[2];
+				t[0]->edges[0] = t[1]->edges[1] = initialEdgeLablesCount++;
+				t[1]->edges[0] = t[2]->edges[1] = initialEdgeLablesCount++;
+				t[2]->edges[0] = t[3]->edges[1] = initialEdgeLablesCount++;
+				t[3]->edges[0] = t[0]->edges[1] = initialEdgeLablesCount++;
+
 				delete p1p2;
 				delete p3p1;
+				splitedMeshPointsMemory.push_back(p2p3);
 				nextPointCandidate = p2p3;
 				nextTriangleCandidate = next_tri->neighbors_[0];
 			}
 			else if (p3p1->x != -1 && p3p1->y != -1)
 			{
+				status = 2;
 				t[0] = new p2t::Triangle(*p3, *p3p1, *next_p);
 				t[1] = new p2t::Triangle(*p3p1, *p1, *next_p);
 				t[2] = new p2t::Triangle(*p1, *p2, *next_p);
 				t[3] = new p2t::Triangle(*p2, *p3, *next_p);
 
+				t[2]->edges[2] = next_tri->edges[2];
+				t[3]->edges[2] = next_tri->edges[0];
+				t[0]->edges[0] = t[1]->edges[1] = initialEdgeLablesCount++;
+				t[1]->edges[0] = t[2]->edges[1] = initialEdgeLablesCount++;
+				t[2]->edges[0] = t[3]->edges[1] = initialEdgeLablesCount++;
+				t[3]->edges[0] = t[0]->edges[1] = initialEdgeLablesCount++;
+
 				delete p1p2;
 				delete p2p3;
+				splitedMeshPointsMemory.push_back(p3p1);
 				nextPointCandidate = p3p1;
 				nextTriangleCandidate = next_tri->neighbors_[1];
 			}
 			else
 			{
+				status = 3;
 				t[0] = new p2t::Triangle(*p1, *p2, *next_p);
 				t[1] = new p2t::Triangle(*p2, *p3, *next_p);
 				t[2] = new p2t::Triangle(*p3, *p1, *next_p);
 				t[3] = NULL;
+
+				t[0]->edges[2] = next_tri->edges[2];
+				t[1]->edges[2] = next_tri->edges[0];
+				t[2]->edges[2] = next_tri->edges[1];
+				t[0]->edges[0] = t[1]->edges[1] = initialEdgeLablesCount++;
+				t[1]->edges[0] = t[2]->edges[1] = initialEdgeLablesCount++;
+				t[2]->edges[0] = t[0]->edges[1] = initialEdgeLablesCount++;
 
 				delete p1p2;
 				delete p2p3;
@@ -203,14 +260,49 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 					p2t::Point t3 = *t[i]->GetPoint(2);
 
 					if (DOUBLE_EQUAL(p2t::Cross(t2 - t1, t3 - t1), 0))
+					{
+						if (POINT_EQUAL(t1, t2))
+						{
+							t[(i + 1) % 4]->edges[1] = t[(i + 3) % 4]->edges[0];
+							t[1 - i]->edges[2] = next_tri->edges[(status + 2) % 3];
+						}
+						else if (POINT_EQUAL(t3, t1))
+							if (status == 3) t[(i + 1) % 3]->edges[1] = t[i]->edges[2];
+							else t[0]->edges[1] = next_tri->edges[(status + 1) % 3];
+						else if (POINT_EQUAL(t3, t2))
+							if (status == 3)t[(i + 2) % 3]->edges[0] = t[i]->edges[2];
+							else t[1]->edges[0] = next_tri->edges[status];
+						else
+						{
+							if (*ot[0]->GetPoint(0) == t1)
+							{
+								ot[0]->edges[2] = t[i]->edges[1];
+								ot[1]->edges[2] = t[i]->edges[0];
+							}
+							else
+							{
+								ot[0]->edges[2] = t[i]->edges[0];
+								ot[1]->edges[2] = t[i]->edges[1];
+							}
+						}
 						delete t[i];
+						t[i] = NULL;
+					}
 					else
+					{
 						splitedMesh.push_back(t[i]);
+						splitedMeshTrianglesMemory.push_back(t[i]);
+					}
 				}
 			}
+			for (int i = 0; i < 2; i++)
+				ot[i] = t[i];
 			next_tri = nextTriangleCandidate;
 			next_p = nextPointCandidate;
 		}
+		for (int i = 0; i < 2; i++)
+		if (ot[i] != NULL)
+			ot[i]->edges[2] = initialEdgeLablesCount++;
 	}
 
 	Mesh::const_iterator it;
@@ -224,7 +316,7 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 	return splitedMesh;
 }
 
-void firstTriangleBackwardSplit(Mesh &splitedMesh, p2t::Triangle &tri, p2t::Point &p)
+void firstTriangleBackwardSplit(Mesh &splitedMesh, p2t::Triangle &tri, p2t::Point &p, p2t::Triangle *ot[])
 {
 	int edge = -1;
 	edge = findEdgePointStands(tri, p);
@@ -254,21 +346,40 @@ void firstTriangleBackwardSplit(Mesh &splitedMesh, p2t::Triangle &tri, p2t::Poin
 				p2t::Triangle *t2;
 				if (tri.neighbors_[edge]->neighbors_[0] == &tri)
 				{
-					t1 = new p2t::Triangle(*n1, p, *n3);
+					t1 = new p2t::Triangle(*n3, *n1, p);
+					t1->edges[1] = initialEdgeLablesCount++;
+					t1->edges[2] = tri.edges[1];
 					t2 = new p2t::Triangle(*n1, *n2, p);
+					t2->edges[0] = initialEdgeLablesCount++;
+					t2->edges[2] = tri.edges[2];
+					t1->edges[0] = t2->edges[1] = initialEdgeLablesCount++;
 				}
 				else if (tri.neighbors_[edge]->neighbors_[1] == &tri)
 				{
-					t1 = new p2t::Triangle(*n2, p, *n1);
+					t1 = new p2t::Triangle(*n1, *n2, p);
+					t1->edges[1] = initialEdgeLablesCount++;
+					t1->edges[2] = tri.edges[2];
 					t2 = new p2t::Triangle(*n2, *n3, p);
+					t2->edges[0] = initialEdgeLablesCount++;
+					t2->edges[2] = tri.edges[0];
+					t1->edges[0] = t2->edges[1] = initialEdgeLablesCount++;
 				}
 				else if (tri.neighbors_[edge]->neighbors_[2] == &tri)
 				{
-					t1 = new p2t::Triangle(*n3, p, *n2);
+					t1 = new p2t::Triangle(*n2, *n3, p);
+					t1->edges[1] = initialEdgeLablesCount++;
+					t1->edges[2] = tri.edges[0];
 					t2 = new p2t::Triangle(*n3, *n1, p);
+					t2->edges[0] = initialEdgeLablesCount++;
+					t2->edges[2] = tri.edges[1];
+					t1->edges[0] = t2->edges[1] = initialEdgeLablesCount++;
 				}
 				splitedMesh.push_back(t1);
+				splitedMeshTrianglesMemory.push_back(t1);
 				splitedMesh.push_back(t2);
+				splitedMeshTrianglesMemory.push_back(t2);
+				ot[0] = t1;
+				ot[1] = t2;
 			}
 		}
 	}
@@ -394,41 +505,76 @@ void rebuildTrianglesRelationship(Mesh &mesh)
 {
 	for (int i = 0; i < mesh.size(); i++)
 	{
-		const p2t::Point p1 = *mesh[i]->GetPoint(0);
-		const p2t::Point p2 = *mesh[i]->GetPoint(1);
-		const p2t::Point p3 = *mesh[i]->GetPoint(2);
+		const p2t::Point &p1 = *mesh[i]->GetPoint(0);
+		const p2t::Point &p2 = *mesh[i]->GetPoint(1);
+		const p2t::Point &p3 = *mesh[i]->GetPoint(2);
 
 		mesh[i]->neighbors_[0] = NULL;
 		mesh[i]->neighbors_[1] = NULL;
 		mesh[i]->neighbors_[2] = NULL;
 		for (int j = 0; j < mesh.size(); j++)
 		{
-			const p2t::Point k1 = *mesh[j]->GetPoint(0);
-			const p2t::Point k2 = *mesh[j]->GetPoint(1);
-			const p2t::Point k3 = *mesh[j]->GetPoint(2);
+			const p2t::Point &k1 = *mesh[j]->GetPoint(0);
+			const p2t::Point &k2 = *mesh[j]->GetPoint(1);
+			const p2t::Point &k3 = *mesh[j]->GetPoint(2);
 
-			if ((p1 != k1 && ((p2 == k2 && p3 == k3) || (p2 == k3 && p3 == k2))) ||
-				(p1 != k2 && ((p2 == k1 && p3 == k3) || (p2 == k3 && p3 == k1))) ||
-				(p1 != k3 && ((p2 == k1 && p3 == k2) || (p2 == k2 && p3 == k1))))
+			bool cond1 = p1 != k1 && ((p2 == k2 && p3 == k3) || (p2 == k3 && p3 == k2));
+			bool cond2 = p1 != k2 && ((p2 == k1 && p3 == k3) || (p2 == k3 && p3 == k1));
+			bool cond3 = p1 != k3 && ((p2 == k1 && p3 == k2) || (p2 == k2 && p3 == k1));
+			int ne = -1;
+
+			if (cond1 || cond2 || cond3)
 			{
 				mesh[i]->neighbors_[0] = mesh[j];
+				if (mesh[i]->edges[0] == -1)
+				{
+					if (cond1) ne = 0;
+					else if (cond2) ne = 1;
+					else if (cond3) ne = 2;
+					if (mesh[j]->edges[ne] == -1)
+						mesh[i]->edges[0] = edgeLabelsCount++;
+					else mesh[i]->edges[0] = mesh[j]->edges[ne];
+				}
 				continue;
 			}
-			if ((p2 != k1 && ((p1 == k2 && p3 == k3) || (p1 == k3 && p3 == k2))) ||
-				(p2 != k2 && ((p1 == k1 && p3 == k3) || (p1 == k3 && p3 == k1))) ||
-				(p2 != k3 && ((p1 == k1 && p3 == k2) || (p1 == k2 && p3 == k1))))
+			cond1 = p2 != k1 && ((p1 == k2 && p3 == k3) || (p1 == k3 && p3 == k2));
+			cond2 = p2 != k2 && ((p1 == k1 && p3 == k3) || (p1 == k3 && p3 == k1));
+			cond3 = p2 != k3 && ((p1 == k1 && p3 == k2) || (p1 == k2 && p3 == k1));
+			if (cond1 || cond2 || cond3)
 			{
 				mesh[i]->neighbors_[1] = mesh[j];
+				if (mesh[i]->edges[1] == -1)
+				{
+					if (cond1) ne = 0;
+					else if (cond2) ne = 1;
+					else if (cond3) ne = 2;
+					if (mesh[j]->edges[ne] == -1)
+						mesh[i]->edges[1] = edgeLabelsCount++;
+					else mesh[i]->edges[1] = mesh[j]->edges[ne];
+				}
 				continue;
 			}
-			if ((p3 != k1 && ((p1 == k2 && p2 == k3) || (p1 == k3 && p2 == k2))) ||
-				(p3 != k2 && ((p1 == k1 && p2 == k3) || (p1 == k3 && p2 == k1))) ||
-				(p3 != k3 && ((p1 == k1 && p2 == k2) || (p1 == k2 && p2 == k1))))
+			cond1 = p3 != k1 && ((p1 == k2 && p2 == k3) || (p1 == k3 && p2 == k2));
+			cond2 = p3 != k2 && ((p1 == k1 && p2 == k3) || (p1 == k3 && p2 == k1));
+			cond3 = p3 != k3 && ((p1 == k1 && p2 == k2) || (p1 == k2 && p2 == k1));
+			if (cond1 || cond2 || cond3)
 			{
 				mesh[i]->neighbors_[2] = mesh[j];
+				if (mesh[i]->edges[2] == -1)
+				{
+					if (cond1) ne = 0;
+					else if (cond2) ne = 1;
+					else if (cond3) ne = 2;
+					if (mesh[j]->edges[ne] == -1)
+						mesh[i]->edges[2] = edgeLabelsCount++;
+					else mesh[i]->edges[2] = mesh[j]->edges[ne];
+				}
 				continue;
 			}
 		}
+		for (int k = 0; k < 3; k++)
+		if (mesh[i]->edges[k] == -1)
+			mesh[i]->edges[k] = edgeLabelsCount++;
 	}
 }
 
@@ -463,4 +609,24 @@ bool pointInTriangle(const p2t::Point &pt, const p2t::Point &v1, const p2t::Poin
 	b3 = toLeft(pt, v3, v1) <= 0.0f;
 
 	return ((b1 == b2) && (b2 == b3));
+}
+
+void clearInitialMeshMemory(Mesh &initialMesh)
+{
+	for (int i = 0; i < initialMeshPointsMemory.size(); i++)
+		delete initialMeshPointsMemory[i];
+	initialMeshPointsMemory.clear();
+	for (int i = 0; i < initialMesh.size(); i++)
+		delete initialMesh[i];
+	initialMesh.clear();
+}
+
+void clearSplitedMeshMemory()
+{
+	for (int i = 0; i < splitedMeshPointsMemory.size(); i++)
+		delete splitedMeshPointsMemory[i];
+	splitedMeshPointsMemory.clear();
+	for (int i = 0; i < splitedMeshTrianglesMemory.size(); i++)
+		delete splitedMeshTrianglesMemory[i];
+	splitedMeshTrianglesMemory.clear();
 }

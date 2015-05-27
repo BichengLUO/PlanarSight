@@ -13,6 +13,7 @@ Rendering::Rendering()
 	player.x = 370;
 	player.y = 310;
 	moving = false;
+	preprocessFinished = false;
 
 	srand((unsigned)time(0));
 }
@@ -27,24 +28,13 @@ Rendering::~Rendering()
 //绘制地图的主方法，每次重绘都会被调用
 void Rendering::draw()
 {
-	/*glBegin(GL_TRIANGLES);
-	glColor3d(1, 0, 0);
-	glVertex2d(20, 20);
-	glColor3d(0, 1, 0);
-	glVertex2d(20, 40);
-	glColor3d(0, 0, 1);
-	glVertex2d(40, 20);
-	glEnd();*/
-
 	if (drawOuterWall || drawInnerWall)
-	{
 		drawUnfinishedLoop(loopBuf);
-	}
 
-	/*if (splitedMesh.size() > 0)
+	if (splitedMesh.size() > 0)
 		drawTrianglesMesh(splitedMesh);
 	else if (initialMesh.size() > 0)
-		drawTrianglesMesh(initialMesh);*/
+		drawTrianglesMesh(initialMesh);
 
 	drawPolygon(*basePolygon);
 	drawPlayer(player);
@@ -64,6 +54,12 @@ void Rendering::draw()
 		for (int i = 0; i < size; i++)
 			drawPolygon(visPolygons[i]);
 	}
+}
+
+void Rendering::preprocess()
+{
+	initialMesh = buildInitialMesh(*basePolygon);
+	preprocessFinished = true;
 }
 
 void Rendering::drawPolygon(CPolygon& p)
@@ -156,6 +152,8 @@ bool Rendering::addMonster(Point& p)
 	monsters.push_back(m);
 	CPolygon cp;
 	visPolygons.push_back(cp);
+
+	clearSplitedMeshMemory();
 	splitedMesh = insertPointToUpdateTriangles(initialMesh, p2t::Point(p.x, p.y));
 	return true;
 }
@@ -242,11 +240,12 @@ void Rendering::clear()
 		visPolygons[i].clear();
 	loopBuf.clear();
 	monsters.clear();
-	initialMesh.clear();
+	clearInitialMeshMemory(initialMesh);
 	splitedMesh.clear();
 	drawOuterWall = false;
 	drawInnerWall = false;
 	drawMonster = false;
+	preprocessFinished = false;
 }
 
 // 计算可见多边形
@@ -477,5 +476,30 @@ void Rendering::drawTrianglesMesh(const std::vector<p2t::Triangle*> &mesh)
 		glVertex2d(p3->x, p3->y);
 		glEnd();
 		glPopAttrib();
+	}
+
+	for (it = mesh.begin(); it != mesh.end(); ++it)
+	{
+		const p2t::Point *p1 = (*it)->GetPoint(0);
+		const p2t::Point *p2 = (*it)->GetPoint(1);
+		const p2t::Point *p3 = (*it)->GetPoint(2);
+
+		glColor3d(0.8, 0.3, 0.0);
+		char edgeLable[10];
+
+		glRasterPos2d((p1->x + p2->x) / 2.0, (p1->y + p2->y) / 2.0);
+		_itoa((*it)->edges[2], edgeLable, 10);
+		for (int i = 0; i < strlen(edgeLable); i++)
+			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, edgeLable[i]);
+
+		glRasterPos2d((p2->x + p3->x) / 2.0, (p2->y + p3->y) / 2.0);
+		_itoa((*it)->edges[0], edgeLable, 10);
+		for (int i = 0; i < strlen(edgeLable); i++)
+			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, edgeLable[i]);
+
+		glRasterPos2d((p1->x + p3->x) / 2.0, (p1->y + p3->y) / 2.0);
+		_itoa((*it)->edges[1], edgeLable, 10);
+		for (int i = 0; i < strlen(edgeLable); i++)
+			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, edgeLable[i]);
 	}
 }

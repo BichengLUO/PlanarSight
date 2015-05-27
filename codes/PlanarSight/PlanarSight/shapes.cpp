@@ -38,6 +38,7 @@ Triangle::Triangle(Point& a, Point& b, Point& c)
 {
   points_[0] = &a; points_[1] = &b; points_[2] = &c;
   neighbors_[0] = NULL; neighbors_[1] = NULL; neighbors_[2] = NULL;
+  edges[0] = -1; edges[1] = -1; edges[2] = -1;
   constrained_edge[0] = constrained_edge[1] = constrained_edge[2] = false;
   delaunay_edge[0] = delaunay_edge[1] = delaunay_edge[2] = false;
   interior_ = false;
