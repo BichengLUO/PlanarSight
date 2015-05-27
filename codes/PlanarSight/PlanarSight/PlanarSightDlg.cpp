@@ -224,7 +224,9 @@ void CPlanarSightDlg::OnBnClickedClear()
 	GetDlgItem(IDC_OUTER_WALLS)->EnableWindow(true);
 	GetDlgItem(IDC_INNER_WALLS)->EnableWindow(false);
 	GetDlgItem(IDC_MONSTERS)->EnableWindow(false);
-	GetDlgItem(IDC_START_GAME)->EnableWindow(false);
+	GetDlgItem(IDC_START_GAME)->EnableWindow(true);
+	GetDlgItem(IDC_END_GAME)->EnableWindow(false);
+	m_pDisplay->rendering->gameStart = false;
 }
 
 

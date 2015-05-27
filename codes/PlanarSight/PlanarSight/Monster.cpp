@@ -2,7 +2,7 @@
 
 double Monster::maxViewAngle = PI / 6;
 double Monster::minViewAngle = PI / 8;
-double Monster::speed = 0.5;
+double Monster::speed = 0.8;
 double Monster::viewDistance = 100;
 
 Monster::Monster(Point p) : pos(p)
