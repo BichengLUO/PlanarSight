@@ -24,11 +24,13 @@ public:
 	bool showVisPolygon;
 	bool gameStart;
 	bool moving;
+	bool preprocessFinished;
 
 public:
 	Rendering();
 	~Rendering();
 	void draw();
+	void preprocess();
 	void drawPolygon(CPolygon& p);
 	void drawLoop(CPolygon& p, int loopID);
 	void drawUnfinishedLoop(PointArray& pa);

@@ -212,7 +212,8 @@ void CPlanarSightDlg::OnBnClickedMonsters()
 	GetDlgItem(IDC_INNER_WALLS)->EnableWindow(false);
 	GetDlgItem(IDC_MONSTERS)->EnableWindow(false);
 	GetDlgItem(IDC_START_GAME)->EnableWindow(false);
-	m_pDisplay->rendering->initialMesh = buildInitialMesh(*m_pDisplay->rendering->basePolygon);
+	if (!m_pDisplay->rendering->preprocessFinished)
+		m_pDisplay->rendering->preprocess();
 }
 
 

@@ -24,4 +24,6 @@ int findPointInTriangles(const Mesh &mesh, const p2t::Point &p);
 inline double toLeft(const p2t::Point &p1, const p2t::Point &p2, const p2t::Point &p3);
 bool pointInTriangle(const p2t::Point &pt, const p2t::Point &v1, const p2t::Point &v2, const p2t::Point &v3);
 
+void clearInitialMeshMemory(Mesh &initialMesh);
+void clearSplitedMeshMemory();
 #endif

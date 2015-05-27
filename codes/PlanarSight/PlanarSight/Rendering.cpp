@@ -13,6 +13,7 @@ Rendering::Rendering()
 	player.x = 370;
 	player.y = 310;
 	moving = false;
+	preprocessFinished = false;
 }
 
 int Rendering::playerSpeed = 3;
@@ -43,6 +44,12 @@ void Rendering::draw()
 		for (int i = 0; i < size; i++)
 			drawPolygon(visPolygons[i]);
 	}
+}
+
+void Rendering::preprocess()
+{
+	initialMesh = buildInitialMesh(*basePolygon);
+	preprocessFinished = true;
 }
 
 void Rendering::drawPolygon(CPolygon& p)
@@ -132,6 +139,7 @@ bool Rendering::addMonster(Point& p)
 		return false;
 
 	monsters.push_back(p);
+	clearSplitedMeshMemory();
 	splitedMesh = insertPointToUpdateTriangles(initialMesh, p2t::Point(p.x, p.y));
 	return true;
 }
@@ -193,11 +201,12 @@ void Rendering::clear()
 		visPolygons[i].clear();
 	loopBuf.clear();
 	monsters.clear();
-	initialMesh.clear();
+	clearInitialMeshMemory(initialMesh);
 	splitedMesh.clear();
 	drawOuterWall = false;
 	drawInnerWall = false;
 	drawMonster = false;
+	preprocessFinished = false;
 }
 
 // 计算可见多边形

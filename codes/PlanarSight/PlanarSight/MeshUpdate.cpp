@@ -9,6 +9,10 @@
 int edgeLabelsCount = 0;
 int initialEdgeLablesCount;
 
+std::vector<p2t::Point*> initialMeshPointsMemory;
+std::vector<p2t::Point*> splitedMeshPointsMemory;
+std::vector<p2t::Triangle*> splitedMeshTrianglesMemory;
+
 Mesh buildInitialMesh(const CPolygon &basePolygon)
 {
 	edgeLabelsCount = 0;
@@ -75,9 +79,11 @@ Mesh buildMeshFromPolygon(const CPolygon &basePolygon)
 	{
 		int pointID = basePolygon.loopArray[0].pointIDArray[i];
 		Point p = basePolygon.pointArray[pointID];
-		polyline.push_back(new p2t::Point(p.x, p.y));
+		p2t::Point *np = new p2t::Point(p.x, p.y);
+		polyline.push_back(np);
+		initialMeshPointsMemory.push_back(np);
 	}
-	p2t::CDT *cdt = new p2t::CDT(polyline);
+	p2t::CDT cdt(polyline);
 	for (int i = 1; i < basePolygon.loopArray.size(); i++)
 	{
 		vector<p2t::Point*> hole;
@@ -85,12 +91,14 @@ Mesh buildMeshFromPolygon(const CPolygon &basePolygon)
 		{
 			int pointID = basePolygon.loopArray[i].pointIDArray[j];
 			Point p = basePolygon.pointArray[pointID];
-			hole.push_back(new p2t::Point(p.x, p.y));
+			p2t::Point *np = new p2t::Point(p.x, p.y);
+			hole.push_back(np);
+			initialMeshPointsMemory.push_back(np);
 		}
-		cdt->AddHole(hole);
+		cdt.AddHole(hole);
 	}
-	cdt->Triangulate();
-	initialMesh = cdt->GetTriangles();
+	cdt.Triangulate();
+	initialMesh = cdt.GetTriangles();
 	return initialMesh;
 }
 
@@ -101,11 +109,13 @@ Mesh buildMeshFromInnerLoop(const Loop &loop)
 	{
 		int pointID = loop.pointIDArray[i];
 		Point p = loop.polygon->pointArray[pointID];
-		polyline.push_back(new p2t::Point(p.x, p.y));
+		p2t::Point *np = new p2t::Point(p.x, p.y);
+		polyline.push_back(np);
+		initialMeshPointsMemory.push_back(np);
 	}
-	p2t::CDT *cdt = new p2t::CDT(polyline);
-	cdt->Triangulate();
-	Mesh mesh = cdt->GetTriangles();
+	p2t::CDT cdt(polyline);
+	cdt.Triangulate();
+	Mesh mesh = cdt.GetTriangles();
 	return mesh;
 }
 
@@ -116,11 +126,13 @@ Mesh buildMeshFromOuterLoop(const Loop &loop)
 	{
 		int pointID = loop.pointIDArray[i];
 		Point p = loop.polygon->pointArray[pointID];
-		polyline.push_back(new p2t::Point(p.x, p.y));
+		p2t::Point *np = new p2t::Point(p.x, p.y);
+		polyline.push_back(np);
+		initialMeshPointsMemory.push_back(np);
 	}
-	p2t::CDT *cdt = new p2t::CDT(polyline);
-	cdt->Triangulate();
-	Mesh mesh = cdt->GetTriangles();
+	p2t::CDT cdt(polyline);
+	cdt.Triangulate();
+	Mesh mesh = cdt.GetTriangles();
 	return mesh;
 }
 
@@ -133,6 +145,7 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 	{
 		p2t::Triangle *next_tri = mesh[ind];
 		p2t::Point *next_p = new p2t::Point(p.x, p.y);
+		splitedMeshPointsMemory.push_back(next_p);
 		p2t::Triangle *ot[2];
 
 		firstTriangleBackwardSplit(splitedMesh, *next_tri, *next_p, ot);
@@ -170,6 +183,7 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 
 				delete p2p3;
 				delete p3p1;
+				splitedMeshPointsMemory.push_back(p1p2);
 				nextPointCandidate = p1p2;
 				nextTriangleCandidate = next_tri->neighbors_[2];
 			}
@@ -190,6 +204,7 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 
 				delete p1p2;
 				delete p3p1;
+				splitedMeshPointsMemory.push_back(p2p3);
 				nextPointCandidate = p2p3;
 				nextTriangleCandidate = next_tri->neighbors_[0];
 			}
@@ -210,6 +225,7 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 
 				delete p1p2;
 				delete p2p3;
+				splitedMeshPointsMemory.push_back(p3p1);
 				nextPointCandidate = p3p1;
 				nextTriangleCandidate = next_tri->neighbors_[1];
 			}
@@ -273,7 +289,10 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 						t[i] = NULL;
 					}
 					else
+					{
 						splitedMesh.push_back(t[i]);
+						splitedMeshTrianglesMemory.push_back(t[i]);
+					}
 				}
 			}
 			for (int i = 0; i < 2; i++)
@@ -282,6 +301,7 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 			next_p = nextPointCandidate;
 		}
 		for (int i = 0; i < 2; i++)
+		if (ot[i] != NULL)
 			ot[i]->edges[2] = initialEdgeLablesCount++;
 	}
 
@@ -355,7 +375,9 @@ void firstTriangleBackwardSplit(Mesh &splitedMesh, p2t::Triangle &tri, p2t::Poin
 					t1->edges[0] = t2->edges[1] = initialEdgeLablesCount++;
 				}
 				splitedMesh.push_back(t1);
+				splitedMeshTrianglesMemory.push_back(t1);
 				splitedMesh.push_back(t2);
+				splitedMeshTrianglesMemory.push_back(t2);
 				ot[0] = t1;
 				ot[1] = t2;
 			}
@@ -587,4 +609,24 @@ bool pointInTriangle(const p2t::Point &pt, const p2t::Point &v1, const p2t::Poin
 	b3 = toLeft(pt, v3, v1) <= 0.0f;
 
 	return ((b1 == b2) && (b2 == b3));
+}
+
+void clearInitialMeshMemory(Mesh &initialMesh)
+{
+	for (int i = 0; i < initialMeshPointsMemory.size(); i++)
+		delete initialMeshPointsMemory[i];
+	initialMeshPointsMemory.clear();
+	for (int i = 0; i < initialMesh.size(); i++)
+		delete initialMesh[i];
+	initialMesh.clear();
+}
+
+void clearSplitedMeshMemory()
+{
+	for (int i = 0; i < splitedMeshPointsMemory.size(); i++)
+		delete splitedMeshPointsMemory[i];
+	splitedMeshPointsMemory.clear();
+	for (int i = 0; i < splitedMeshTrianglesMemory.size(); i++)
+		delete splitedMeshTrianglesMemory[i];
+	splitedMeshTrianglesMemory.clear();
 }
