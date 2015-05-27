@@ -214,8 +214,6 @@ void CPlanarSightDlg::OnBnClickedMonsters()
 	GetDlgItem(IDC_INNER_WALLS)->EnableWindow(false);
 	GetDlgItem(IDC_MONSTERS)->EnableWindow(false);
 	GetDlgItem(IDC_START_GAME)->EnableWindow(false);
-	if (!m_pDisplay->rendering->preprocessFinished)
-		m_pDisplay->rendering->preprocess();
 }
 
 
@@ -241,6 +239,8 @@ void CPlanarSightDlg::OnBnClickedStartGame()
 	GetDlgItem(IDC_END_GAME)->EnableWindow(true);
 	m_pDisplay->SetActiveWindow();
 	m_pDisplay->rendering->gameStart = true;
+	if (!m_pDisplay->rendering->preprocessFinished)
+		m_pDisplay->rendering->preprocess();
 }
 
 
@@ -252,6 +252,7 @@ void CPlanarSightDlg::OnBnClickedEndGame()
 	GetDlgItem(IDC_START_GAME)->EnableWindow(true);
 	GetDlgItem(IDC_END_GAME)->EnableWindow(false);
 	m_pDisplay->rendering->gameStart = false;
+	m_pDisplay->rendering->preprocessFinished = false;
 }
 
 

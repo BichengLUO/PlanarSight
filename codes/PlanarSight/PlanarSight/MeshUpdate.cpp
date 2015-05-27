@@ -519,9 +519,9 @@ void rebuildTrianglesRelationship(Mesh &mesh)
 			const p2t::Point &k2 = *mesh[j]->GetPoint(1);
 			const p2t::Point &k3 = *mesh[j]->GetPoint(2);
 
-			bool cond1 = p1 != k1 && ((p2 == k2 && p3 == k3) || (p2 == k3 && p3 == k2));
-			bool cond2 = p1 != k2 && ((p2 == k1 && p3 == k3) || (p2 == k3 && p3 == k1));
-			bool cond3 = p1 != k3 && ((p2 == k1 && p3 == k2) || (p2 == k2 && p3 == k1));
+			bool cond1 = ((p1.x != k1.x) || (p1.y != k1.y)) && ((p2 == k2 && p3 == k3) || (p2 == k3 && p3 == k2));
+			bool cond2 = ((p1.x != k2.x) || (p1.y != k2.y)) && ((p2 == k1 && p3 == k3) || (p2 == k3 && p3 == k1));
+			bool cond3 = ((p1.x != k3.x) || (p1.y != k3.y)) && ((p2 == k1 && p3 == k2) || (p2 == k2 && p3 == k1));
 			int ne = -1;
 
 			if (cond1 || cond2 || cond3)
@@ -538,9 +538,9 @@ void rebuildTrianglesRelationship(Mesh &mesh)
 				}
 				continue;
 			}
-			cond1 = p2 != k1 && ((p1 == k2 && p3 == k3) || (p1 == k3 && p3 == k2));
-			cond2 = p2 != k2 && ((p1 == k1 && p3 == k3) || (p1 == k3 && p3 == k1));
-			cond3 = p2 != k3 && ((p1 == k1 && p3 == k2) || (p1 == k2 && p3 == k1));
+			cond1 = ((p2.x != k1.x) || (p2.y != k1.y)) && ((p1 == k2 && p3 == k3) || (p1 == k3 && p3 == k2));
+			cond2 = ((p2.x != k2.x) || (p2.y != k2.y)) && ((p1 == k1 && p3 == k3) || (p1 == k3 && p3 == k1));
+			cond3 = ((p2.x != k3.x) || (p2.y != k3.y)) && ((p1 == k1 && p3 == k2) || (p1 == k2 && p3 == k1));
 			if (cond1 || cond2 || cond3)
 			{
 				mesh[i]->neighbors_[1] = mesh[j];
@@ -555,9 +555,9 @@ void rebuildTrianglesRelationship(Mesh &mesh)
 				}
 				continue;
 			}
-			cond1 = p3 != k1 && ((p1 == k2 && p2 == k3) || (p1 == k3 && p2 == k2));
-			cond2 = p3 != k2 && ((p1 == k1 && p2 == k3) || (p1 == k3 && p2 == k1));
-			cond3 = p3 != k3 && ((p1 == k1 && p2 == k2) || (p1 == k2 && p2 == k1));
+			cond1 = ((p3.x != k1.x) || (p3.y != k1.y)) && ((p1 == k2 && p2 == k3) || (p1 == k3 && p2 == k2));
+			cond2 = ((p3.x != k2.x) || (p3.y != k2.y)) && ((p1 == k1 && p2 == k3) || (p1 == k3 && p2 == k1));
+			cond3 = ((p3.x != k3.x) || (p3.y != k3.y)) && ((p1 == k1 && p2 == k2) || (p1 == k2 && p2 == k1));
 			if (cond1 || cond2 || cond3)
 			{
 				mesh[i]->neighbors_[2] = mesh[j];

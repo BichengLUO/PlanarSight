@@ -32,7 +32,7 @@ void Rendering::draw()
 	if (drawOuterWall || drawInnerWall)
 		drawUnfinishedLoop(loopBuf);
 
-	if (gameStart)
+	if (gameStart && monsters.size() > 0)
 	{
 		clearSplitedMeshMemory();
 		splitedMesh = insertPointToUpdateTriangles(initialMesh, p2t::Point(monsters[0].pos.x, monsters[0].pos.y));
@@ -65,6 +65,7 @@ void Rendering::draw()
 
 void Rendering::preprocess()
 {
+	clearInitialMeshMemory(initialMesh);
 	initialMesh = buildInitialMesh(*basePolygon);
 	preprocessFinished = true;
 }
@@ -512,16 +513,16 @@ void Rendering::drawTrianglesMesh(const std::vector<p2t::Triangle*> &mesh)
 		glRasterPos2d((p1->x + p2->x) / 2.0, (p1->y + p2->y) / 2.0);
 		_itoa((*it)->edges[2], edgeLable, 10);
 		for (int i = 0; i < strlen(edgeLable); i++)
-			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, edgeLable[i]);
+			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, edgeLable[i]);
 
 		glRasterPos2d((p2->x + p3->x) / 2.0, (p2->y + p3->y) / 2.0);
 		_itoa((*it)->edges[0], edgeLable, 10);
 		for (int i = 0; i < strlen(edgeLable); i++)
-			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, edgeLable[i]);
+			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, edgeLable[i]);
 
 		glRasterPos2d((p1->x + p3->x) / 2.0, (p1->y + p3->y) / 2.0);
 		_itoa((*it)->edges[1], edgeLable, 10);
 		for (int i = 0; i < strlen(edgeLable); i++)
-			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, edgeLable[i]);
+			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, edgeLable[i]);
 	}
 }
