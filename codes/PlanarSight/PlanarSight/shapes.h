@@ -163,6 +163,8 @@ bool mark_to_be_splited;
 Triangle* neighbors_[3];
 /// Edge label
 int edges[3];
+/// Polygon Edge
+bool polygon_edge[3];
 
 Point* GetPoint(const int& index);
 Point* PointCW(Point& point);

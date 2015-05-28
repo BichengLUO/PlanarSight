@@ -7,7 +7,7 @@
 #define POINT_EQUAL(a,b) (abs((a).x-(b).x)<=1e-6&&abs((a).y-(b).y)<=1e-6)
 
 int edgeLabelsCount = 0;
-int initialEdgeLablesCount;
+int splitedEdgeLablesCount;
 
 std::vector<p2t::Point*> initialMeshPointsMemory;
 std::vector<p2t::Point*> splitedMeshPointsMemory;
@@ -29,6 +29,7 @@ Mesh buildInitialMesh(const CPolygon &basePolygon)
 		initialMesh.insert(initialMesh.end(), earMesh.begin(), earMesh.end());
 	}
 	rebuildTrianglesRelationship(initialMesh);
+	markPolygonEdges(initialMesh, basePolygon);
 	return initialMesh;
 }
 
@@ -138,7 +139,7 @@ Mesh buildMeshFromOuterLoop(const Loop &loop)
 
 Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 {
-	initialEdgeLablesCount = edgeLabelsCount;
+	splitedEdgeLablesCount = edgeLabelsCount;
 	Mesh splitedMesh;
 	int ind = findPointInTriangles(mesh, p);
 	if (ind != -1)
@@ -176,10 +177,15 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 
 				t[2]->edges[2] = next_tri->edges[0];
 				t[3]->edges[2] = next_tri->edges[1];
-				t[0]->edges[0] = t[1]->edges[1] = initialEdgeLablesCount++;
-				t[1]->edges[0] = t[2]->edges[1] = initialEdgeLablesCount++;
-				t[2]->edges[0] = t[3]->edges[1] = initialEdgeLablesCount++;
-				t[3]->edges[0] = t[0]->edges[1] = initialEdgeLablesCount++;
+				t[0]->edges[0] = t[1]->edges[1] = splitedEdgeLablesCount++;
+				t[1]->edges[0] = t[2]->edges[1] = splitedEdgeLablesCount++;
+				t[2]->edges[0] = t[3]->edges[1] = splitedEdgeLablesCount++;
+				t[3]->edges[0] = t[0]->edges[1] = splitedEdgeLablesCount++;
+
+				t[0]->polygon_edge[2] = next_tri->polygon_edge[2];
+				t[1]->polygon_edge[2] = next_tri->polygon_edge[2];
+				t[2]->polygon_edge[2] = next_tri->polygon_edge[0];
+				t[3]->polygon_edge[2] = next_tri->polygon_edge[1];
 
 				delete p2p3;
 				delete p3p1;
@@ -197,10 +203,15 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 
 				t[2]->edges[2] = next_tri->edges[1];
 				t[3]->edges[2] = next_tri->edges[2];
-				t[0]->edges[0] = t[1]->edges[1] = initialEdgeLablesCount++;
-				t[1]->edges[0] = t[2]->edges[1] = initialEdgeLablesCount++;
-				t[2]->edges[0] = t[3]->edges[1] = initialEdgeLablesCount++;
-				t[3]->edges[0] = t[0]->edges[1] = initialEdgeLablesCount++;
+				t[0]->edges[0] = t[1]->edges[1] = splitedEdgeLablesCount++;
+				t[1]->edges[0] = t[2]->edges[1] = splitedEdgeLablesCount++;
+				t[2]->edges[0] = t[3]->edges[1] = splitedEdgeLablesCount++;
+				t[3]->edges[0] = t[0]->edges[1] = splitedEdgeLablesCount++;
+
+				t[0]->polygon_edge[2] = next_tri->polygon_edge[0];
+				t[1]->polygon_edge[2] = next_tri->polygon_edge[0];
+				t[2]->polygon_edge[2] = next_tri->polygon_edge[1];
+				t[3]->polygon_edge[2] = next_tri->polygon_edge[2];
 
 				delete p1p2;
 				delete p3p1;
@@ -218,10 +229,15 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 
 				t[2]->edges[2] = next_tri->edges[2];
 				t[3]->edges[2] = next_tri->edges[0];
-				t[0]->edges[0] = t[1]->edges[1] = initialEdgeLablesCount++;
-				t[1]->edges[0] = t[2]->edges[1] = initialEdgeLablesCount++;
-				t[2]->edges[0] = t[3]->edges[1] = initialEdgeLablesCount++;
-				t[3]->edges[0] = t[0]->edges[1] = initialEdgeLablesCount++;
+				t[0]->edges[0] = t[1]->edges[1] = splitedEdgeLablesCount++;
+				t[1]->edges[0] = t[2]->edges[1] = splitedEdgeLablesCount++;
+				t[2]->edges[0] = t[3]->edges[1] = splitedEdgeLablesCount++;
+				t[3]->edges[0] = t[0]->edges[1] = splitedEdgeLablesCount++;
+
+				t[0]->polygon_edge[2] = next_tri->polygon_edge[1];
+				t[1]->polygon_edge[2] = next_tri->polygon_edge[1];
+				t[2]->polygon_edge[2] = next_tri->polygon_edge[2];
+				t[3]->polygon_edge[2] = next_tri->polygon_edge[0];
 
 				delete p1p2;
 				delete p2p3;
@@ -240,9 +256,13 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 				t[0]->edges[2] = next_tri->edges[2];
 				t[1]->edges[2] = next_tri->edges[0];
 				t[2]->edges[2] = next_tri->edges[1];
-				t[0]->edges[0] = t[1]->edges[1] = initialEdgeLablesCount++;
-				t[1]->edges[0] = t[2]->edges[1] = initialEdgeLablesCount++;
-				t[2]->edges[0] = t[0]->edges[1] = initialEdgeLablesCount++;
+				t[0]->edges[0] = t[1]->edges[1] = splitedEdgeLablesCount++;
+				t[1]->edges[0] = t[2]->edges[1] = splitedEdgeLablesCount++;
+				t[2]->edges[0] = t[0]->edges[1] = splitedEdgeLablesCount++;
+
+				t[0]->polygon_edge[2] = next_tri->polygon_edge[2];
+				t[1]->polygon_edge[2] = next_tri->polygon_edge[0];
+				t[2]->polygon_edge[2] = next_tri->polygon_edge[1];
 
 				delete p1p2;
 				delete p2p3;
@@ -270,20 +290,28 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 							if (status == 3) t[(i + 1) % 3]->edges[1] = t[i]->edges[2];
 							else t[0]->edges[1] = next_tri->edges[(status + 1) % 3];
 						else if (POINT_EQUAL(t3, t2))
-							if (status == 3)t[(i + 2) % 3]->edges[0] = t[i]->edges[2];
+							if (status == 3) t[(i + 2) % 3]->edges[0] = t[i]->edges[2];
 							else t[1]->edges[0] = next_tri->edges[status];
 						else
 						{
-							if (ot[0] != NULL && ot[1] != NULL)
-							if (*ot[0]->GetPoint(0) == t1)
+							if (i == 2 || i == 3)
 							{
-								ot[0]->edges[2] = t[i]->edges[1];
-								ot[1]->edges[2] = t[i]->edges[0];
-							}
-							else
-							{
-								ot[0]->edges[2] = t[i]->edges[0];
-								ot[1]->edges[2] = t[i]->edges[1];
+								if (t[(i + 1) % 4] == NULL)
+									t[(i + 2) % 4]->polygon_edge[1] = t[i]->polygon_edge[2];
+								else t[(i + 1) % 4]->polygon_edge[1] = t[i]->polygon_edge[2];
+								if (t[(i + 3) % 4] == NULL)
+									t[(i + 2) % 4]->polygon_edge[0] = t[i]->polygon_edge[2];
+								else t[(i + 3) % 4]->polygon_edge[0] = t[i]->polygon_edge[2];
+								if (*ot[0]->GetPoint(0) == t1)
+								{
+									ot[0]->edges[2] = t[i]->edges[1];
+									ot[1]->edges[2] = t[i]->edges[0];
+								}
+								else
+								{
+									ot[0]->edges[2] = t[i]->edges[0];
+									ot[1]->edges[2] = t[i]->edges[1];
+								}
 							}
 						}
 						delete t[i];
@@ -303,7 +331,7 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 		}
 		for (int i = 0; i < 2; i++)
 		if (ot[i] != NULL)
-			ot[i]->edges[2] = initialEdgeLablesCount++;
+			ot[i]->edges[2] = splitedEdgeLablesCount++;
 	}
 
 	Mesh::const_iterator it;
@@ -348,32 +376,41 @@ void firstTriangleBackwardSplit(Mesh &splitedMesh, p2t::Triangle &tri, p2t::Poin
 				if (tri.neighbors_[edge]->neighbors_[0] == &tri)
 				{
 					t1 = new p2t::Triangle(*n3, *n1, p);
-					t1->edges[1] = initialEdgeLablesCount++;
+					t1->edges[1] = splitedEdgeLablesCount++;
 					t1->edges[2] = tri.edges[1];
 					t2 = new p2t::Triangle(*n1, *n2, p);
-					t2->edges[0] = initialEdgeLablesCount++;
+					t2->edges[0] = splitedEdgeLablesCount++;
 					t2->edges[2] = tri.edges[2];
-					t1->edges[0] = t2->edges[1] = initialEdgeLablesCount++;
+					t1->edges[0] = t2->edges[1] = splitedEdgeLablesCount++;
+
+					t1->polygon_edge[2] = tri.polygon_edge[1];
+					t2->polygon_edge[2] = tri.polygon_edge[2];
 				}
 				else if (tri.neighbors_[edge]->neighbors_[1] == &tri)
 				{
 					t1 = new p2t::Triangle(*n1, *n2, p);
-					t1->edges[1] = initialEdgeLablesCount++;
+					t1->edges[1] = splitedEdgeLablesCount++;
 					t1->edges[2] = tri.edges[2];
 					t2 = new p2t::Triangle(*n2, *n3, p);
-					t2->edges[0] = initialEdgeLablesCount++;
+					t2->edges[0] = splitedEdgeLablesCount++;
 					t2->edges[2] = tri.edges[0];
-					t1->edges[0] = t2->edges[1] = initialEdgeLablesCount++;
+					t1->edges[0] = t2->edges[1] = splitedEdgeLablesCount++;
+
+					t1->polygon_edge[2] = tri.polygon_edge[2];
+					t2->polygon_edge[2] = tri.polygon_edge[0];
 				}
 				else if (tri.neighbors_[edge]->neighbors_[2] == &tri)
 				{
 					t1 = new p2t::Triangle(*n2, *n3, p);
-					t1->edges[1] = initialEdgeLablesCount++;
+					t1->edges[1] = splitedEdgeLablesCount++;
 					t1->edges[2] = tri.edges[0];
 					t2 = new p2t::Triangle(*n3, *n1, p);
-					t2->edges[0] = initialEdgeLablesCount++;
+					t2->edges[0] = splitedEdgeLablesCount++;
 					t2->edges[2] = tri.edges[1];
-					t1->edges[0] = t2->edges[1] = initialEdgeLablesCount++;
+					t1->edges[0] = t2->edges[1] = splitedEdgeLablesCount++;
+
+					t1->polygon_edge[2] = tri.polygon_edge[0];
+					t2->polygon_edge[2] = tri.polygon_edge[1];
 				}
 				splitedMesh.push_back(t1);
 				splitedMeshTrianglesMemory.push_back(t1);
@@ -498,6 +535,43 @@ void rayIntersectTriangle(p2t::Triangle &tri, const p2t::Point &p, p2t::Point *p
 			p3p1->x = p.x;
 			p3p1->y = ny;
 			return;
+		}
+	}
+}
+
+void markPolygonEdges(Mesh &mesh, const CPolygon &basePolygon)
+{
+	for (int i = 0; i < mesh.size(); i++)
+	{
+		const p2t::Point &p1 = *mesh[i]->GetPoint(0);
+		const p2t::Point &p2 = *mesh[i]->GetPoint(1);
+		const p2t::Point &p3 = *mesh[i]->GetPoint(2);
+
+		for (int j = 0; j < basePolygon.loopArray.size(); j++)
+		{
+			const Loop &loop = basePolygon.loopArray[j];
+			int loopCount = loop.pointIDArray.size();
+			for (int k = 0; k < loopCount; k++)
+			{
+				const Point &sp = loop.polygon->pointArray[loop.pointIDArray[k]];
+				const Point &ep = loop.polygon->pointArray[loop.pointIDArray[(k + 1) % loopCount]];
+
+				if ((p1.x == sp.x && p1.y == sp.y &&
+					p2.x == ep.x && p2.y == ep.y) ||
+					(p1.x == ep.x && p1.y == ep.y &&
+					p2.x == sp.x && p2.y == sp.y))
+					mesh[i]->polygon_edge[2] = true;
+				if ((p2.x == sp.x && p2.y == sp.y &&
+					p3.x == ep.x && p3.y == ep.y) ||
+					(p2.x == ep.x && p2.y == ep.y &&
+					p3.x == sp.x && p3.y == sp.y))
+					mesh[i]->polygon_edge[0] = true;
+				if ((p3.x == sp.x && p3.y == sp.y &&
+					p1.x == ep.x && p1.y == ep.y) ||
+					(p3.x == ep.x && p3.y == ep.y &&
+					p1.x == sp.x && p1.y == sp.y))
+					mesh[i]->polygon_edge[1] = true;
+			}
 		}
 	}
 }

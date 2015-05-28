@@ -110,6 +110,7 @@
     <ClInclude Include="DCEL.h" />
     <ClInclude Include="DisjointSet.h" />
     <ClInclude Include="Graph.h" />
+    <ClInclude Include="Mesh2Graph.h" />
     <ClInclude Include="MeshUpdate.h" />
     <ClInclude Include="Monster.h" />
     <ClInclude Include="OpenGL.h" />
@@ -134,6 +135,7 @@
     <ClCompile Include="DCEL.cpp" />
     <ClCompile Include="DisjointSet.cpp" />
     <ClCompile Include="Graph.cpp" />
+    <ClCompile Include="Mesh2Graph.cpp" />
     <ClCompile Include="MeshUpdate.cpp" />
     <ClCompile Include="Monster.cpp" />
     <ClCompile Include="OpenGL.cpp" />
