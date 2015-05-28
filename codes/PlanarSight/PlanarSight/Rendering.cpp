@@ -130,19 +130,38 @@ void Rendering::drawPoint(Point& p, double size)
 	glEnd();
 }
 
+bool Rendering::addPointIntoLoopBuf(Point& p)
+{
+	if (!basePolygon->pointInPolygonTest(p))
+		return false;
+	loopBuf.push_back(p);
+	if (loopBuf.size() <= 1)
+		return true;
+	if (basePolygon->edgePolygonIntersectionTest(loopBuf[loopBuf.size() - 2], p))
+	{
+		loopBuf.pop_back();
+		return false;
+	}
+	return true;
+}
+
 bool Rendering::loopFinished()
 {
-	if (loopBuf.size() < 3)
-	{
-		loopBuf.clear();
-		return true;
-	}
-
 	bool flag;
-	if (drawOuterWall)
-		flag = basePolygon->addOuterLoop(loopBuf);
-	else if (drawInnerWall)
-		flag = basePolygon->addInnerLoop(loopBuf);
+	if (loopBuf.size() < 3)
+		flag = true;
+	else if (basePolygon->edgePolygonIntersectionTest(loopBuf[loopBuf.size() - 1], loopBuf[0]))
+		flag = false;
+	else if (basePolygon->loopSelfIntersectionTest(loopBuf))
+		flag = false;
+	else
+	{
+		if (drawOuterWall)
+			basePolygon->addOuterLoop(loopBuf);
+		else if (drawInnerWall)
+			basePolygon->addInnerLoop(loopBuf);
+		flag = true;
+	}	
 
 	loopBuf.clear();
 	return flag;
@@ -239,10 +258,20 @@ void Rendering::monsterWalk(int monsterID)
 	}
 	else
 	{
-		p = mPtr->pos - direction;
+		double r;
+		basePolygon->edgePolygonIntersectionNormal(mPtr->pos, p, r);
+		r = 2 * r - angle;
+		if (r > DOUBLE_PI)
+			r -= DOUBLE_PI;
+		else if (r < 0)
+			r += DOUBLE_PI;
+		mPtr->viewDirection = r;
+		mPtr->walkDirection = r;
+
+		/*p = mPtr->pos - direction;
 		mPtr->pos = p;
 		mPtr->viewDirection = angle + PI;
-		mPtr->walkDirection = angle + PI;
+		mPtr->walkDirection = angle + PI;*/
 	}
 	if (mPtr->walkDirection > DOUBLE_PI)
 		mPtr->walkDirection -= DOUBLE_PI;
