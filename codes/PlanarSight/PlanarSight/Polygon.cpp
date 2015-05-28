@@ -100,10 +100,13 @@ bool CPolygon::pointInLoopTest(Point& p, int loopID)
 
 bool CPolygon::pointInPolygonTest(Point& p)
 {
+	int loopSize = loopArray.size();
+	if (loopSize == 0)
+		return true;
+
 	if (!pointInLoopTest(p, 0))
 		return false;
 
-	int loopSize = loopArray.size();
 	for (int i = 1; i < loopSize; i++)
 	{
 		if (pointInLoopTest(p, i))
@@ -145,6 +148,73 @@ void CPolygon::reverseLoop(int loopID)
 {
 	Loop* lPtr = &(loopArray[loopID]);
 	std::reverse(lPtr->pointIDArray.begin(), lPtr->pointIDArray.end());
+}
+
+bool CPolygon::edgeEdgeIntersectionTest(Point& a1, Point& a2, Point& b1, Point& b2)
+{
+	Vector a1a2 = a2 - a1;
+	Vector b1b2 = b2 - b1;
+	Vector b1a1 = a1 - b1;
+	Vector a1b1 = b1 - a1;
+
+	double s = b1b2 ^ a1a2;
+	if (equalZero(s))
+		return false;
+
+	double pa = (b1a1 ^ b1b2) / s;
+	double pb = (a1a2 ^ a1b1) / s;
+
+	if (pa > 0 && pa < 1 && pb > 0 && pb < 1)
+		return true;
+	else
+		return false;
+}
+
+bool CPolygon::edgeLoopIntersectionTest(Point& a1, Point& a2, int loopID)
+{
+	Loop* lPtr;
+	lPtr = &(loopArray[loopID]);
+	int loopPointSize = lPtr->pointIDArray.size();
+	int preID, curID;
+
+	curID = lPtr->pointIDArray[0];
+	preID = lPtr->pointIDArray[loopPointSize - 1];
+	if (edgeEdgeIntersectionTest(a1, a2, pointArray[preID], pointArray[curID]))
+		return true;
+	for (int i = 1; i < loopPointSize; i++)
+	{
+		preID = curID;
+		curID = lPtr->pointIDArray[i];
+		if (edgeEdgeIntersectionTest(a1, a2, pointArray[preID], pointArray[curID]))
+			return true;
+	}
+
+	return false;
+}
+
+bool CPolygon::loopSelfIntersectionTest(PointArray& pa)
+{
+	int size = pa.size();
+	for (int i = 0; i < size; i++)
+	{
+		for (int j = i + 1; j < size; j++)
+		{
+			if (edgeEdgeIntersectionTest(pa[i], pa[(i + 1) % size], pa[j], pa[(j + 1) % size]))
+				return true;
+		}
+	}
+
+	return false;
+}
+
+bool CPolygon::edgePolygonIntersectionTest(Point& p1, Point& p2)
+{
+	int loopSize = loopArray.size();
+	for (int i = 0; i < loopSize; i++)
+		if (edgeLoopIntersectionTest(p1, p2, i))
+			return true;
+
+	return false;
 }
 
 void CPolygon::clear()

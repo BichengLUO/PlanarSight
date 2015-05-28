@@ -47,6 +47,10 @@ public:
 	bool pointInPolygonTest(Point& p);
 	bool loopCCWTest(int loopID);
 	void reverseLoop(int loopID);
+	bool edgeEdgeIntersectionTest(Point& a1, Point& a2, Point& b1, Point& b2);
+	bool edgeLoopIntersectionTest(Point& a1, Point& a2, int loopID);
+	bool edgePolygonIntersectionTest(Point& a1, Point& a2);
+	bool loopSelfIntersectionTest(PointArray& pa);
 	void clear();
 };
 typedef vector<CPolygon> PolygonArray;

@@ -130,19 +130,38 @@ void Rendering::drawPoint(Point& p, double size)
 	glEnd();
 }
 
+bool Rendering::addPointIntoLoopBuf(Point& p)
+{
+	if (!basePolygon->pointInPolygonTest(p))
+		return false;
+	loopBuf.push_back(p);
+	if (loopBuf.size() <= 1)
+		return true;
+	if (basePolygon->edgePolygonIntersectionTest(loopBuf[loopBuf.size() - 2], p))
+	{
+		loopBuf.pop_back();
+		return false;
+	}
+	return true;
+}
+
 bool Rendering::loopFinished()
 {
-	if (loopBuf.size() < 3)
-	{
-		loopBuf.clear();
-		return true;
-	}
-
 	bool flag;
-	if (drawOuterWall)
-		flag = basePolygon->addOuterLoop(loopBuf);
-	else if (drawInnerWall)
-		flag = basePolygon->addInnerLoop(loopBuf);
+	if (loopBuf.size() < 3)
+		flag = true;
+	else if (basePolygon->edgePolygonIntersectionTest(loopBuf[loopBuf.size() - 1], loopBuf[0]))
+		flag = false;
+	else if (basePolygon->loopSelfIntersectionTest(loopBuf))
+		flag = false;
+	else
+	{
+		if (drawOuterWall)
+			basePolygon->addOuterLoop(loopBuf);
+		else if (drawInnerWall)
+			basePolygon->addInnerLoop(loopBuf);
+		flag = true;
+	}	
 
 	loopBuf.clear();
 	return flag;

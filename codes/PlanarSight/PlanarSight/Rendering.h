@@ -38,6 +38,7 @@ public:
 	void drawUnfinishedLoop(PointArray& pa);
 	void drawPoint(Point& p);
 	void drawPoint(Point& p, double size);
+	bool addPointIntoLoopBuf(Point& p);
 	bool loopFinished();
 	void drawMonsters(MonsterArray& pa);
 	bool addMonster(Point& p);
