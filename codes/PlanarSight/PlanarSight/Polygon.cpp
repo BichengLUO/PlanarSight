@@ -217,6 +217,52 @@ bool CPolygon::edgePolygonIntersectionTest(Point& p1, Point& p2)
 	return false;
 }
 
+bool CPolygon::edgeLoopIntersectionNormal(Point& a1, Point& a2, int loopID, double& result)
+{
+	Loop* lPtr;
+	lPtr = &(loopArray[loopID]);
+	int loopPointSize = lPtr->pointIDArray.size();
+	int preID, curID;
+	bool flag = false;
+	Vector xAxis(1, 0);
+
+	curID = lPtr->pointIDArray[0];
+	preID = lPtr->pointIDArray[loopPointSize - 1];
+	if (edgeEdgeIntersectionTest(a1, a2, pointArray[preID], pointArray[curID]))
+		flag =  true;
+	else
+	{
+		for (int i = 1; i < loopPointSize; i++)
+		{
+			preID = curID;
+			curID = lPtr->pointIDArray[i];
+			if (edgeEdgeIntersectionTest(a1, a2, pointArray[preID], pointArray[curID]))
+			{
+				flag = true;
+				break;
+			}
+		}
+	}
+	
+	Vector edge = pointArray[curID] - pointArray[preID];
+	double angle = calAngle(xAxis, edge);
+	if ((xAxis ^ edge) < 0)
+		angle = DOUBLE_PI - angle;
+	result = angle;
+
+	return flag;
+}
+
+bool CPolygon::edgePolygonIntersectionNormal(Point& p1, Point& p2, double& result)
+{
+	int loopSize = loopArray.size();
+	for (int i = 0; i < loopSize; i++)
+		if (edgeLoopIntersectionNormal(p1, p2, i, result))
+			return true;
+
+	return false;
+}
+
 void CPolygon::clear()
 {
 	pointArray.clear();

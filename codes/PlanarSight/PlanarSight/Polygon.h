@@ -50,6 +50,8 @@ public:
 	bool edgeEdgeIntersectionTest(Point& a1, Point& a2, Point& b1, Point& b2);
 	bool edgeLoopIntersectionTest(Point& a1, Point& a2, int loopID);
 	bool edgePolygonIntersectionTest(Point& a1, Point& a2);
+	bool edgeLoopIntersectionNormal(Point& a1, Point& a2, int loopID, double& result);
+	bool edgePolygonIntersectionNormal(Point& a1, Point& a2, double& result);
 	bool loopSelfIntersectionTest(PointArray& pa);
 	void clear();
 };

@@ -258,10 +258,20 @@ void Rendering::monsterWalk(int monsterID)
 	}
 	else
 	{
-		p = mPtr->pos - direction;
+		double r;
+		basePolygon->edgePolygonIntersectionNormal(mPtr->pos, p, r);
+		r = 2 * r - angle;
+		if (r > DOUBLE_PI)
+			r -= DOUBLE_PI;
+		else if (r < 0)
+			r += DOUBLE_PI;
+		mPtr->viewDirection = r;
+		mPtr->walkDirection = r;
+
+		/*p = mPtr->pos - direction;
 		mPtr->pos = p;
 		mPtr->viewDirection = angle + PI;
-		mPtr->walkDirection = angle + PI;
+		mPtr->walkDirection = angle + PI;*/
 	}
 	if (mPtr->walkDirection > DOUBLE_PI)
 		mPtr->walkDirection -= DOUBLE_PI;
