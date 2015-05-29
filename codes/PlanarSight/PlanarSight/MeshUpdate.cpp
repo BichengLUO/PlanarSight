@@ -302,15 +302,17 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 								if (t[(i + 3) % 4] == NULL)
 									t[(i + 2) % 4]->polygon_edge[0] = t[i]->polygon_edge[2];
 								else t[(i + 3) % 4]->polygon_edge[0] = t[i]->polygon_edge[2];
-								if (*ot[0]->GetPoint(0) == t1)
+								if ((ot[0] != NULL && *ot[0]->GetPoint(0) == t1) ||
+									(ot[1] != NULL && *ot[1]->GetPoint(1) == t2))
 								{
-									ot[0]->edges[2] = t[i]->edges[1];
-									ot[1]->edges[2] = t[i]->edges[0];
+									if (ot[0] != NULL) ot[0]->edges[2] = t[i]->edges[1];
+									if (ot[1] != NULL) ot[1]->edges[2] = t[i]->edges[0];
 								}
-								else
+								else if ((ot[0] != NULL && *ot[0]->GetPoint(0) == t2) ||
+									(ot[1] != NULL && *ot[1]->GetPoint(1) == t1))
 								{
-									ot[0]->edges[2] = t[i]->edges[0];
-									ot[1]->edges[2] = t[i]->edges[1];
+									if (ot[0] != NULL) ot[0]->edges[2] = t[i]->edges[0];
+									if (ot[1] != NULL) ot[1]->edges[2] = t[i]->edges[1];
 								}
 							}
 						}

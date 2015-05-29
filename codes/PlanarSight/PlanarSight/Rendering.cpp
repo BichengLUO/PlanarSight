@@ -540,27 +540,27 @@ void Rendering::drawTrianglesMesh(const std::vector<p2t::Triangle*> &mesh)
 		glColor3d(0.8, 0.3, 0.0);
 
 		if ((*it)->polygon_edge[2])
-		{
 			sprintf(edgeLable, "[%d]", (*it)->edges[2]);
-			glRasterPos2d((p1->x + p2->x) / 2.0, (p1->y + p2->y) / 2.0);
-			for (int i = 0; i < strlen(edgeLable); i++)
-				glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, edgeLable[i]);
-		}
+		else
+			sprintf(edgeLable, "%d", (*it)->edges[2]);
+		glRasterPos2d((p1->x + p2->x) / 2.0, (p1->y + p2->y) / 2.0);
+		for (int i = 0; i < strlen(edgeLable); i++)
+			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, edgeLable[i]);
 
 		if ((*it)->polygon_edge[0])
-		{
 			sprintf(edgeLable, "[%d]", (*it)->edges[0]);
-			glRasterPos2d((p2->x + p3->x) / 2.0, (p2->y + p3->y) / 2.0);
-			for (int i = 0; i < strlen(edgeLable); i++)
-				glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, edgeLable[i]);
-		}
+		else
+			sprintf(edgeLable, "%d", (*it)->edges[0]);
+		glRasterPos2d((p2->x + p3->x) / 2.0, (p2->y + p3->y) / 2.0);
+		for (int i = 0; i < strlen(edgeLable); i++)
+			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, edgeLable[i]);
 
 		if ((*it)->polygon_edge[1])
-		{
 			sprintf(edgeLable, "[%d]", (*it)->edges[1]);
-			glRasterPos2d((p1->x + p3->x) / 2.0, (p1->y + p3->y) / 2.0);
-			for (int i = 0; i < strlen(edgeLable); i++)
-				glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, edgeLable[i]);
-		}
+		else
+			sprintf(edgeLable, "%d", (*it)->edges[1]);
+		glRasterPos2d((p1->x + p3->x) / 2.0, (p1->y + p3->y) / 2.0);
+		for (int i = 0; i < strlen(edgeLable); i++)
+			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, edgeLable[i]);
 	}
 }
