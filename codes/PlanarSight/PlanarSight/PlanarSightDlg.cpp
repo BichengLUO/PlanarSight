@@ -65,6 +65,8 @@ void CPlanarSightDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_VISI_POLYGON, vis_pol_check);
 	DDX_Control(pDX, IDC_SHOW_TRIANGULATION, showTriangulation);
+	DDX_Control(pDX, IDC_MESH_EDGE_LABELS, showMeshEdgeLabels);
+	DDX_Control(pDX, IDC_SORTES_SEGMENTS, sortedSegments);
 }
 
 BEGIN_MESSAGE_MAP(CPlanarSightDlg, CDialogEx)
@@ -82,6 +84,8 @@ BEGIN_MESSAGE_MAP(CPlanarSightDlg, CDialogEx)
 ON_WM_KEYDOWN()
 ON_WM_KEYUP()
 ON_BN_CLICKED(IDC_SHOW_TRIANGULATION, &CPlanarSightDlg::OnBnClickedShowTriangulation)
+ON_BN_CLICKED(IDC_MESH_EDGE_LABELS, &CPlanarSightDlg::OnBnClickedMeshEdgeLabels)
+ON_BN_CLICKED(IDC_SORTES_SEGMENTS, &CPlanarSightDlg::OnBnClickedSortesSegments)
 END_MESSAGE_MAP()
 
 
@@ -323,4 +327,24 @@ void CPlanarSightDlg::OnBnClickedShowTriangulation()
 		m_pDisplay->rendering->showTriangulation = false;
 	else
 		m_pDisplay->rendering->showTriangulation = true;
+}
+
+
+void CPlanarSightDlg::OnBnClickedMeshEdgeLabels()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	if (showMeshEdgeLabels.GetCheck() == 0)
+		m_pDisplay->rendering->showMeshEdgeLabels = false;
+	else
+		m_pDisplay->rendering->showMeshEdgeLabels = true;
+}
+
+
+void CPlanarSightDlg::OnBnClickedSortesSegments()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	if (sortedSegments.GetCheck() == 0)
+		m_pDisplay->rendering->showSortedSegment = false;
+	else
+		m_pDisplay->rendering->showSortedSegment = true;
 }

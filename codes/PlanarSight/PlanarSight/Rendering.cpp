@@ -1,6 +1,6 @@
 ﻿#include "stdafx.h"
 #include "Rendering.h"
-
+#include "Mesh2Graph.h"
 
 Rendering::Rendering()
 {
@@ -10,6 +10,7 @@ Rendering::Rendering()
 	drawMonster = false;
 	showVisPolygon = false;
 	showTriangulation = false;
+	showMeshEdgeLabels = false;
 	gameStart = false;
 	player.x = 370;
 	player.y = 310;
@@ -34,8 +35,16 @@ void Rendering::draw()
 
 	if (gameStart && monsters.size() > 0)
 	{
+		//清空上次的新剖分出来的三角形信息
 		clearSplitedMeshMemory();
-		splitedMesh = insertPointToUpdateTriangles(initialMesh, p2t::Point(monsters[0].pos.x, monsters[0].pos.y));
+		p2t::Point p(monsters[0].pos.x, monsters[0].pos.y);
+		int selc; //表示新剖分出来的边数
+		splitedMesh = insertPointToUpdateTriangles(initialMesh, p, &selc); //生成新的三角剖分网格
+
+		//清空上次的排序线段和顶点信息
+		sortedPointArray.clear();
+		sortedSegmentArray.clear();
+		sortedSegmentArray = mesh2SegArray(splitedMesh, p, selc, sortedPointArray); //生成新的排序线段和顶点
 	}
 	if (showTriangulation)
 	if (splitedMesh.size() > 0)
@@ -45,7 +54,6 @@ void Rendering::draw()
 
 	drawPolygon(*basePolygon);
 	drawPlayer(player);
-
 	if (gameStart)
 	{
 		int monsterSize = monsters.size();
@@ -54,7 +62,8 @@ void Rendering::draw()
 	}
 	drawMonsters(monsters);
 	calcVisPolygon();
-
+	if (showSortedSegment)
+		drawSortedSegments(sortedPointArray, sortedSegmentArray);
 	if (showVisPolygon)
 	{
 		int size = visPolygons.size();
@@ -88,6 +97,7 @@ void Rendering::drawLoop(CPolygon& p, int loopID)
 {
 	int pointSize = p.loopArray[loopID].pointIDArray.size();
 	int index;
+	glLineWidth(1.0);
 	glBegin(GL_LINE_LOOP);
 	for (int i = 0; i < pointSize; i++)
 	{
@@ -100,7 +110,7 @@ void Rendering::drawLoop(CPolygon& p, int loopID)
 void Rendering::drawUnfinishedLoop(PointArray& pa)
 {
 	int pointSize = pa.size();
-
+	glLineWidth(1.0);
 	glColor3d(1, 1, 0);
 	glBegin(GL_LINE_STRIP);
 	for (int i = 0; i < pointSize; i++)
@@ -293,6 +303,8 @@ void Rendering::clear()
 	loopBuf.clear();
 	monsters.clear();
 	clearInitialMeshMemory(initialMesh);
+	sortedPointArray.clear();
+	sortedSegmentArray.clear();
 	splitedMesh.clear();
 	drawOuterWall = false;
 	drawInnerWall = false;
@@ -502,6 +514,7 @@ void Rendering::Test()
 
 void Rendering::drawTrianglesMesh(const std::vector<p2t::Triangle*> &mesh)
 {
+	glLineWidth(1.0);
 	std::vector<p2t::Triangle*>::const_iterator it;
 	for (it = mesh.begin(); it != mesh.end(); ++it)
 	{
@@ -539,28 +552,75 @@ void Rendering::drawTrianglesMesh(const std::vector<p2t::Triangle*> &mesh)
 		char edgeLable[10];
 		glColor3d(0.8, 0.3, 0.0);
 
-		if ((*it)->polygon_edge[2])
-			sprintf(edgeLable, "[%d]", (*it)->edges[2]);
-		else
-			sprintf(edgeLable, "%d", (*it)->edges[2]);
-		glRasterPos2d((p1->x + p2->x) / 2.0, (p1->y + p2->y) / 2.0);
-		for (int i = 0; i < strlen(edgeLable); i++)
-			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, edgeLable[i]);
+		if (showMeshEdgeLabels)
+		{
+			if ((*it)->polygon_edge[2])
+				sprintf(edgeLable, "[%d]", (*it)->edges[2]);
+			else
+				sprintf(edgeLable, "%d", (*it)->edges[2]);
+			glRasterPos2d((p1->x + p2->x) / 2.0, (p1->y + p2->y) / 2.0);
+			for (int i = 0; i < strlen(edgeLable); i++)
+				glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, edgeLable[i]);
 
-		if ((*it)->polygon_edge[0])
-			sprintf(edgeLable, "[%d]", (*it)->edges[0]);
-		else
-			sprintf(edgeLable, "%d", (*it)->edges[0]);
-		glRasterPos2d((p2->x + p3->x) / 2.0, (p2->y + p3->y) / 2.0);
-		for (int i = 0; i < strlen(edgeLable); i++)
-			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, edgeLable[i]);
+			if ((*it)->polygon_edge[0])
+				sprintf(edgeLable, "[%d]", (*it)->edges[0]);
+			else
+				sprintf(edgeLable, "%d", (*it)->edges[0]);
+			glRasterPos2d((p2->x + p3->x) / 2.0, (p2->y + p3->y) / 2.0);
+			for (int i = 0; i < strlen(edgeLable); i++)
+				glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, edgeLable[i]);
 
-		if ((*it)->polygon_edge[1])
-			sprintf(edgeLable, "[%d]", (*it)->edges[1]);
+			if ((*it)->polygon_edge[1])
+				sprintf(edgeLable, "[%d]", (*it)->edges[1]);
+			else
+				sprintf(edgeLable, "%d", (*it)->edges[1]);
+			glRasterPos2d((p1->x + p3->x) / 2.0, (p1->y + p3->y) / 2.0);
+			for (int i = 0; i < strlen(edgeLable); i++)
+				glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, edgeLable[i]);
+		}
 		else
-			sprintf(edgeLable, "%d", (*it)->edges[1]);
-		glRasterPos2d((p1->x + p3->x) / 2.0, (p1->y + p3->y) / 2.0);
-		for (int i = 0; i < strlen(edgeLable); i++)
-			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, edgeLable[i]);
+		{
+			if ((*it)->polygon_edge[2])
+			{
+				sprintf(edgeLable, "[%d]", (*it)->edges[2]);
+				glRasterPos2d((p1->x + p2->x) / 2.0, (p1->y + p2->y) / 2.0);
+				for (int i = 0; i < strlen(edgeLable); i++)
+					glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, edgeLable[i]);
+			}
+
+			if ((*it)->polygon_edge[0])
+			{
+				sprintf(edgeLable, "[%d]", (*it)->edges[0]);
+				glRasterPos2d((p2->x + p3->x) / 2.0, (p2->y + p3->y) / 2.0);
+				for (int i = 0; i < strlen(edgeLable); i++)
+					glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, edgeLable[i]);
+			}
+
+			if ((*it)->polygon_edge[1])
+			{
+				sprintf(edgeLable, "[%d]", (*it)->edges[1]);
+				glRasterPos2d((p1->x + p3->x) / 2.0, (p1->y + p3->y) / 2.0);
+				for (int i = 0; i < strlen(edgeLable); i++)
+					glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, edgeLable[i]);
+			}
+		}
+	}
+}
+
+void Rendering::drawSortedSegments(const PointArray &pa, const SegmentArray &sOrder)
+{
+	glLineWidth(3.0);
+	for (int i = 0; i < sOrder.size(); i++)
+	{
+		Point pointA = pa[sOrder[i].aID];
+		Point pointB = pa[sOrder[i].bID];
+
+		glColor3d(1 - i / (double)sOrder.size(),
+			1 - i / (double)sOrder.size(),
+			1 - i / (double)sOrder.size());
+		glBegin(GL_LINES);
+		glVertex2d(pointA.x, pointA.y);
+		glVertex2d(pointB.x, pointB.y);
+		glEnd();
 	}
 }

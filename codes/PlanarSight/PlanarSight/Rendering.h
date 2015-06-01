@@ -13,6 +13,9 @@ protected:
 public:
 	std::vector<p2t::Triangle*> initialMesh;
 	std::vector<p2t::Triangle*> splitedMesh;
+	PointArray sortedPointArray;
+	SegmentArray sortedSegmentArray;
+
 	CPolygon* basePolygon;
 	PolygonArray visPolygons;
 	PointArray loopBuf;
@@ -22,8 +25,12 @@ public:
 	bool drawOuterWall;
 	bool drawInnerWall;
 	bool drawMonster;
+
 	bool showVisPolygon;
 	bool showTriangulation;
+	bool showMeshEdgeLabels;
+	bool showSortedSegment;
+
 	bool gameStart;
 	bool moving;
 	bool preprocessFinished;
@@ -52,5 +59,6 @@ public:
 	void calcVisPolygon();
 	void Test();
 	void drawTrianglesMesh(const std::vector<p2t::Triangle*> &mesh);
+	void drawSortedSegments(const PointArray &pa, const SegmentArray &sOrder);
 };
 

@@ -137,7 +137,7 @@ Mesh buildMeshFromOuterLoop(const Loop &loop)
 	return mesh;
 }
 
-Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
+Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p, int *selc)
 {
 	splitedEdgeLablesCount = edgeLabelsCount;
 	Mesh splitedMesh;
@@ -344,6 +344,7 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p)
 		else
 			(*it)->mark_to_be_splited = false;
 	}
+	*selc = splitedEdgeLablesCount;
 	return splitedMesh;
 }
 

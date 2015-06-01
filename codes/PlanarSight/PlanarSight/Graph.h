@@ -26,14 +26,14 @@ public:
 	Graph(int ct);
 	void addEdge(int src, int dest);
 	void printGraph();
-	void topologicalSort(std::vector<int> &sortedList);
+	void topologicalSort(std::vector<int> &sortedList) const;
 	~Graph();
 
 protected:
 	int count;
 	AdjList* array;
 	std::vector<AdjListNode*> allListNodes;
-	void topologicalSortUtil(int v, bool visited[], std::stack<int> &Stack);
+	void topologicalSortUtil(int v, bool visited[], std::stack<int> &Stack) const;
 };
 
 #endif

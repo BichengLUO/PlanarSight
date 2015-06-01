@@ -12,6 +12,7 @@ public:
 	int bID;
 public:
 	Segment(){}
+	Segment(int a, int b): aID(a), bID(b){}
 };
 typedef vector<Segment> SegmentArray;
 

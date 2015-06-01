@@ -44,7 +44,7 @@ void Graph::printGraph()
 }
 
 // A recursive function used by topologicalSort
-void Graph::topologicalSortUtil(int v, bool visited[], std::stack<int> &Stack)
+void Graph::topologicalSortUtil(int v, bool visited[], std::stack<int> &Stack) const
 {
 	// Mark the current node as visited.
 	visited[v] = true;
@@ -63,7 +63,7 @@ void Graph::topologicalSortUtil(int v, bool visited[], std::stack<int> &Stack)
 }
 
 // The function to do Topological Sort. It uses recursive topologicalSortUtil()
-void Graph::topologicalSort(std::vector<int> &sortedList)
+void Graph::topologicalSort(std::vector<int> &sortedList) const
 {
 	std::stack<int> Stack;
 

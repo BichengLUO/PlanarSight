@@ -14,7 +14,7 @@ Mesh buildMeshFromPolygon(const CPolygon &basePolygon);
 Mesh buildMeshFromInnerLoop(const Loop &loop);
 Mesh buildMeshFromOuterLoop(const Loop &loop);
 
-Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p);
+Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p, int *selc);
 void firstTriangleBackwardSplit(Mesh &splitedMesh, p2t::Triangle &tri, p2t::Point &p, p2t::Triangle *ot[]);
 int findEdgePointStands(p2t::Triangle &tri, const p2t::Point &p);
 void rayIntersectTriangle(p2t::Triangle &tri, const p2t::Point &p, p2t::Point *p1p2, p2t::Point *p2p3, p2t::Point *p3p1);
