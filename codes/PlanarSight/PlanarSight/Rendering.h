@@ -30,6 +30,7 @@ public:
 	bool showTriangulation;
 	bool showMeshEdgeLabels;
 	bool showSortedSegment;
+	bool showDualGraph;
 
 	bool gameStart;
 	bool moving;
@@ -60,5 +61,8 @@ public:
 	void Test();
 	void drawTrianglesMesh(const std::vector<p2t::Triangle*> &mesh);
 	void drawSortedSegments(const PointArray &pa, const SegmentArray &sOrder);
+	void drawDualGraphBackground();
+	void drawDualGraph(const PointArray &pa, double rc, double gc, double bc);
+	void drawDualGraph(const Point &p, double rc, double gc, double bc);
 };
 

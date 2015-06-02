@@ -67,6 +67,7 @@ void CPlanarSightDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SHOW_TRIANGULATION, showTriangulation);
 	DDX_Control(pDX, IDC_MESH_EDGE_LABELS, showMeshEdgeLabels);
 	DDX_Control(pDX, IDC_SORTES_SEGMENTS, sortedSegments);
+	DDX_Control(pDX, IDC_DUAL_GRAPH, showDualGraph);
 }
 
 BEGIN_MESSAGE_MAP(CPlanarSightDlg, CDialogEx)
@@ -86,6 +87,7 @@ ON_WM_KEYUP()
 ON_BN_CLICKED(IDC_SHOW_TRIANGULATION, &CPlanarSightDlg::OnBnClickedShowTriangulation)
 ON_BN_CLICKED(IDC_MESH_EDGE_LABELS, &CPlanarSightDlg::OnBnClickedMeshEdgeLabels)
 ON_BN_CLICKED(IDC_SORTES_SEGMENTS, &CPlanarSightDlg::OnBnClickedSortesSegments)
+ON_BN_CLICKED(IDC_DUAL_GRAPH, &CPlanarSightDlg::OnBnClickedDualGraph)
 END_MESSAGE_MAP()
 
 
@@ -347,4 +349,14 @@ void CPlanarSightDlg::OnBnClickedSortesSegments()
 		m_pDisplay->rendering->showSortedSegment = false;
 	else
 		m_pDisplay->rendering->showSortedSegment = true;
+}
+
+
+void CPlanarSightDlg::OnBnClickedDualGraph()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	if (showDualGraph.GetCheck() == 0)
+		m_pDisplay->rendering->showDualGraph = false;
+	else
+		m_pDisplay->rendering->showDualGraph = true;
 }

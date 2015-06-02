@@ -8,9 +8,12 @@ Rendering::Rendering()
 	drawOuterWall = false;
 	drawInnerWall = false;
 	drawMonster = false;
+
 	showVisPolygon = false;
 	showTriangulation = false;
 	showMeshEdgeLabels = false;
+	showDualGraph = false;
+
 	gameStart = false;
 	player.x = 370;
 	player.y = 310;
@@ -30,8 +33,18 @@ Rendering::~Rendering()
 //绘制地图的主方法，每次重绘都会被调用
 void Rendering::draw()
 {
+	drawPolygon(*basePolygon);
+	if (showDualGraph)
+	{
+		drawDualGraphBackground();
+		drawDualGraph(basePolygon->pointArray, 0, 0, 1);
+	}
 	if (drawOuterWall || drawInnerWall)
+	{
 		drawUnfinishedLoop(loopBuf);
+		if (showDualGraph)
+			drawDualGraph(loopBuf, 1, 1, 0);
+	}
 
 	if (gameStart && monsters.size() > 0)
 	{
@@ -52,15 +65,15 @@ void Rendering::draw()
 	else if (initialMesh.size() > 0)
 		drawTrianglesMesh(initialMesh);
 
-	drawPolygon(*basePolygon);
 	drawPlayer(player);
+	int monsterSize = monsters.size();
 	if (gameStart)
-	{
-		int monsterSize = monsters.size();
 		for (int i = 0; i < monsterSize; i++)
 			monsterWalk(i);
-	}
 	drawMonsters(monsters);
+	if (showDualGraph)
+	for (int i = 0; i < monsterSize; i++)
+		drawDualGraph(monsters[i].pos, 0, 1, 1);
 	calcVisPolygon();
 	if (showSortedSegment)
 		drawSortedSegments(sortedPointArray, sortedSegmentArray);
@@ -623,4 +636,78 @@ void Rendering::drawSortedSegments(const PointArray &pa, const SegmentArray &sOr
 		glVertex2d(pointB.x, pointB.y);
 		glEnd();
 	}
+}
+
+void Rendering::drawDualGraphBackground()
+{
+	int width = 740;
+	int height = 620;
+
+	glLineWidth(1.0);
+	glColor3d(1.0, 1.0, 1.0);
+	glBegin(GL_LINE_LOOP);
+	glVertex2d(10, 10);
+	glVertex2d(10 + width / 5.0, 10);
+	glVertex2d(10 + width / 5.0, 10 + height / 5.0);
+	glVertex2d(10, 10 + height / 5.0);
+	glEnd();
+
+	glColor3d(0.0, 0.0, 0.0);
+	glBegin(GL_POLYGON);
+	glVertex2d(10, 10);
+	glVertex2d(10 + width / 5.0, 10);
+	glVertex2d(10 + width / 5.0, 10 + height / 5.0);
+	glVertex2d(10, 10 + height / 5);
+	glEnd();
+}
+
+void Rendering::drawDualGraph(const PointArray &pa, double rc, double gc, double bc)
+{
+	int width = 740;
+	int height = 620;
+
+	for (int i = 0; i < pa.size(); i++)
+	{
+		double a = pa[i].x - width / 2.0;
+		double b = pa[i].y - height / 2.0;;
+
+		a /= 200;
+		Point cand[4];
+		cand[0] = Point(-width / 2.0, a * width / 2.0 + b);
+		cand[1] = Point((b + height / 2.0) / a, -height / 2.0);
+		cand[2] = Point(width / 2.0, -a * width / 2.0 + b);
+		cand[3] = Point((b - height / 2.0) / a, height / 2.0);
+
+		glColor3d(rc, gc, bc);
+		glBegin(GL_LINE_STRIP);
+		for (int j = 0; j < 4; j++)
+		if (cand[j].x <= width / 2.0 && cand[j].x >= -width / 2.0 &&
+			cand[j].y <= height / 2.0 && cand[j].y >= -height / 2.0)
+			glVertex2d((cand[j].x + width / 2.0) / 5.0 + 10, (cand[j].y + height / 2.0) / 5.0 + 10);
+		glEnd();
+	}
+}
+
+void Rendering::drawDualGraph(const Point &p, double rc, double gc, double bc)
+{
+	int width = 740;
+	int height = 620;
+
+	double a = p.x - width / 2.0;
+	double b = p.y - height / 2.0;;
+
+	a /= 200;
+	Point cand[4];
+	cand[0] = Point(-width / 2.0, a * width / 2.0 + b);
+	cand[1] = Point((b + height / 2.0) / a, -height / 2.0);
+	cand[2] = Point(width / 2.0, -a * width / 2.0 + b);
+	cand[3] = Point((b - height / 2.0) / a, height / 2.0);
+
+	glColor3d(rc, gc, bc);
+	glBegin(GL_LINE_STRIP);
+	for (int j = 0; j < 4; j++)
+	if (cand[j].x <= width / 2.0 && cand[j].x >= -width / 2.0 &&
+		cand[j].y <= height / 2.0 && cand[j].y >= -height / 2.0)
+		glVertex2d((cand[j].x + width / 2.0) / 5.0 + 10, (cand[j].y + height / 2.0) / 5.0 + 10);
+	glEnd();
 }
