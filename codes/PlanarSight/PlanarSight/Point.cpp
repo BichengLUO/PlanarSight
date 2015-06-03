@@ -91,3 +91,31 @@ double randomDouble()
 {
 	return (double)rand() / RAND_MAX;
 }
+
+double calPolar(Point& o, Point& p)
+{
+	Vector v = p - o;
+	double angle;
+	if (equalZero(v.x))
+	{
+		if (v.y >= 0)
+			angle = PI * 0.5;
+		else
+			angle = PI * 1.5;
+	}
+	else
+	{
+		angle = atan(v.y / v.x);
+		if (v.x < 0)
+			angle += PI;
+		else if (v.x > 0 && v.y < 0)
+			angle += DOUBLE_PI;
+	}
+
+	return angle;
+}
+
+bool polarSortLess(Polar& p1, Polar& p2)
+{
+	return p1.value < p2.value;
+}

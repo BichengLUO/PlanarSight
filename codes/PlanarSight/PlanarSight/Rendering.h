@@ -5,6 +5,7 @@
 #include "MeshUpdate.h"
 #include "Monster.h"
 #include <iostream>
+#include <algorithm>
 
 class Rendering
 {
@@ -15,6 +16,9 @@ public:
 	std::vector<p2t::Triangle*> splitedMesh;
 	PointArray sortedPointArray;
 	SegmentArray sortedSegmentArray;
+	IntArray pPolarID;
+	DoubleArray pPolarValues;
+	IntArray pPolarOrder;
 
 	CPolygon* basePolygon;
 	PolygonArray visPolygons;
@@ -42,6 +46,7 @@ public:
 	void draw();
 	void preprocess();
 	void drawPolygon(CPolygon& p);
+	void drawVisPolygon(CPolygon& p);
 	void drawLoop(CPolygon& p, int loopID);
 	void drawUnfinishedLoop(PointArray& pa);
 	void drawPoint(Point& p);
@@ -55,9 +60,10 @@ public:
 	bool playerMoveTo(Point& p);
 	void monsterWalk(int monsterID);
 	void clear();
-	CPolygon calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& sOrder, IntArray& pPolarPos, DoubleArray& pPolarValues, IntArray& pPolarOrder, double rangeMin, double rangeMax);
+	CPolygon calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& sOrder, IntArray& pPolarID, DoubleArray& pPolarValues, IntArray& pPolarOrder);
 	bool calcLineLineIntersection(Point& result, Point& a1, double polar, Point& a3, Point& a4);
 	void calcVisPolygon();
+	void getPolarOrder(int monsterID, PointArray& pa, IntArray& pPolarID, DoubleArray& pPolarValues, IntArray& pPolarOrder);
 	void Test();
 	void drawTrianglesMesh(const std::vector<p2t::Triangle*> &mesh);
 	void drawSortedSegments(const PointArray &pa, const SegmentArray &sOrder);

@@ -8,7 +8,8 @@ using namespace std;
 
 #define TOLERANCE	1e-7
 #define PI				3.1415926
-#define DOUBLE_PI	6.28318852
+#define DOUBLE_PI	6.2831852
+#define HALF_PI		1.5707963
 
 class Point
 {
@@ -33,15 +34,26 @@ public:
 	void normalize();
 };
 
+struct Polar
+{
+	int id;
+	double value;
+};
+
 typedef Point Vector;
 typedef vector<Point> PointArray;
 typedef vector<Vector> VectorArray;
 typedef vector<int> IntArray;
 typedef vector<double> DoubleArray;
 
+typedef vector<Polar> PolarArray;
+
 double calAngle(Vector& v1, Vector& v2);
 bool equalZero(double d);
 double randomDouble();
+double calPolar(Point& o, Point& p);
+
+bool polarSortLess(Polar& p1, Polar& p2);
 
 
 

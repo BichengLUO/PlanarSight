@@ -46,6 +46,14 @@ void Rendering::draw()
 			drawDualGraph(loopBuf, 1, 1, 0);
 	}
 
+	drawPlayer(player);
+
+	int monsterSize = monsters.size();
+	if (gameStart)
+		for (int i = 0; i < monsterSize; i++)
+			monsterWalk(i);
+	drawMonsters(monsters);
+
 	if (gameStart && monsters.size() > 0)
 	{
 		//清空上次的新剖分出来的三角形信息
@@ -60,29 +68,37 @@ void Rendering::draw()
 		sortedSegmentArray = mesh2SegArray(splitedMesh, p, selc, sortedPointArray); //生成新的排序线段和顶点
 	}
 	if (showTriangulation)
-	if (splitedMesh.size() > 0)
-		drawTrianglesMesh(splitedMesh);
+		if (splitedMesh.size() > 0)
+			drawTrianglesMesh(splitedMesh);
 	else if (initialMesh.size() > 0)
 		drawTrianglesMesh(initialMesh);
 
-	drawPlayer(player);
-	int monsterSize = monsters.size();
-	if (gameStart)
-		for (int i = 0; i < monsterSize; i++)
-			monsterWalk(i);
-	drawMonsters(monsters);
-	if (showDualGraph)
-	for (int i = 0; i < monsterSize; i++)
-		drawDualGraph(monsters[i].pos, 0, 1, 1);
-	calcVisPolygon();
-	if (showSortedSegment)
-		drawSortedSegments(sortedPointArray, sortedSegmentArray);
+	if (gameStart && monsterSize > 0)
+	{
+		pPolarID.clear();
+		pPolarValues.clear();
+		pPolarOrder.clear();
+		visPolygons.clear();
+		getPolarOrder(0, sortedPointArray, pPolarID, pPolarValues, pPolarOrder);
+		CPolygon cp = calcVisPolygon(0, sortedPointArray, sortedSegmentArray, pPolarID, pPolarValues, pPolarOrder);
+		visPolygons.push_back(cp);
+	}
+	//calcVisPolygon();
 	if (showVisPolygon)
 	{
 		int size = visPolygons.size();
 		for (int i = 0; i < size; i++)
-			drawPolygon(visPolygons[i]);
+			drawVisPolygon(visPolygons[i]);
 	}
+
+	if (showDualGraph)
+	{
+		for (int i = 0; i < monsterSize; i++)
+			drawDualGraph(monsters[i].pos, 0, 1, 1);
+	}	
+
+	if (showSortedSegment)
+		drawSortedSegments(sortedPointArray, sortedSegmentArray);
 }
 
 void Rendering::preprocess()
@@ -104,6 +120,12 @@ void Rendering::drawPolygon(CPolygon& p)
 	glColor3d(1, 0, 0);
 	for (int i = 1; i < loopSize; i++)
 		drawLoop(p, i);
+}
+
+void Rendering::drawVisPolygon(CPolygon& p)
+{
+	glColor3d(1, 1, 1);
+	drawLoop(p, 0);
 }
 
 void Rendering::drawLoop(CPolygon& p, int loopID)
@@ -170,6 +192,21 @@ bool Rendering::addPointIntoLoopBuf(Point& p)
 
 bool Rendering::loopFinished()
 {
+	/*if (drawOuterWall)
+	{
+		loopBuf[0] = Point(100, 500);
+		loopBuf[1] = Point(300, 100);
+		loopBuf[2] = Point(500, 500);
+		loopBuf[3] = Point(300, 400);
+	}
+	else
+	{
+		loopBuf[0] = Point(200, 300);
+		loopBuf[1] = Point(200, 200);
+		loopBuf[2] = Point(300, 200);
+		loopBuf[3] = Point(300, 300);
+	}*/
+
 	bool flag;
 	if (loopBuf.size() < 3)
 		flag = true;
@@ -199,9 +236,9 @@ bool Rendering::addMonster(Point& p)
 		return false;
 
 	Monster m(p);
+	/*m.pos = Point(250, 150);
+	m.viewDirection = m.walkDirection = PI / 4;*/
 	monsters.push_back(m);
-	CPolygon cp;
-	visPolygons.push_back(cp);
 
 	return true;
 }
@@ -331,25 +368,58 @@ void Rendering::clear()
 // pPolarID：指示pa中所有点在极角排序中的次序，与pa一一对应
 // pPolarVal：指示pa中所有点的极角值，与pa一一对应
 // pPolarOrder：存储一组关于pa中点的索引，按pa中点的极角序排放
-CPolygon Rendering::calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& sOrder, IntArray& pPolarID, DoubleArray& pPolarVal, IntArray& pPolarOrder, double rangeMin, double rangeMax)
+CPolygon Rendering::calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& sOrder, IntArray& pPolarID, DoubleArray& pPolarVal, IntArray& pPolarOrder)
 {
 	int zeroNum = 0;							//极角为0的点的数量
 	int pointSize = pa.size();
+	int maxPolarID = 0;
 	for (int i = 0; i < pointSize; i++)
-		if (pPolarVal[i] == 0)
-			zeroNum++;
-	int xSize = pointSize - zeroNum + 1;		//x方向所需的区间数量
+	{
+		if (pPolarID[i] > maxPolarID)
+			maxPolarID = pPolarID[i];
+	}		
+
+	int xSize = maxPolarID + 1;		//x方向所需的区间数量
 	int segmentSize = sOrder.size();
 	int left, right;
 	int x;
-	DisjointSet ds(xSize);
+	int tmp;
+	bool reverseFlag;
+	DisjointSet ds(xSize + 1);
 	IntArray vis;								//指示每个x向上可见的线段ID
-	vis.insert(vis.begin(), xSize, -1);
+	vis.insert(vis.begin(), xSize, -1);	
 
 	for (int i = 0; i < segmentSize; i++)
 	{
+		reverseFlag = false;
+
 		left = pPolarID[sOrder[i].aID];		//线段左端点对应的x值
 		right = pPolarID[sOrder[i].bID];		//线段右端点对应的x值
+		if (left > right)
+		{
+			if (right != 0)
+				reverseFlag = true;
+			else
+			{
+				if (pPolarVal[sOrder[i].aID] < PI)
+					reverseFlag = true;
+			}					
+		}
+		else
+		{
+			if (left == 0 && pPolarVal[sOrder[i].bID] > PI)
+				reverseFlag = true;
+		}
+		if (reverseFlag)
+		{
+			tmp = sOrder[i].aID;
+			sOrder[i].aID = sOrder[i].bID;
+			sOrder[i].bID = tmp;
+			tmp = left;
+			left = right;
+			right = tmp;
+		}
+
 		if (right == 0)
 			right = xSize;
 		x = ds.findSetMax(left);				//线段左端点x值所在集合最大值
@@ -361,28 +431,35 @@ CPolygon Rendering::calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& 
 		}
 	}
 
-	int rangeLeft = 0;			//可视范围的左边界所在的x区间
-	int rangeRight = 0;		//可视范围的右边界所在的x区间
+	double rangeMin = monsters[monsterID].viewDirection - monsters[monsterID].range - HALF_PI;
+	double rangeMax = monsters[monsterID].viewDirection + monsters[monsterID].range - HALF_PI;
+	if (rangeMin < 0)
+		rangeMin += DOUBLE_PI;
+	if (rangeMax < 0)
+		rangeMax += DOUBLE_PI;
+	else if (rangeMax > DOUBLE_PI)
+		rangeMax -= DOUBLE_PI;
+
+	int rangeLeft = zeroNum - 1;			//可视范围的左边界所在的x区间
+	int rangeRight = zeroNum - 1;		//可视范围的右边界所在的x区间
 	int rangeLeftY;			//可视范围的左边界所在区间的y值
 	int rangeRightY;			//可视范围的右边界所在区间的y值
 	int rangeLengthX;			//可视范围的区间在x上的长度，不包含两个端点
 	int pID;
-	for (int i = zeroNum; i < pointSize; i++)
+	for (int i = 0; i < pointSize; i++)
 	{
 		pID = pPolarOrder[i];
 		if (pPolarVal[pID] > rangeMin)
 			break;
-		rangeLeft = i;
+		rangeLeft = pPolarID[pID];
 	}
-	for (int i = zeroNum; i < pointSize; i++)
+	for (int i = 0; i < pointSize; i++)
 	{
 		pID = pPolarOrder[i];
 		if (pPolarVal[pID] > rangeMax)
 			break;
-		rangeRight = i;
+		rangeRight = pPolarID[pID];
 	}
-	rangeLeft -= zeroNum - 1;
-	rangeRight -= zeroNum - 1;
 	rangeLeftY = vis[rangeLeft];
 	rangeRightY = vis[rangeRight];
 	if (rangeMin <= rangeMax)
@@ -400,7 +477,7 @@ CPolygon Rendering::calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& 
 	pointBuf.push_back(monsters[monsterID].pos);
 
 	//计算可视范围左边界与线段集的交点
-	calcLineLineIntersection(pLeft, monsters[monsterID].pos, rangeMin, pa[sOrder[rangeLeftY].aID], pa[sOrder[rangeLeftY].bID]);
+	calcLineLineIntersection(pLeft, monsters[monsterID].pos, rangeMin + HALF_PI, pa[sOrder[rangeLeftY].aID], pa[sOrder[rangeLeftY].bID]);
 	pointBuf.push_back(pLeft);
 	preY = rangeLeftY;
 
@@ -411,29 +488,34 @@ CPolygon Rendering::calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& 
 			xFlag = 0;
 
 		curY = vis[xFlag];
-		//由y值更大的可视线段切换到更小的
-		if (curY > preY)
+		if (curY == -1)
+			curY = preY;
+		else
 		{
-			polar = pPolarVal[sOrder[preY].bID];
-			calcLineLineIntersection(pMid, monsters[monsterID].pos, polar, pa[sOrder[curY].aID], pa[sOrder[curY].bID]);
-			pointBuf.push_back(pa[sOrder[preY].bID]);
-			pointBuf.push_back(pMid);
-		}
-		//由y值更小的可视线段切换到更大的
-		else if (curY < preY)
-		{
-			polar = pPolarVal[sOrder[curY].aID];
-			calcLineLineIntersection(pMid, monsters[monsterID].pos, polar, pa[sOrder[preY].aID], pa[sOrder[preY].bID]);
-			pointBuf.push_back(pMid);
-			pointBuf.push_back(pa[sOrder[curY].aID]);
-		}
+			//由y值更大的可视线段切换到更小的
+			if (curY > preY)
+			{
+				polar = pPolarVal[sOrder[preY].bID];
+				calcLineLineIntersection(pMid, monsters[monsterID].pos, polar + HALF_PI, pa[sOrder[curY].aID], pa[sOrder[curY].bID]);
+				pointBuf.push_back(pa[sOrder[preY].bID]);
+				pointBuf.push_back(pMid);
+			}
+			//由y值更小的可视线段切换到更大的
+			else if (curY < preY)
+			{
+				polar = pPolarVal[sOrder[curY].aID];
+				calcLineLineIntersection(pMid, monsters[monsterID].pos, polar + HALF_PI, pa[sOrder[preY].aID], pa[sOrder[preY].bID]);
+				pointBuf.push_back(pMid);
+				pointBuf.push_back(pa[sOrder[curY].aID]);
+			}
+		}		
 
 		preY = curY;
 		xFlag++;
 	}
 
 	//计算可视范围右边界与线段集的交点
-	calcLineLineIntersection(pRight, monsters[monsterID].pos, rangeMax, pa[sOrder[rangeRightY].aID], pa[sOrder[rangeRightY].bID]);
+	calcLineLineIntersection(pRight, monsters[monsterID].pos, rangeMax + HALF_PI, pa[sOrder[rangeRightY].aID], pa[sOrder[rangeRightY].bID]);
 	pointBuf.push_back(pRight);
 
 	cp.addLoop(pointBuf);
@@ -473,6 +555,52 @@ void Rendering::calcVisPolygon()
 		
 		it++;
 	}
+}
+
+void Rendering::getPolarOrder(int monsterID, PointArray& pa, IntArray& pPolarID, DoubleArray& pPolarValues, IntArray& pPolarOrder)
+{
+	int pointSize = pa.size();
+	PolarArray polar;
+	Polar p;
+	double angle;
+	int zeroNum = 0;
+	for (int i = 0; i < pointSize; i++)
+	{
+		angle = calPolar(monsters[monsterID].pos, pa[i]);
+		angle -= HALF_PI;
+		if (angle < 0)
+			angle += DOUBLE_PI;
+		/*if (angle == 0)
+			zeroNum++;*/
+
+		pPolarID.push_back(-1);
+		pPolarValues.push_back(angle);
+
+		p.id = i;
+		p.value = angle;
+		polar.push_back(p);
+	}
+
+	sort(polar.begin(), polar.end(), polarSortLess);
+
+	int index = 0;
+	pPolarID[polar[0].id] = 0;
+	pPolarOrder.push_back(polar[0].id);
+	for (int i = 1; i < pointSize; i++)
+	{
+		if (polar[i].value != polar[i - 1].value)
+			index++;
+		pPolarID[polar[i].id] = index;
+		pPolarOrder.push_back(polar[i].id);
+	}	
+
+	/*zeroNum--;
+	for (int i = 0; i < pointSize; i++)
+	{
+		pPolarID[i] -= zeroNum;
+		if (pPolarID[i] < 0)
+			pPolarID[i] = 0;
+	}*/
 }
 
 void Rendering::Test()
@@ -522,7 +650,7 @@ void Rendering::Test()
 	DoubleArray pPolarVal;
 	IntArray pPolarOrder;
 
-	calcVisPolygon(0, pa, sa, polarID, pPolarVal, pPolarOrder, 0, DOUBLE_PI);
+	calcVisPolygon(0, pa, sa, polarID, pPolarVal, pPolarOrder);
 }
 
 void Rendering::drawTrianglesMesh(const std::vector<p2t::Triangle*> &mesh)
