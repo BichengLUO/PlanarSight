@@ -59,7 +59,7 @@ void Rendering::draw()
 		//清空上次的新剖分出来的三角形信息
 		clearSplitedMeshMemory();
 		p2t::Point p(monsters[0].pos.x, monsters[0].pos.y);
-		int selc; //表示新剖分出来的边数
+		int selc = 1; //表示新剖分出来的边数
 		splitedMesh = insertPointToUpdateTriangles(initialMesh, p, &selc); //生成新的三角剖分网格
 
 		//清空上次的排序线段和顶点信息
@@ -124,6 +124,16 @@ void Rendering::drawPolygon(CPolygon& p)
 
 void Rendering::drawVisPolygon(CPolygon& p)
 {
+	glColor3d(0.4, 0.4, 0.5);
+	int pointSize = p.loopArray[0].pointIDArray.size();
+	int index;
+	glBegin(GL_POLYGON);
+	for (int i = 0; i < pointSize; i++)
+	{
+		index = p.loopArray[0].pointIDArray[i];
+		glVertex2d(p.pointArray[index].x, p.pointArray[index].y);
+	}
+	glEnd();
 	glColor3d(1, 1, 1);
 	drawLoop(p, 0);
 }

@@ -84,6 +84,7 @@ void Graph::topologicalSort(std::vector<int> &sortedList) const
 		sortedList.push_back(Stack.top());
 		Stack.pop();
 	}
+	delete[] visited;
 }
 
 Graph::~Graph()

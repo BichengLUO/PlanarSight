@@ -1,6 +1,6 @@
 #include "Mesh2Graph.h"
 
-SegmentArray mesh2SegArray(const Mesh &mesh, const p2t::Point p, int splitedEdgeLablesCount,
+SegmentArray mesh2SegArray(const Mesh &mesh, const p2t::Point &p, int splitedEdgeLablesCount,
 	PointArray &pa)
 {
 	bool *polygonEdge = new bool[splitedEdgeLablesCount];
@@ -8,7 +8,7 @@ SegmentArray mesh2SegArray(const Mesh &mesh, const p2t::Point p, int splitedEdge
 	Graph *graph = mesh2Graph(mesh, p, splitedEdgeLablesCount, pa, polygonEdge);
 	SegmentArray sOrder = graph2SegArray(*graph, pa, polygonEdge);
 	delete graph;
-	delete polygonEdge;
+	delete[] polygonEdge;
 	return sOrder;
 }
 
@@ -32,7 +32,7 @@ SegmentArray graph2SegArray(const Graph &graph, PointArray &pa, const bool *poly
 	return sOrder;
 }
 
-Graph* mesh2Graph(const Mesh &mesh, const p2t::Point p, int splitedEdgeLablesCount,
+Graph* mesh2Graph(const Mesh &mesh, const p2t::Point &p, int splitedEdgeLablesCount,
 	PointArray &pa, bool *polygonEdge)
 {
 	Graph *graph = new Graph(splitedEdgeLablesCount);
