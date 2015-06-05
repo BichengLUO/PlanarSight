@@ -20,6 +20,7 @@ protected:
 	void setup_light();
 	void setup_material();
 	GLuint loadTex(LPCTSTR file_addr);
+	GLuint loadTexAlpha(LPCTSTR file_addr);
 
 public:
 	Rendering *rendering;

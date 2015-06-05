@@ -50,8 +50,10 @@ public:
 	void drawPolygon(CPolygon& p);
 	void drawPolygon3D(CPolygon& p);
 	void drawVisPolygon(CPolygon& p);
+	void drawVisPolygon3D(CPolygon& p, double offset);
 	void drawLoop(CPolygon& p, int loopID);
 	void drawLoop3D(CPolygon &p, int loopID);
+	void drawFloor();
 	void drawUnfinishedLoop(PointArray& pa);
 	void drawPoint(Point& p);
 	void drawPoint(Point& p, double size);

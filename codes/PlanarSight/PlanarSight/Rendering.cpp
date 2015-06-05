@@ -3,6 +3,8 @@
 #include "Mesh2Graph.h"
 
 extern int wood_tex_id;
+extern int floor_tex_id;
+extern int visp_tex_id;
 
 Rendering::Rendering()
 {
@@ -52,6 +54,7 @@ void Rendering::draw()
 	if (show3DView)
 	{
 		glEnable(GL_DEPTH_TEST);
+		drawFloor();
 		drawPolygon3D(*basePolygon);
 	}
 	else
@@ -68,7 +71,12 @@ void Rendering::draw()
 	{
 		int size = visPolygons.size();
 		for (int i = 0; i < size; i++)
-			drawVisPolygon(visPolygons[i]);
+		{
+			if (show3DView)
+				drawVisPolygon3D(visPolygons[i], i / (double)size);
+			else
+				drawVisPolygon(visPolygons[i]);
+		}
 	}
 
 	if (show3DView)
@@ -170,6 +178,27 @@ void Rendering::drawVisPolygon(CPolygon& p)
 	glEnd();
 }
 
+void Rendering::drawVisPolygon3D(CPolygon& p, double offset)
+{
+	int pointSize = p.loopArray[0].pointIDArray.size();
+	int index;
+
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, visp_tex_id);
+	glBegin(GL_POLYGON);
+	glNormal3d(0, 0, 1);
+	for (int i = 0; i < pointSize; i++)
+	{
+		index = p.loopArray[0].pointIDArray[i];
+		glVertex3d(p.pointArray[index].x, p.pointArray[index].y, 10 + offset);
+		glTexCoord2d(0.5, 0.5);
+	}
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
+}
+
 void Rendering::drawLoop(CPolygon& p, int loopID)
 {
 	int pointSize = p.loopArray[loopID].pointIDArray.size();
@@ -189,7 +218,7 @@ void Rendering::drawLoop3D(CPolygon &p, int loopID)
 	int pointSize = p.loopArray[loopID].pointIDArray.size();
 	int index, next;
 	double height = 30;
-	double wall_thickness = 1.5;
+	double wall_thickness = 2.0;
 
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
 	glEnable(GL_TEXTURE_2D);
@@ -238,6 +267,31 @@ void Rendering::drawLoop3D(CPolygon &p, int loopID)
 		glVertex3d(p.pointArray[index].x + wa.x, p.pointArray[index].y + wa.y, height);
 		glVertex3d(p.pointArray[next].x + wa.x, p.pointArray[next].y + wa.y, height);
 		glVertex3d(p.pointArray[next].x, p.pointArray[next].y, height);
+		glEnd();
+	}
+	glDisable(GL_TEXTURE_2D);
+}
+
+void Rendering::drawFloor()
+{
+	int size = 200;
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, floor_tex_id);
+	for (int i = -5; i < 5; i++)
+	for (int j = -5; j < 5; j++)
+	{
+		glBegin(GL_POLYGON);
+		glNormal3d(0, 0, 1);
+		glVertex3d(i * size, j * size, 0);
+		glTexCoord2d(1, 0);
+		glVertex3d(i * size, (j + 1) * size, 0);
+		glTexCoord2d(0, 0);
+		glVertex3d((i + 1) * size, (j + 1) * size, 0);
+		glTexCoord2d(0, 1);
+		glVertex3d((i + 1) * size, j * size, 0);
+		glTexCoord2d(1, 1);
 		glEnd();
 	}
 	glDisable(GL_TEXTURE_2D);
@@ -302,21 +356,6 @@ bool Rendering::addPointIntoLoopBuf(Point& p)
 
 bool Rendering::loopFinished()
 {
-	/*if (drawOuterWall)
-	{
-		loopBuf[0] = Point(100, 500);
-		loopBuf[1] = Point(300, 100);
-		loopBuf[2] = Point(500, 500);
-		loopBuf[3] = Point(300, 400);
-	}
-	else
-	{
-		loopBuf[0] = Point(200, 300);
-		loopBuf[1] = Point(200, 200);
-		loopBuf[2] = Point(300, 200);
-		loopBuf[3] = Point(300, 300);
-	}*/
-
 	bool flag;
 	if (loopBuf.size() < 3)
 		flag = true;
