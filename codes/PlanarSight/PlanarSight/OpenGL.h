@@ -17,6 +17,9 @@ protected:
 	HGLRC hglrc;
 	int MySetPixelFormat(HDC hdc);
 	void RenderScene();
+	void setup_light();
+	void setup_material();
+	GLuint loadTex(LPCTSTR file_addr);
 
 public:
 	Rendering *rendering;
@@ -34,6 +37,9 @@ public:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+
+	void SetUp2D();
+	void SetUp3D();
 };
 
 

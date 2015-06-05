@@ -35,6 +35,7 @@ public:
 	bool showMeshEdgeLabels;
 	bool showSortedSegment;
 	bool showDualGraph;
+	bool show3DView;
 
 	bool gameStart;
 	bool moving;
@@ -44,18 +45,24 @@ public:
 	Rendering();
 	~Rendering();
 	void draw();
+	void process(int monID);
 	void preprocess();
 	void drawPolygon(CPolygon& p);
+	void drawPolygon3D(CPolygon& p);
 	void drawVisPolygon(CPolygon& p);
 	void drawLoop(CPolygon& p, int loopID);
+	void drawLoop3D(CPolygon &p, int loopID);
 	void drawUnfinishedLoop(PointArray& pa);
 	void drawPoint(Point& p);
 	void drawPoint(Point& p, double size);
+	void drawPoint3D(Point& p, double size);
 	bool addPointIntoLoopBuf(Point& p);
 	bool loopFinished();
 	void drawMonsters(MonsterArray& pa);
+	void drawMonsters3D(MonsterArray& ma);
 	bool addMonster(Point& p);
 	void drawPlayer(Point& p);
+	void drawPlayer3D(Point& p);
 	void playerWalk(int flag);
 	bool playerMoveTo(Point& p);
 	void monsterWalk(int monsterID);

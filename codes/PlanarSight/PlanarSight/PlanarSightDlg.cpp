@@ -68,6 +68,7 @@ void CPlanarSightDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_MESH_EDGE_LABELS, showMeshEdgeLabels);
 	DDX_Control(pDX, IDC_SORTES_SEGMENTS, sortedSegments);
 	DDX_Control(pDX, IDC_DUAL_GRAPH, showDualGraph);
+	DDX_Control(pDX, IDC_SHOW_3D_VIEW, show3DView);
 }
 
 BEGIN_MESSAGE_MAP(CPlanarSightDlg, CDialogEx)
@@ -88,6 +89,7 @@ ON_BN_CLICKED(IDC_SHOW_TRIANGULATION, &CPlanarSightDlg::OnBnClickedShowTriangula
 ON_BN_CLICKED(IDC_MESH_EDGE_LABELS, &CPlanarSightDlg::OnBnClickedMeshEdgeLabels)
 ON_BN_CLICKED(IDC_SORTES_SEGMENTS, &CPlanarSightDlg::OnBnClickedSortesSegments)
 ON_BN_CLICKED(IDC_DUAL_GRAPH, &CPlanarSightDlg::OnBnClickedDualGraph)
+ON_BN_CLICKED(IDC_SHOW_3D_VIEW, &CPlanarSightDlg::OnBnClickedShow3dView)
 END_MESSAGE_MAP()
 
 
@@ -230,7 +232,7 @@ void CPlanarSightDlg::OnBnClickedClear()
 	GetDlgItem(IDC_OUTER_WALLS)->EnableWindow(true);
 	GetDlgItem(IDC_INNER_WALLS)->EnableWindow(false);
 	GetDlgItem(IDC_MONSTERS)->EnableWindow(false);
-	GetDlgItem(IDC_START_GAME)->EnableWindow(true);
+	GetDlgItem(IDC_START_GAME)->EnableWindow(false);
 	GetDlgItem(IDC_END_GAME)->EnableWindow(false);
 	m_pDisplay->rendering->gameStart = false;
 }
@@ -359,4 +361,20 @@ void CPlanarSightDlg::OnBnClickedDualGraph()
 		m_pDisplay->rendering->showDualGraph = false;
 	else
 		m_pDisplay->rendering->showDualGraph = true;
+}
+
+
+void CPlanarSightDlg::OnBnClickedShow3dView()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	if (show3DView.GetCheck() == 0)
+	{
+		m_pDisplay->rendering->show3DView = false;
+		m_pDisplay->SetUp2D();
+	}
+	else
+	{
+		m_pDisplay->rendering->show3DView = true;
+		m_pDisplay->SetUp3D();
+	}
 }

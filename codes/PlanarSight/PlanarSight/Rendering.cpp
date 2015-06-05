@@ -2,6 +2,8 @@
 #include "Rendering.h"
 #include "Mesh2Graph.h"
 
+extern int wood_tex_id;
+
 Rendering::Rendering()
 {
 	basePolygon = new CPolygon();
@@ -13,6 +15,7 @@ Rendering::Rendering()
 	showTriangulation = false;
 	showMeshEdgeLabels = false;
 	showDualGraph = false;
+	show3DView = false;
 
 	gameStart = false;
 	player.x = 370;
@@ -33,32 +36,73 @@ Rendering::~Rendering()
 //绘制地图的主方法，每次重绘都会被调用
 void Rendering::draw()
 {
-	drawPolygon(*basePolygon);
-	if (showDualGraph)
-	{
-		drawDualGraphBackground();
-		drawDualGraph(basePolygon->pointArray, 0, 0, 1);
-	}
-	if (drawOuterWall || drawInnerWall)
-	{
-		drawUnfinishedLoop(loopBuf);
-		if (showDualGraph)
-			drawDualGraph(loopBuf, 1, 1, 0);
-	}
-
-	drawPlayer(player);
-
+	//数据处理与准备
 	int monsterSize = monsters.size();
+	visPolygons.clear();
+	for (int i = 0; i < monsterSize; i++)
+		process(i);
+
+	//绘制与渲染
+	if (showTriangulation)
+		if (splitedMesh.size() > 0)
+			drawTrianglesMesh(splitedMesh);
+	else if (initialMesh.size() > 0)
+		drawTrianglesMesh(initialMesh);
+
+	if (show3DView)
+	{
+		glEnable(GL_DEPTH_TEST);
+		drawPolygon3D(*basePolygon);
+	}
+	else
+		drawPolygon(*basePolygon);
+
+	if (drawOuterWall || drawInnerWall)
+		drawUnfinishedLoop(loopBuf);
+
 	if (gameStart)
 		for (int i = 0; i < monsterSize; i++)
 			monsterWalk(i);
-	drawMonsters(monsters);
 
+	if (showVisPolygon)
+	{
+		int size = visPolygons.size();
+		for (int i = 0; i < size; i++)
+			drawVisPolygon(visPolygons[i]);
+	}
+
+	if (show3DView)
+	{
+		drawMonsters3D(monsters);
+		drawPlayer3D(player);
+	}
+	else
+	{
+		drawMonsters(monsters);
+		drawPlayer(player);
+	}	
+
+	if (showSortedSegment)
+		drawSortedSegments(sortedPointArray, sortedSegmentArray);
+
+	if (showDualGraph)
+	{
+		drawDualGraphBackground();
+		if (drawOuterWall || drawInnerWall)
+			drawDualGraph(loopBuf, 1, 1, 0);
+		drawDualGraph(basePolygon->pointArray, 0, 0, 1);
+		for (int i = 0; i < monsterSize; i++)
+			drawDualGraph(monsters[i].pos, 0, 1, 1);
+	}
+}
+
+void Rendering::process(int monID)
+{
 	if (gameStart && monsters.size() > 0)
 	{
 		//清空上次的新剖分出来的三角形信息
 		clearSplitedMeshMemory();
-		p2t::Point p(monsters[0].pos.x, monsters[0].pos.y);
+		p2t::Point p(monsters[monID].pos.x, monsters[monID].pos.y);
 		int selc = 1; //表示新剖分出来的边数
 		splitedMesh = insertPointToUpdateTriangles(initialMesh, p, &selc); //生成新的三角剖分网格
 
@@ -67,38 +111,16 @@ void Rendering::draw()
 		sortedSegmentArray.clear();
 		sortedSegmentArray = mesh2SegArray(splitedMesh, p, selc, sortedPointArray); //生成新的排序线段和顶点
 	}
-	if (showTriangulation)
-		if (splitedMesh.size() > 0)
-			drawTrianglesMesh(splitedMesh);
-	else if (initialMesh.size() > 0)
-		drawTrianglesMesh(initialMesh);
-
+	int monsterSize = monsters.size();
 	if (gameStart && monsterSize > 0)
 	{
 		pPolarID.clear();
 		pPolarValues.clear();
 		pPolarOrder.clear();
-		visPolygons.clear();
-		getPolarOrder(0, sortedPointArray, pPolarID, pPolarValues, pPolarOrder);
-		CPolygon cp = calcVisPolygon(0, sortedPointArray, sortedSegmentArray, pPolarID, pPolarValues, pPolarOrder);
+		getPolarOrder(monID, sortedPointArray, pPolarID, pPolarValues, pPolarOrder);
+		CPolygon cp = calcVisPolygon(monID, sortedPointArray, sortedSegmentArray, pPolarID, pPolarValues, pPolarOrder);
 		visPolygons.push_back(cp);
 	}
-	//calcVisPolygon();
-	if (showVisPolygon)
-	{
-		int size = visPolygons.size();
-		for (int i = 0; i < size; i++)
-			drawVisPolygon(visPolygons[i]);
-	}
-
-	if (showDualGraph)
-	{
-		for (int i = 0; i < monsterSize; i++)
-			drawDualGraph(monsters[i].pos, 0, 1, 1);
-	}	
-
-	if (showSortedSegment)
-		drawSortedSegments(sortedPointArray, sortedSegmentArray);
 }
 
 void Rendering::preprocess()
@@ -122,9 +144,21 @@ void Rendering::drawPolygon(CPolygon& p)
 		drawLoop(p, i);
 }
 
+void Rendering::drawPolygon3D(CPolygon& p)
+{
+	int loopSize = p.loopArray.size();
+	if (loopSize == 0)
+		return;
+
+	drawLoop3D(p, 0);
+
+	for (int i = 1; i < loopSize; i++)
+		drawLoop3D(p, i);
+}
+
 void Rendering::drawVisPolygon(CPolygon& p)
 {
-	glColor3d(0.4, 0.4, 0.5);
+	glColor4d(0.4, 0.4, 0.5, 0.6);
 	int pointSize = p.loopArray[0].pointIDArray.size();
 	int index;
 	glBegin(GL_POLYGON);
@@ -134,8 +168,6 @@ void Rendering::drawVisPolygon(CPolygon& p)
 		glVertex2d(p.pointArray[index].x, p.pointArray[index].y);
 	}
 	glEnd();
-	glColor3d(1, 1, 1);
-	drawLoop(p, 0);
 }
 
 void Rendering::drawLoop(CPolygon& p, int loopID)
@@ -150,6 +182,65 @@ void Rendering::drawLoop(CPolygon& p, int loopID)
 		glVertex2d(p.pointArray[index].x, p.pointArray[index].y);
 	}
 	glEnd();
+}
+
+void Rendering::drawLoop3D(CPolygon &p, int loopID)
+{
+	int pointSize = p.loopArray[loopID].pointIDArray.size();
+	int index, next;
+	double height = 30;
+	double wall_thickness = 1.5;
+
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, wood_tex_id);
+	for (int i = 0; i < pointSize; i++)
+	{
+		index = p.loopArray[loopID].pointIDArray[i];
+		next = p.loopArray[loopID].pointIDArray[(i + 1) % pointSize];
+		Point normal = p.pointArray[next] - p.pointArray[index];
+		double temp = normal.x;
+		normal.x = -normal.y;
+		normal.y = temp;
+		normal.normalize();
+
+		Point wa = normal;
+		wa = wa * wall_thickness;
+
+		glBegin(GL_POLYGON);
+		glNormal3d(normal.x, normal.y, 0);
+		glVertex3d(p.pointArray[index].x, p.pointArray[index].y, height);
+		glTexCoord2d(1, 0);
+		glVertex3d(p.pointArray[index].x, p.pointArray[index].y, 0);
+		glTexCoord2d(0, 0);
+		glVertex3d(p.pointArray[next].x, p.pointArray[next].y, 0);
+		glTexCoord2d(0, 1);
+		glVertex3d(p.pointArray[next].x, p.pointArray[next].y, height);
+		glTexCoord2d(1, 1);
+		glEnd();
+
+		glBegin(GL_POLYGON);
+		glNormal3d(normal.x, normal.y, 0);
+		glVertex3d(p.pointArray[index].x + wa.x, p.pointArray[index].y + wa.y, height);
+		glTexCoord2d(1, 0);
+		glVertex3d(p.pointArray[index].x + wa.x, p.pointArray[index].y + wa.y, 0);
+		glTexCoord2d(0, 0);
+		glVertex3d(p.pointArray[next].x + wa.x, p.pointArray[next].y + wa.y, 0);
+		glTexCoord2d(0, 1);
+		glVertex3d(p.pointArray[next].x + wa.x, p.pointArray[next].y + wa.y, height);
+		glTexCoord2d(1, 1);
+		glEnd();
+
+		glBegin(GL_POLYGON);
+		glNormal3d(0, 0, 1);
+		glVertex3d(p.pointArray[index].x, p.pointArray[index].y, height);
+		glVertex3d(p.pointArray[index].x + wa.x, p.pointArray[index].y + wa.y, height);
+		glVertex3d(p.pointArray[next].x + wa.x, p.pointArray[next].y + wa.y, height);
+		glVertex3d(p.pointArray[next].x, p.pointArray[next].y, height);
+		glEnd();
+	}
+	glDisable(GL_TEXTURE_2D);
 }
 
 void Rendering::drawUnfinishedLoop(PointArray& pa)
@@ -183,6 +274,15 @@ void Rendering::drawPoint(Point& p, double size)
 		glVertex2d(p.x + size * cos(angle), p.y + size * sin(angle));
 	}
 	glEnd();
+}
+
+void Rendering::drawPoint3D(Point& p, double size)
+{
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glTranslatef(p.x, p.y, 0);
+	glutSolidSphere(size, 10, 10);
+	glPopMatrix();
 }
 
 bool Rendering::addPointIntoLoopBuf(Point& p)
@@ -261,10 +361,24 @@ void Rendering::drawMonsters(MonsterArray& ma)
 		drawPoint(ma[i].pos, 5);
 }
 
+void Rendering::drawMonsters3D(MonsterArray& ma)
+{
+	int pointSize = ma.size();
+	glColor3d(0, 1, 1);
+	for (int i = 0; i < pointSize; i++)
+		drawPoint3D(ma[i].pos, 5);
+}
+
 void Rendering::drawPlayer(Point& p)
 {
 	glColor3d(1, 1, 0);
 	drawPoint(player, 7);
+}
+
+void Rendering::drawPlayer3D(Point& p)
+{
+	glColor3d(1, 1, 0);
+	drawPoint3D(player, 7);
 }
 
 void Rendering::playerWalk(int keyFlag)
