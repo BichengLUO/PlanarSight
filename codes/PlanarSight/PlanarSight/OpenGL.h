@@ -19,6 +19,7 @@ protected:
 	void RenderScene();
 	void setup_light();
 	void setup_material();
+	void setup_fog();
 	GLuint loadTex(LPCTSTR file_addr);
 	GLuint loadTexAlpha(LPCTSTR file_addr);
 
