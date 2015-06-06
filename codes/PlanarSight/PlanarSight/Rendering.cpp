@@ -16,6 +16,7 @@ Rendering::Rendering()
 	showVisPolygon = false;
 	showTriangulation = false;
 	showMeshEdgeLabels = false;
+	showSortedSegment = false;
 	showDualGraph = false;
 	show3DView = false;
 	showLinearSet = false;
