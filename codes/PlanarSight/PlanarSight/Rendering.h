@@ -19,6 +19,11 @@ public:
 	IntArray pPolarID;
 	DoubleArray pPolarValues;
 	IntArray pPolarOrder;
+	int xLeft;
+	int xRight;
+	double xLeftParam;
+	double xRightParam;
+	IntArray visArray;
 
 	CPolygon* basePolygon;
 	PolygonArray visPolygons;
@@ -36,6 +41,7 @@ public:
 	bool showSortedSegment;
 	bool showDualGraph;
 	bool show3DView;
+	bool showLinearSet;
 
 	bool gameStart;
 	bool moving;
@@ -45,7 +51,7 @@ public:
 	Rendering();
 	~Rendering();
 	void draw();
-	void process(int monID);
+	void process();
 	void preprocess();
 	void drawPolygon(CPolygon& p);
 	void drawPolygon3D(CPolygon& p);
@@ -79,5 +85,7 @@ public:
 	void drawDualGraphBackground();
 	void drawDualGraph(const PointArray &pa, double rc, double gc, double bc);
 	void drawDualGraph(const Point &p, double rc, double gc, double bc);
+	void drawLinearSetBackground();
+	void drawLinearSet();
 };
 

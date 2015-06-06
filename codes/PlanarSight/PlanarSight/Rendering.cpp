@@ -18,6 +18,7 @@ Rendering::Rendering()
 	showMeshEdgeLabels = false;
 	showDualGraph = false;
 	show3DView = false;
+	showLinearSet = false;
 
 	gameStart = false;
 	player.x = 370;
@@ -39,10 +40,7 @@ Rendering::~Rendering()
 void Rendering::draw()
 {
 	//数据处理与准备
-	int monsterSize = monsters.size();
-	visPolygons.clear();
-	for (int i = 0; i < monsterSize; i++)
-		process(i);
+	process();
 
 	//绘制与渲染
 	if (showTriangulation)
@@ -63,6 +61,7 @@ void Rendering::draw()
 	if (drawOuterWall || drawInnerWall)
 		drawUnfinishedLoop(loopBuf);
 
+	int monsterSize = monsters.size();
 	if (gameStart)
 		for (int i = 0; i < monsterSize; i++)
 			monsterWalk(i);
@@ -102,32 +101,43 @@ void Rendering::draw()
 		for (int i = 0; i < monsterSize; i++)
 			drawDualGraph(monsters[i].pos, 0, 1, 1);
 	}
+
+	if (showLinearSet)
+	{
+		drawLinearSetBackground();
+		drawLinearSet();
+	}
 }
 
-void Rendering::process(int monID)
+void Rendering::process()
 {
-	if (gameStart && monsters.size() > 0)
-	{
-		//清空上次的新剖分出来的三角形信息
-		clearSplitedMeshMemory();
-		p2t::Point p(monsters[monID].pos.x, monsters[monID].pos.y);
-		int selc = 1; //表示新剖分出来的边数
-		splitedMesh = insertPointToUpdateTriangles(initialMesh, p, &selc); //生成新的三角剖分网格
-
-		//清空上次的排序线段和顶点信息
-		sortedPointArray.clear();
-		sortedSegmentArray.clear();
-		sortedSegmentArray = mesh2SegArray(splitedMesh, p, selc, sortedPointArray); //生成新的排序线段和顶点
-	}
 	int monsterSize = monsters.size();
+	int monID;
 	if (gameStart && monsterSize > 0)
 	{
-		pPolarID.clear();
-		pPolarValues.clear();
-		pPolarOrder.clear();
-		getPolarOrder(monID, sortedPointArray, pPolarID, pPolarValues, pPolarOrder);
-		CPolygon cp = calcVisPolygon(monID, sortedPointArray, sortedSegmentArray, pPolarID, pPolarValues, pPolarOrder);
-		visPolygons.push_back(cp);
+		visPolygons.clear();
+		for (int i = 0; i < monsterSize; i++)
+		{
+			monID = i;
+			//清空上次的新剖分出来的三角形信息
+			clearSplitedMeshMemory();
+			p2t::Point p(monsters[monID].pos.x, monsters[monID].pos.y);
+			int selc = 1; //表示新剖分出来的边数
+			splitedMesh = insertPointToUpdateTriangles(initialMesh, p, &selc); //生成新的三角剖分网格
+
+			//清空上次的排序线段和顶点信息
+			sortedPointArray.clear();
+			sortedSegmentArray.clear();
+			sortedSegmentArray = mesh2SegArray(splitedMesh, p, selc, sortedPointArray); //生成新的排序线段和顶点
+
+			pPolarID.clear();
+			pPolarValues.clear();
+			pPolarOrder.clear();
+			getPolarOrder(monID, sortedPointArray, pPolarID, pPolarValues, pPolarOrder);
+			CPolygon cp = calcVisPolygon(monID, sortedPointArray, sortedSegmentArray, pPolarID, pPolarValues, pPolarOrder);
+			visPolygons.push_back(cp);
+		}	
+		
 	}
 }
 
@@ -513,6 +523,7 @@ void Rendering::clear()
 	int visSize = visPolygons.size();
 	for (int i = 0; i < visSize; i++)
 		visPolygons[i].clear();
+	visPolygons.clear();
 	loopBuf.clear();
 	monsters.clear();
 	clearInitialMeshMemory(initialMesh);
@@ -680,6 +691,26 @@ CPolygon Rendering::calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& 
 	//计算可视范围右边界与线段集的交点
 	calcLineLineIntersection(pRight, monsters[monsterID].pos, rangeMax + HALF_PI, pa[sOrder[rangeRightY].aID], pa[sOrder[rangeRightY].bID]);
 	pointBuf.push_back(pRight);
+
+	if (monsterID == 0)
+	{
+		xLeft = rangeLeft;
+		xRight = rangeRight;
+
+		if (pa[sOrder[rangeLeftY].bID].x - pa[sOrder[rangeLeftY].aID].x != 0)
+			xLeftParam = (pLeft.x - pa[sOrder[rangeLeftY].aID].x) / (pa[sOrder[rangeLeftY].bID].x - pa[sOrder[rangeLeftY].aID].x);
+		else
+			xLeftParam = (pLeft.y - pa[sOrder[rangeLeftY].aID].y) / (pa[sOrder[rangeLeftY].bID].y - pa[sOrder[rangeLeftY].aID].y);
+		if (pa[sOrder[rangeRightY].bID].x - pa[sOrder[rangeRightY].aID].x != 0)
+			xRightParam = (pRight.x - pa[sOrder[rangeRightY].aID].x) / (pa[sOrder[rangeRightY].bID].x - pa[sOrder[rangeRightY].aID].x);
+		else
+			xRightParam = (pRight.y - pa[sOrder[rangeRightY].aID].y) / (pa[sOrder[rangeRightY].bID].y - pa[sOrder[rangeRightY].aID].y);
+
+		int visSize = vis.size();
+		visArray.clear();
+		for (int i = 0; i < visSize; i++)
+			visArray.push_back(vis[i]);
+	}
 
 	cp.addLoop(pointBuf);
 	return cp;
@@ -1001,4 +1032,122 @@ void Rendering::drawDualGraph(const Point &p, double rc, double gc, double bc)
 		cand[j].y <= height / 2.0 && cand[j].y >= -height / 2.0)
 		glVertex2d((cand[j].x + width / 2.0) / 5.0 + 10, (cand[j].y + height / 2.0) / 5.0 + 10);
 	glEnd();
+}
+
+void Rendering::drawLinearSetBackground()
+{
+	int width = 740;
+	int height = 620;
+
+	glLineWidth(1.0);
+	glColor3d(1.0, 1.0, 1.0);
+	glBegin(GL_LINE_LOOP);
+	glVertex2d(730, 10);
+	glVertex2d(730 - width / 5.0, 10);
+	glVertex2d(730 - width / 5.0, 10 + height / 5.0);
+	glVertex2d(730, 10 + height / 5.0);
+	glEnd();
+
+	glColor3d(0.0, 0.0, 0.0);
+	glBegin(GL_POLYGON);
+	glVertex2d(730, 10);
+	glVertex2d(730 - width / 5.0, 10);
+	glVertex2d(730 - width / 5.0, 10 + height / 5.0);
+	glVertex2d(730, 10 + height / 5.0);
+	glEnd();
+}
+
+void Rendering::drawLinearSet()
+{
+	int width = 740;
+	int height = 620;
+
+	int left = 730 - width / 5 + 5;
+	int right = 730 - 5;
+	int bottom = 15;
+	int top = 10 + height / 5.0 - 5;
+	
+	glLineWidth(1.0);
+	glColor3d(1.0, 1.0, 1.0);
+	glBegin(GL_LINE_STRIP);
+	glVertex2d(left, top);
+	glVertex2d(left, bottom);
+	glVertex2d(right, bottom);
+	glEnd();
+
+	glBegin(GL_TRIANGLES);
+	glVertex2d(left, top + 4);
+	glVertex2d(left - 3, top - 2);
+	glVertex2d(left + 3, top - 2);
+	glVertex2d(right + 4, bottom);
+	glVertex2d(right - 2, bottom + 3);
+	glVertex2d(right - 2, bottom - 3);
+	glEnd();
+
+	int yRange = sortedSegmentArray.size();
+	if (yRange == 0)
+		return;
+
+	int pointSize = sortedPointArray.size();
+	int xRange = 0;
+	for (int i = 0; i < pointSize; i++)
+	{
+		if (pPolarID[i] > xRange)
+			xRange = pPolarID[i];
+	}
+	int xScale = (right - left) / (xRange + 1);
+	int yScale = (top - bottom) / (yRange + 1);
+	int xLeftVal;
+	int xRightVal;
+	glColor3d(0.2, 0.8, 1);
+	glBegin(GL_LINES);
+	for (int i = 0; i < yRange; i++)
+	{
+		xLeftVal = pPolarID[sortedSegmentArray[i].aID];
+		xRightVal = pPolarID[sortedSegmentArray[i].bID];
+		if (xRightVal == 0)
+			xRightVal = xRange + 1;
+		glVertex2d(left + xLeftVal * xScale, bottom + 5 + i * yScale);
+		glVertex2d(left + xRightVal * xScale, bottom + 5 + i * yScale);
+	}
+	glEnd();
+
+	int yVal;
+	double x, y;
+	yVal = visArray[xLeft];
+	glColor4d(0.8, 0.8, 0, 0.4);
+	glBegin(GL_POLYGON);
+	x = left + (xLeft + xLeftParam) * xScale;
+	glVertex2d(x, bottom);
+	y = bottom + 5 + yVal * yScale;
+	glVertex2d(x, y);
+	x = left + xLeft * xScale;
+	int i = xLeft + 1;
+	while (true)
+	{
+		if (i == xRight + 1)
+			break;
+		x += xScale;
+		glVertex2d(x, y);
+		glVertex2d(x, bottom);
+		glEnd();
+
+		if (i > xRange)
+		{
+			i = 0;
+			x = left;
+		}
+		glBegin(GL_POLYGON);
+		glVertex2d(x, bottom);
+		yVal = visArray[i];
+		y = bottom + 5 + yVal * yScale;
+		glVertex2d(x, y);
+
+		i++;
+	}
+	x = left + (xRight + xRightParam) * xScale;
+	glVertex2d(x, y);
+	glVertex2d(x, bottom);
+	glEnd();
+	
 }

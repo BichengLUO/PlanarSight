@@ -69,6 +69,7 @@ void CPlanarSightDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SORTES_SEGMENTS, sortedSegments);
 	DDX_Control(pDX, IDC_DUAL_GRAPH, showDualGraph);
 	DDX_Control(pDX, IDC_SHOW_3D_VIEW, show3DView);
+	DDX_Control(pDX, IDC_LINEAR_SET, showLinearSet);
 }
 
 BEGIN_MESSAGE_MAP(CPlanarSightDlg, CDialogEx)
@@ -90,6 +91,7 @@ ON_BN_CLICKED(IDC_MESH_EDGE_LABELS, &CPlanarSightDlg::OnBnClickedMeshEdgeLabels)
 ON_BN_CLICKED(IDC_SORTES_SEGMENTS, &CPlanarSightDlg::OnBnClickedSortesSegments)
 ON_BN_CLICKED(IDC_DUAL_GRAPH, &CPlanarSightDlg::OnBnClickedDualGraph)
 ON_BN_CLICKED(IDC_SHOW_3D_VIEW, &CPlanarSightDlg::OnBnClickedShow3dView)
+ON_BN_CLICKED(IDC_LINEAR_SET, &CPlanarSightDlg::OnBnClickedLinearSet)
 END_MESSAGE_MAP()
 
 
@@ -377,4 +379,13 @@ void CPlanarSightDlg::OnBnClickedShow3dView()
 		m_pDisplay->rendering->show3DView = true;
 		m_pDisplay->SetUp3D();
 	}
+}
+
+void CPlanarSightDlg::OnBnClickedLinearSet()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	if (showLinearSet.GetCheck() == 0)
+		m_pDisplay->rendering->showLinearSet = false;
+	else
+		m_pDisplay->rendering->showLinearSet = true;
 }
