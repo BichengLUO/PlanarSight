@@ -124,7 +124,10 @@
     <ClInclude Include="ConvexHull.h" />
     <ClInclude Include="DCEL.h" />
     <ClInclude Include="DisjointSet.h" />
+    <ClInclude Include="Face.h" />
     <ClInclude Include="Graph.h" />
+    <ClInclude Include="HalfEdge.h" />
+    <ClInclude Include="Line.h" />
     <ClInclude Include="Mesh2Graph.h" />
     <ClInclude Include="MeshUpdate.h" />
     <ClInclude Include="Monster.h" />
@@ -142,6 +145,7 @@
     <ClInclude Include="sweep_context.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="utils.h" />
+    <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="advancing_front.cpp" />
@@ -149,7 +153,10 @@
     <ClCompile Include="ConvexHull.cpp" />
     <ClCompile Include="DCEL.cpp" />
     <ClCompile Include="DisjointSet.cpp" />
+    <ClCompile Include="Face.cpp" />
     <ClCompile Include="Graph.cpp" />
+    <ClCompile Include="HalfEdge.cpp" />
+    <ClCompile Include="Line.cpp" />
     <ClCompile Include="Mesh2Graph.cpp" />
     <ClCompile Include="MeshUpdate.cpp" />
     <ClCompile Include="Monster.cpp" />
@@ -166,6 +173,7 @@
     </ClCompile>
     <ClCompile Include="sweep.cpp" />
     <ClCompile Include="sweep_context.cpp" />
+    <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PlanarSight.rc" />
