@@ -129,13 +129,19 @@ void Rendering::process()
 			//清空上次的排序线段和顶点信息
 			sortedPointArray.clear();
 			sortedSegmentArray.clear();
-			PointArray new_pa;
-			sortedSegmentArray = mesh2SegArray(splitedMesh, p, selc, basePolygon->pointArray.size(), new_pa); //生成新的排序线段和顶点
+			PointArray newPointArray;
+			sortedSegmentArray = mesh2SegArray(splitedMesh, p, selc, basePolygon->pointArray.size(), newPointArray); //生成新的排序线段和顶点
 
 			pPolarID.clear();
 			pPolarValues.clear();
 			pPolarOrder.clear();
+
+			//将新的点加到原多边形上的点的集合当中去，并使用快排进行简单的极角序排列
+			sortedPointArray.insert(sortedPointArray.end(), basePolygon->pointArray.begin(), basePolygon->pointArray.end());
+			sortedPointArray.insert(sortedPointArray.end(), newPointArray.begin(), newPointArray.end());
 			getPolarOrder(monID, sortedPointArray, pPolarID, pPolarValues, pPolarOrder);
+			//上面的这三个语句到时候用DCEL的极角排序算法替换掉
+
 			CPolygon cp = calcVisPolygon(monID, sortedPointArray, sortedSegmentArray, pPolarID, pPolarValues, pPolarOrder);
 			visPolygons.push_back(cp);
 		}	
