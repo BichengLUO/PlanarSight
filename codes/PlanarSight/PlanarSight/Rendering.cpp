@@ -129,7 +129,8 @@ void Rendering::process()
 			//清空上次的排序线段和顶点信息
 			sortedPointArray.clear();
 			sortedSegmentArray.clear();
-			sortedSegmentArray = mesh2SegArray(splitedMesh, p, selc, sortedPointArray); //生成新的排序线段和顶点
+			PointArray new_pa;
+			sortedSegmentArray = mesh2SegArray(splitedMesh, p, selc, basePolygon->pointArray.size(), new_pa); //生成新的排序线段和顶点
 
 			pPolarID.clear();
 			pPolarValues.clear();

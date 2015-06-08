@@ -1,39 +1,33 @@
 #include "Mesh2Graph.h"
 
 SegmentArray mesh2SegArray(const Mesh &mesh, const p2t::Point &p, int splitedEdgeLablesCount,
-	PointArray &pa)
+	int basePolygonPointsCount, PointArray &new_pa)
 {
 	bool *polygonEdge = new bool[splitedEdgeLablesCount];
-	pa.resize(2 * splitedEdgeLablesCount);
-	Graph *graph = mesh2Graph(mesh, p, splitedEdgeLablesCount, pa, polygonEdge);
-	SegmentArray sOrder = graph2SegArray(*graph, pa, polygonEdge);
+	IntArray pla(2 * splitedEdgeLablesCount);
+	Graph *graph = mesh2Graph(mesh, p, splitedEdgeLablesCount,
+		basePolygonPointsCount, new_pa, pla, polygonEdge);
+	SegmentArray sOrder = graph2SegArray(*graph, pla, polygonEdge);
 	delete graph;
 	delete[] polygonEdge;
 	return sOrder;
 }
 
-SegmentArray graph2SegArray(const Graph &graph, PointArray &pa, const bool *polygonEdge)
+SegmentArray graph2SegArray(const Graph &graph, IntArray &pla, const bool *polygonEdge)
 {
 	IntArray sortedEdgeLabels;
 	graph.topologicalSort(sortedEdgeLabels);
 	SegmentArray sOrder;
-	PointArray new_pa;
 	for (int i = 0; i < sortedEdgeLabels.size(); i++)
 	{
 		if (polygonEdge[sortedEdgeLabels[i]])
-		{
-			new_pa.push_back(pa[2 * sortedEdgeLabels[i]]);
-			new_pa.push_back(pa[2 * sortedEdgeLabels[i] + 1]);
-			sOrder.push_back(Segment(new_pa.size() - 2, new_pa.size() - 1));
-		}
+			sOrder.push_back(Segment(pla[2 * sortedEdgeLabels[i]], pla[2 * sortedEdgeLabels[i] + 1]));
 	}
-	pa.clear();
-	pa.insert(pa.end(), new_pa.begin(), new_pa.end());
 	return sOrder;
 }
 
 Graph* mesh2Graph(const Mesh &mesh, const p2t::Point &p, int splitedEdgeLablesCount,
-	PointArray &pa, bool *polygonEdge)
+	int basePolygonPointsCount, PointArray &new_pa, IntArray &pla, bool *polygonEdge)
 {
 	Graph *graph = new Graph(splitedEdgeLablesCount);
 	memset(polygonEdge, false, splitedEdgeLablesCount * sizeof(bool));
@@ -94,16 +88,46 @@ Graph* mesh2Graph(const Mesh &mesh, const p2t::Point &p, int splitedEdgeLablesCo
 		if (sign3 == 0 && sign2 > 0)
 			graph->addEdge((*it)->edges[0], (*it)->edges[1]);
 
-		pa[2 * (*it)->edges[0]] = Point(p2->x, p2->y);
-		pa[2 * (*it)->edges[0] + 1] = Point(p3->x, p3->y);
+		pla[2 * (*it)->edges[0]] = p2->pointLabel;
+		if (p2->pointLabel == -1)
+		{
+			pla[2 * (*it)->edges[0]] = basePolygonPointsCount++;
+			new_pa.push_back(Point(p2->x, p2->y));
+		}
+		pla[2 * (*it)->edges[0] + 1] = p3->pointLabel;
+		if (p3->pointLabel == -1)
+		{
+			pla[2 * (*it)->edges[0] + 1] = basePolygonPointsCount++;
+			new_pa.push_back(Point(p3->x, p3->y));
+		}
 		polygonEdge[(*it)->edges[0]] = (*it)->polygon_edge[0];
 
-		pa[2 * (*it)->edges[1]] = Point(p3->x, p3->y);
-		pa[2 * (*it)->edges[1] + 1] = Point(p1->x, p1->y);
+		pla[2 * (*it)->edges[1]] = p3->pointLabel;
+		if (p3->pointLabel == -1)
+		{
+			pla[2 * (*it)->edges[1]] = basePolygonPointsCount++;
+			new_pa.push_back(Point(p3->x, p3->y));
+		}
+		pla[2 * (*it)->edges[1] + 1] = p1->pointLabel;
+		if (p1->pointLabel == -1)
+		{
+			pla[2 * (*it)->edges[1] + 1] = basePolygonPointsCount++;
+			new_pa.push_back(Point(p1->x, p1->y));
+		}
 		polygonEdge[(*it)->edges[1]] = (*it)->polygon_edge[1];
 
-		pa[2 * (*it)->edges[2]] = Point(p1->x, p1->y);
-		pa[2 * (*it)->edges[2] + 1] = Point(p2->x, p2->y);
+		pla[2 * (*it)->edges[2]] = p1->pointLabel;
+		if (p1->pointLabel == -1)
+		{
+			pla[2 * (*it)->edges[2]] = basePolygonPointsCount++;
+			new_pa.push_back(Point(p1->x, p1->y));
+		}
+		pla[2 * (*it)->edges[2] + 1] = p2->pointLabel;
+		if (p2->pointLabel == -1)
+		{
+			pla[2 * (*it)->edges[2] + 1] = basePolygonPointsCount++;
+			new_pa.push_back(Point(p2->x, p2->y));
+		}
 		polygonEdge[(*it)->edges[2]] = (*it)->polygon_edge[2];
 	}
 	return graph;
