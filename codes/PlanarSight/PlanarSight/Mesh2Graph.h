@@ -5,9 +5,9 @@
 #include "Graph.h"
 
 SegmentArray mesh2SegArray(const Mesh &mesh, const p2t::Point &p, int splitedEdgeLablesCount,
-	PointArray &pa);
-SegmentArray graph2SegArray(const Graph &graph, PointArray &pa, const bool *polygonEdge);
+	int basePolygonPointsCount, PointArray &new_pa);
+SegmentArray graph2SegArray(const Graph &graph, IntArray &pla, const bool *polygonEdge);
 Graph* mesh2Graph(const Mesh &mesh, const p2t::Point &p, int splitedEdgeLablesCount,
-	PointArray &pa, bool *polygonEdge);
+	int basePolygonPointsCount, PointArray &new_pa, IntArray &pla, bool *polygonEdge);
 
 #endif

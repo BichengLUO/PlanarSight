@@ -45,19 +45,22 @@ struct Edge;
 struct Point {
 
   double x, y;
+  int pointLabel;
 
   /// Default constructor does nothing (for performance).
   Point()
   {
     x = 0.0;
     y = 0.0;
+	pointLabel = -1;
   }
 
   /// The edges this point constitutes an upper ending point
   std::vector<Edge*> edge_list;
 
   /// Construct using coordinates.
-  Point(double x, double y) : x(x), y(y) {}
+  Point(double x, double y) : x(x), y(y), pointLabel(-1) {}
+  Point(double x, double y, int label) : x(x), y(y), pointLabel(label) {}
 
   /// Set this point to all zeros.
   void set_zero()

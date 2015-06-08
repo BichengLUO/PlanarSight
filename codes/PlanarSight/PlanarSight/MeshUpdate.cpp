@@ -80,7 +80,7 @@ Mesh buildMeshFromPolygon(const CPolygon &basePolygon)
 	{
 		int pointID = basePolygon.loopArray[0].pointIDArray[i];
 		Point p = basePolygon.pointArray[pointID];
-		p2t::Point *np = new p2t::Point(p.x, p.y);
+		p2t::Point *np = new p2t::Point(p.x, p.y, pointID);
 		polyline.push_back(np);
 		initialMeshPointsMemory.push_back(np);
 	}
@@ -92,7 +92,7 @@ Mesh buildMeshFromPolygon(const CPolygon &basePolygon)
 		{
 			int pointID = basePolygon.loopArray[i].pointIDArray[j];
 			Point p = basePolygon.pointArray[pointID];
-			p2t::Point *np = new p2t::Point(p.x, p.y);
+			p2t::Point *np = new p2t::Point(p.x, p.y, pointID);
 			hole.push_back(np);
 			initialMeshPointsMemory.push_back(np);
 		}
@@ -110,7 +110,7 @@ Mesh buildMeshFromInnerLoop(const Loop &loop)
 	{
 		int pointID = loop.pointIDArray[i];
 		Point p = loop.polygon->pointArray[pointID];
-		p2t::Point *np = new p2t::Point(p.x, p.y);
+		p2t::Point *np = new p2t::Point(p.x, p.y, pointID);
 		polyline.push_back(np);
 		initialMeshPointsMemory.push_back(np);
 	}
@@ -127,7 +127,7 @@ Mesh buildMeshFromOuterLoop(const Loop &loop)
 	{
 		int pointID = loop.pointIDArray[i];
 		Point p = loop.polygon->pointArray[pointID];
-		p2t::Point *np = new p2t::Point(p.x, p.y);
+		p2t::Point *np = new p2t::Point(p.x, p.y, pointID);
 		polyline.push_back(np);
 		initialMeshPointsMemory.push_back(np);
 	}
@@ -496,18 +496,21 @@ void rayIntersectTriangle(p2t::Triangle &tri, const p2t::Point &p, p2t::Point *p
 	{
 		p1p2->x = p.x;
 		p1p2->y = p1->y > p2->y ? p1->y : p2->y;
+		p1p2->pointLabel = p1->y > p2->y ? p1->pointLabel : p2->pointLabel;
 		return;
 	}
 	if (p2->x == p3->x && p2->x == p.x)
 	{
 		p2p3->x = p.x;
 		p2p3->y = p2->y > p3->y ? p2->y : p3->y;
+		p2p3->pointLabel = p2->y > p3->y ? p2->pointLabel : p3->pointLabel;
 		return;
 	}
 	if (p3->x == p1->x && p1->x == p.x)
 	{
 		p3p1->x = p.x;
 		p3p1->y = p3->y > p1->y ? p3->y : p1->y;
+		p3p1->pointLabel = p3->y > p1->y ? p3->pointLabel : p1->pointLabel;
 		return;
 	}
 	if ((p1->x <= p.x && p2->x > p.x) || (p2->x < p.x && p1->x >= p.x))
@@ -517,6 +520,8 @@ void rayIntersectTriangle(p2t::Triangle &tri, const p2t::Point &p, p2t::Point *p
 		{
 			p1p2->x = p.x;
 			p1p2->y = ny;
+			if (POINT_EQUAL(*p1p2, *p1)) p1p2->pointLabel = p1->pointLabel;
+			if (POINT_EQUAL(*p1p2, *p2)) p1p2->pointLabel = p2->pointLabel;
 			return;
 		}
 	}
@@ -527,6 +532,8 @@ void rayIntersectTriangle(p2t::Triangle &tri, const p2t::Point &p, p2t::Point *p
 		{
 			p2p3->x = p.x;
 			p2p3->y = ny;
+			if (POINT_EQUAL(*p2p3, *p2)) p2p3->pointLabel = p2->pointLabel;
+			if (POINT_EQUAL(*p2p3, *p3)) p2p3->pointLabel = p3->pointLabel;
 			return;
 		}
 	}
@@ -537,6 +544,8 @@ void rayIntersectTriangle(p2t::Triangle &tri, const p2t::Point &p, p2t::Point *p
 		{
 			p3p1->x = p.x;
 			p3p1->y = ny;
+			if (POINT_EQUAL(*p3p1, *p3)) p3p1->pointLabel = p3->pointLabel;
+			if (POINT_EQUAL(*p3p1, *p1)) p3p1->pointLabel = p1->pointLabel;
 			return;
 		}
 	}
