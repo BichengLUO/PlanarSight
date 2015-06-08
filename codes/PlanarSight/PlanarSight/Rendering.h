@@ -4,6 +4,7 @@
 #include "shapes.h"
 #include "MeshUpdate.h"
 #include "Monster.h"
+#include "DCEL.h"
 #include <iostream>
 #include <algorithm>
 
@@ -24,6 +25,8 @@ public:
 	double xLeftParam;
 	double xRightParam;
 	IntArray visArray;
+
+    DCEL* dcel;
 
 	CPolygon* basePolygon;
 	PolygonArray visPolygons;

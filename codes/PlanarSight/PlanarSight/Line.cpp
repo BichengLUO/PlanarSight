@@ -27,7 +27,8 @@ Point Line::getIntersection(HalfEdge* edge)
 bool Line::isOnLine(Point &point)
 {
     double d = a * point.x + b * point.y + c;
-    return fabs(d) < eps;
+    double m = sqrt(a * a + b * b);
+    return fabs(d) / m < eps;
 }
 
 bool Line::isIntersection(HalfEdge* edge)
@@ -51,7 +52,7 @@ bool Line::isIntersection(HalfEdge* edge)
     Vector v02 = Vector(p2.x - p0.x, p2.y - p0.y);
     double s1 = vector ^ v01;
     double s2 = vector ^ v02;
-    return s1 * s2 <= -eps;
+    return s1 * s2 <= 0;
 }
 
 void Line::print()

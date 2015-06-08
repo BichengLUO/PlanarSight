@@ -2,6 +2,11 @@
 
 void DCEL::initialize(PointArray &points)
 {
+    vertexs.clear();
+    edges.clear();
+    faces.clear();
+    lines.clear();
+
     int num = points.size();
     // face[0] is the outer face, and it never be splited
     Face* faceOut = new Face();

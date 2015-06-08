@@ -752,6 +752,7 @@ void Rendering::calcVisPolygon()
 	}
 }
 
+
 void Rendering::getPolarOrder(int monsterID, PointArray& pa, IntArray& pPolarID, DoubleArray& pPolarValues, IntArray& pPolarOrder)
 {
 	int pointSize = pa.size();
@@ -765,8 +766,6 @@ void Rendering::getPolarOrder(int monsterID, PointArray& pa, IntArray& pPolarID,
 		angle -= HALF_PI;
 		if (angle < 0)
 			angle += DOUBLE_PI;
-		/*if (angle == 0)
-			zeroNum++;*/
 
 		pPolarID.push_back(-1);
 		pPolarValues.push_back(angle);
@@ -789,14 +788,88 @@ void Rendering::getPolarOrder(int monsterID, PointArray& pa, IntArray& pPolarID,
 		pPolarOrder.push_back(polar[i].id);
 	}	
 
-	/*zeroNum--;
-	for (int i = 0; i < pointSize; i++)
-	{
-		pPolarID[i] -= zeroNum;
-		if (pPolarID[i] < 0)
-			pPolarID[i] = 0;
-	}*/
 }
+
+/*
+void Rendering::getPolarOrder(int monsterID, PointArray& pa, IntArray& pPolarID, DoubleArray& pPolarValues, IntArray& pPolarOrder)
+{
+    Point pointMonster = monsters[monsterID].pos;
+    Line line = Line(pointMonster.x, 1, -pointMonster.y);
+    int pointSize = pa.size();
+
+    for (int i = 0; i < pointSize; i++)
+    {
+        double angle = calPolar(pointMonster, pa[i]);
+        angle -= HALF_PI;
+        if (angle < 0)
+            angle += DOUBLE_PI;
+
+        pPolarValues.push_back(angle);
+
+        Line temLine = Line(pa[i].x, 1, -pa[i].y);
+        dcel->addLine(temLine, i);
+    }
+
+    IntArray alreadyLines;
+    dcel->query(line, alreadyLines);
+
+    IntArray flagLines;
+    flagLines.clear();
+    for (int i = 0; i < pointSize; i++)
+        flagLines.push_back(0);
+
+    IntArray leftLines, rightLines;
+    leftLines.clear();
+    rightLines.clear();
+
+    int numAlready = alreadyLines.size();
+    for (int i = 0; i < numAlready; i++)
+    {
+        int id = alreadyLines[i];
+        flagLines[id] = 1;
+        if (pPolarValues[id] <= PI)
+        {
+            leftLines.push_back(id);
+        }
+        else
+        {
+            rightLines.push_back(id);
+        }
+    }
+
+    for (int i = 0; i < pointSize; i++)
+    {
+        if (flagLines[i] == 1) continue;
+        if (fabs(pPolarValues[i] - PI) < 1.0)
+        {
+            leftLines.push_back(i);
+            flagLines[i] = 1;
+        }
+        else
+        {
+            rightLines.push_back(i);
+            flagLines[i] = 1;
+        }
+    }
+
+    pPolarOrder.clear();
+    for (int i = 0; i < leftLines.size(); i++)
+        pPolarOrder.push_back(leftLines[i]);
+    for (int i = 0; i < rightLines.size(); i++)
+        pPolarOrder.push_back(rightLines[i]);
+
+    int index = 0;
+    pPolarID.resize(pointSize);
+    pPolarID[pPolarOrder[0]] = 0;
+    for (int i = 1; i < pointSize; i++)
+    {
+        if (fabs(pPolarValues[pPolarOrder[i]] - pPolarValues[pPolarOrder[i - 1]]) > TOLERANCE)
+            index++;
+        pPolarID[pPolarOrder[i]] = index;
+    }
+
+}
+*/
 
 void Rendering::Test()
 {
