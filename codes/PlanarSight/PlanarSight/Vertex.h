@@ -20,12 +20,12 @@ public:
 
 public:
     Vertex(){}
-    Vertex(Point p) : coordinate(p), id(-1), edge(NULL){}
-    Vertex(Point p, int _id) : coordinate(p), id(_id), edge(NULL){}
+    Vertex(const Point p) : coordinate(p), id(-1), edge(NULL){}
+    Vertex(const Point p, int _id) : coordinate(p), id(_id), edge(NULL){}
     ~Vertex(){}
 
     // return the half edge from this vertex to the given vertex
-    HalfEdge* getIncidnetEdge(Vertex* vertex);
+    HalfEdge* getIncidnetEdge(const Vertex* vertex);
 
     int getCountIncident();
 

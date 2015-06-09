@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <cstdio>
+#include <algorithm>
 #include "Point.h"
 #include "HalfEdge.h"
 #include "DCEL.h"
@@ -24,7 +25,7 @@ public:
         b = -1;
         c = bb;
     }
-    Line(Point &p1, Point &p2)
+    Line(const Point &p1, const Point &p2)
     {
         a = p1.y - p2.y;
         b = p2.x - p1.x;
@@ -32,14 +33,16 @@ public:
     }
     ~Line(){}
 
-    bool isParallel(Line &line);
+    bool isParallel(const Line &line);
 
-    Point getIntersectionPoint(Line &line);
+    double getDistance(const Point &point);
+
+    Point getIntersectionPoint(const Line &line);
 
     // get the intersection point with a line this edge on
     Point getIntersection(HalfEdge* edge);
 
-    bool isOnLine(Point &point);
+    bool isOnLine(const Point &point);
 
     bool isIntersection(HalfEdge* edge);
 

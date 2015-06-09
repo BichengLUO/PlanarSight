@@ -1,6 +1,6 @@
 #include "Vertex.h"
 
-HalfEdge* Vertex::getIncidnetEdge(Vertex* vertex)
+HalfEdge* Vertex::getIncidnetEdge(const Vertex* vertex)
 {
     if (edge->getDestination() == vertex)
     {
@@ -24,10 +24,10 @@ int Vertex::getCountIncident()
     {
         num++;
     }
-    return num / 2;
+    return num;
 }
 
 void Vertex::print()
 {
-    printf("VERTEX(%d): point(%lf,%lf)\n", id, coordinate.x, coordinate.y);
+    printf("VERTEX(%d): point(%.10lf,%.10lf)\n", id, coordinate.x, coordinate.y);
 }

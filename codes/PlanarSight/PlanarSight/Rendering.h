@@ -81,7 +81,8 @@ public:
 	CPolygon calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& sOrder, IntArray& pPolarID, DoubleArray& pPolarValues, IntArray& pPolarOrder);
 	bool calcLineLineIntersection(Point& result, Point& a1, double polar, Point& a3, Point& a4);
 	void calcVisPolygon();
-	void getPolarOrder(int monsterID, PointArray& pa, IntArray& pPolarID, DoubleArray& pPolarValues, IntArray& pPolarOrder);
+    void getPolarOrder(int monsterID, PointArray& pa, PointArray& pb, PointArray& p, IntArray& pPolarID, DoubleArray& pPolarValues, IntArray& pPolarOrder);
+    void getPolarOrderByDCEL(int monsterID, PointArray& pa, PointArray& pb, PointArray& p, IntArray& pPolarID, DoubleArray& pPolarValues, IntArray& pPolarOrder);
 	void Test();
 	void drawTrianglesMesh(const std::vector<p2t::Triangle*> &mesh);
 	void drawSortedSegments(const PointArray &pa, const SegmentArray &sOrder);

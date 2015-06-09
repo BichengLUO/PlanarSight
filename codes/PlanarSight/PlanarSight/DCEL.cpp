@@ -1,10 +1,10 @@
 #include "DCEL.h"
 
-void DCEL::initialize(PointArray &points)
+void DCEL::preInitialize(const PointArray &points)
 {
-    vertexs.clear();
-    edges.clear();
     faces.clear();
+    edges.clear();
+    vertexs.clear();
     lines.clear();
 
     int num = points.size();
@@ -48,7 +48,24 @@ void DCEL::initialize(PointArray &points)
 
 }
 
-void DCEL::splitEdge(HalfEdge* edge, Point point)
+void DCEL::initialize(const PointArray &points)
+{
+    PointArray prePoints;
+    prePoints.clear();
+    prePoints.push_back(Point(-INF, -INF));
+    prePoints.push_back(Point(INF, -INF));
+    prePoints.push_back(Point(INF, INF));
+    prePoints.push_back(Point(-INF, INF));
+    preInitialize(prePoints);
+
+    for (int i = 0; i < points.size(); i++)
+    {
+        Line temLine = Line(points[i].x, 1, -points[i].y);
+        addLine(temLine, i);
+    }
+}
+
+void DCEL::splitEdge(HalfEdge* edge, Point &point)
 {
     Vertex* vertex = new Vertex(point, vertexId++);
     vertexs.push_back(vertex);
@@ -126,26 +143,9 @@ void DCEL::splitFace(HalfEdge* edge, Vertex* v, int id)
     end->prev = left;
 }
 
-void DCEL::addLine(Line line, int id)
+void DCEL::addLine(Line &line, int id)
 {
     lines.push_back(line);
-
-    // get the direction vector of line, x positive or (x==0 and y>0)
-    Vector dir = Vector(-line.b, line.a);
-    if (fabs(dir.x) < eps)
-    {
-        dir.x = 0;
-        if (dir.y < 0) 
-            dir.y = -dir.y;
-    }
-    else
-    {
-        if (dir.x < 0)
-        {
-            dir.x = -dir.x;
-            dir.y = -dir.y;
-        }
-    }
 
     // get the start intersection point and halfEdge
     // faces[0] is a magic face for usage
@@ -177,7 +177,6 @@ void DCEL::addLine(Line line, int id)
                 }
             }
         }
-       
     }
 
     if (startEdge == NULL)
@@ -194,9 +193,8 @@ void DCEL::addLine(Line line, int id)
     {
         Point endPoint;
         HalfEdge* endEdge;
-
         HalfEdge *e;
-        for (e = startEdge->next; line.isOnLine(e->getDestination()->coordinate) == false &&
+        for (e = startEdge->next->next; line.isOnLine(e->getDestination()->coordinate) == false &&
             line.isIntersection(e) == false; e = e->next);
         // cross through current face with a vertex
         if (line.isOnLine(e->getDestination()->coordinate) == true)
@@ -204,22 +202,16 @@ void DCEL::addLine(Line line, int id)
             endPoint = e->getDestination()->coordinate;
             for (endEdge = e->next; 1; endEdge = endEdge->twin->next)
             {
-                HalfEdge* preEdge = endEdge->prev;
-                Point pLeft = preEdge->origin->coordinate;
-                Point pO = endEdge->origin->coordinate;
-                Point pRight = endEdge->getDestination()->coordinate;
-                Vector left = Vector(pLeft.x - pO.x, pLeft.y - pO.y);
-                Vector right = Vector(pRight.x - pO.x, pRight.y - pO.y);
-                double sLeft = dir ^ left;
-                double sRight = dir ^ right;
-
-                if (sLeft >= 0 && sRight <= 0)
+                if (e->id == endEdge->id)
                     break;
             }
-            splitFace(startEdge, endEdge->origin, id);
+            endEdge = endEdge->twin;
+            if (endEdge != e){
+                splitFace(startEdge, endEdge->getDestination(), id);
+            }
 
             startPoint = endPoint;
-            startEdge = endEdge->prev;
+            startEdge = endEdge;
         }
         else
         // cross through current face with a halfEdge
@@ -234,7 +226,7 @@ void DCEL::addLine(Line line, int id)
         }
 
         // if the new startPoint is on the boundary, just stop
-        if (fabs(startPoint.x) > INF / 2 || fabs(startPoint.y) > INF / 2)
+        if (fabs(startPoint.x) > INF - INF * eps || fabs(startPoint.y) > INF - INF * eps)
             break;
     }
 }
@@ -242,23 +234,6 @@ void DCEL::addLine(Line line, int id)
 void DCEL::query(Line &line, IntArray& pPolarOrder)
 {
     pPolarOrder.clear();
-
-    // get the direction vector of line, x positive or (x==0 and y>0)
-    Vector dir = Vector(-line.b, line.a);
-    if (fabs(dir.x) < eps)
-    {
-        dir.x = 0;
-        if (dir.y < 0)
-            dir.y = -dir.y;
-    }
-    else
-    {
-        if (dir.x < 0)
-        {
-            dir.x = -dir.x;
-            dir.y = -dir.y;
-        }
-    }
 
     // get the start intersection point and halfEdge
     // faces[0] is a magic face for usage
@@ -283,7 +258,8 @@ void DCEL::query(Line &line, IntArray& pPolarOrder)
                 if (tem.x < startPoint.x || (fabs(tem.x - startPoint.x) < eps && tem.y < startPoint.y))
                 {
                     startPoint = tem;
-                    startEdge = e->twin;
+                    startEdge = e->twin->next;
+                    //printf("BoundaryCount: %d, point:(%.10lf, %.10lf)\n", e->origin->getCountIncident(), e->origin->coordinate.x, e->origin->coordinate.y);
                 }
             }
         }
@@ -302,27 +278,20 @@ void DCEL::query(Line &line, IntArray& pPolarOrder)
         HalfEdge* endEdge;
 
         HalfEdge *e;
-        for (e = startEdge->next; line.isOnLine(e->getDestination()->coordinate) == false &&
-            line.isIntersection(e) == false; e = e->next);
+        for (e = startEdge->next; line.isIntersection(e) == false && 
+            line.isOnLine(e->getDestination()->coordinate) == false; e = e->next);
         // cross through current face with a vertex
         if (line.isOnLine(e->getDestination()->coordinate) == true)
         {
             endPoint = e->getDestination()->coordinate;
             for (endEdge = e->next; 1; endEdge = endEdge->twin->next)
             {
-                HalfEdge* preEdge = endEdge->prev;
-                Point pLeft = preEdge->origin->coordinate;
-                Point pO = endEdge->origin->coordinate;
-                Point pRight = endEdge->getDestination()->coordinate;
-                Vector left = Vector(pLeft.x - pO.x, pLeft.y - pO.y);
-                Vector right = Vector(pRight.x - pO.x, pRight.y - pO.y);
-                double sLeft = dir ^ left;
-                double sRight = dir ^ right;
-
-                if (sLeft >= 0 && sRight <= 0)
+                if (e->id == endEdge->id)
                     break;
             }
-            int cnt = endEdge->origin->getCountIncident();
+            endEdge = endEdge->twin;
+            int cnt = endEdge->getDestination()->getCountIncident();
+            cnt = cnt / 2;
             HalfEdge* temE = e->next;
             for (int i = 0; i < cnt; i++)
             {
@@ -334,7 +303,7 @@ void DCEL::query(Line &line, IntArray& pPolarOrder)
             }
 
             startPoint = endPoint;
-            startEdge = endEdge;
+            startEdge = endEdge->next;
         }
         else
         // cross through current face with a halfEdge
@@ -352,7 +321,7 @@ void DCEL::query(Line &line, IntArray& pPolarOrder)
         }
 
         // if the new startPoint is on the boundary, just stop
-        if (fabs(startPoint.x) > INF / 2 || fabs(startPoint.y) > INF / 2)
+        if (fabs(startPoint.x) > INF - INF * eps || fabs(startPoint.y) > INF - INF * eps)
             break;
     }
 
@@ -360,13 +329,14 @@ void DCEL::query(Line &line, IntArray& pPolarOrder)
 
 void DCEL::print()
 {
-    printf("Vertexs:\n");
+    printf("Vertexs: %d\n", vertexs.size());
     for (int i = 0; i < vertexs.size(); i++)
         vertexs[i]->print();
-    printf("Edges:\n");
+    printf("Edges: %d\n", edges.size());
     for (int i = 0; i < edges.size(); i++)
         edges[i]->print();
-    printf("Faces:\n");
+    printf("Faces: %d\n", faces.size());
     for (int i = 0; i < faces.size(); i++)
         faces[i]->print();
+    
 }

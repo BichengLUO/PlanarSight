@@ -136,11 +136,11 @@ void Rendering::process()
 			pPolarValues.clear();
 			pPolarOrder.clear();
 
+            
 			//将新的点加到原多边形上的点的集合当中去，并使用快排进行简单的极角序排列
-			sortedPointArray.insert(sortedPointArray.end(), basePolygon->pointArray.begin(), basePolygon->pointArray.end());
-			sortedPointArray.insert(sortedPointArray.end(), newPointArray.begin(), newPointArray.end());
-			getPolarOrder(monID, sortedPointArray, pPolarID, pPolarValues, pPolarOrder);
-			//上面的这三个语句到时候用DCEL的极角排序算法替换掉
+            getPolarOrder(monID, basePolygon->pointArray, newPointArray, sortedPointArray, pPolarID, pPolarValues, pPolarOrder);
+
+            //getPolarOrderByDCEL(monID, basePolygon->pointArray, newPointArray, sortedPointArray, pPolarID, pPolarValues, pPolarOrder);
 
 			CPolygon cp = calcVisPolygon(monID, sortedPointArray, sortedSegmentArray, pPolarID, pPolarValues, pPolarOrder);
 			visPolygons.push_back(cp);
@@ -153,6 +153,10 @@ void Rendering::preprocess()
 {
 	clearInitialMeshMemory(initialMesh);
 	initialMesh = buildInitialMesh(*basePolygon);
+    
+    dcel = new DCEL();
+    dcel->initialize(basePolygon->pointArray);
+
 	preprocessFinished = true;
 }
 
@@ -542,6 +546,8 @@ void Rendering::clear()
 	drawInnerWall = false;
 	drawMonster = false;
 	preprocessFinished = false;
+
+    free(dcel);
 }
 
 // 计算可见多边形
@@ -622,8 +628,8 @@ CPolygon Rendering::calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& 
 	else if (rangeMax > DOUBLE_PI)
 		rangeMax -= DOUBLE_PI;
 
-	int rangeLeft = zeroNum - 1;			//可视范围的左边界所在的x区间
-	int rangeRight = zeroNum - 1;		//可视范围的右边界所在的x区间
+	int rangeLeft = 0;			//可视范围的左边界所在的x区间
+	int rangeRight = 0;		//可视范围的右边界所在的x区间
 	int rangeLeftY;			//可视范围的左边界所在区间的y值
 	int rangeRightY;			//可视范围的右边界所在区间的y值
 	int rangeLengthX;			//可视范围的区间在x上的长度，不包含两个端点
@@ -759,52 +765,75 @@ void Rendering::calcVisPolygon()
 	}
 }
 
-
-void Rendering::getPolarOrder(int monsterID, PointArray& pa, IntArray& pPolarID, DoubleArray& pPolarValues, IntArray& pPolarOrder)
+void Rendering::getPolarOrder(int monsterID, PointArray& pa, PointArray& pb, PointArray& points, IntArray& pPolarID, DoubleArray& pPolarValues, IntArray& pPolarOrder)
 {
-	int pointSize = pa.size();
-	PolarArray polar;
-	Polar p;
-	double angle;
-	int zeroNum = 0;
-	for (int i = 0; i < pointSize; i++)
+	PolarArray polars;
+
+    points.clear();
+    points.insert(points.end(), pa.begin(), pa.end());
+
+    int pointSize = points.size();
+    for (int i = 0; i < pointSize; i++)
 	{
-		angle = calPolar(monsters[monsterID].pos, pa[i]);
+        double angle = calPolar(monsters[monsterID].pos, points[i]);
 		angle -= HALF_PI;
 		if (angle < 0)
 			angle += DOUBLE_PI;
 
-		pPolarID.push_back(-1);
 		pPolarValues.push_back(angle);
 
+        Polar p;
 		p.id = i;
 		p.value = angle;
-		polar.push_back(p);
+        polars.push_back(p);
 	}
 
-	sort(polar.begin(), polar.end(), polarSortLess);
+    sort(polars.begin(), polars.end(), polarSortLess);
 
-	int index = 0;
-	pPolarID[polar[0].id] = 0;
-	pPolarOrder.push_back(polar[0].id);
-	for (int i = 1; i < pointSize; i++)
+    for (int i = 0; i < pb.size(); i++)
+    {
+        double angle = eps / 100;
+
+        pPolarValues.push_back(angle);
+        points.push_back(pb[i]);
+    }
+
+    pPolarOrder.clear();
+    for (int i = 0; i < pb.size(); i++)
+    {
+        pPolarOrder.push_back(pa.size() + i);
+    }
+
+    for (int i = 0; i < pointSize; i++)
 	{
-		if (polar[i].value != polar[i - 1].value)
-			index++;
-		pPolarID[polar[i].id] = index;
-		pPolarOrder.push_back(polar[i].id);
+        pPolarOrder.push_back(polars[i].id);
 	}	
+
+    pointSize = points.size();
+
+    int index = 0;
+    pPolarID.resize(pointSize);
+    pPolarID[pPolarOrder[0]] = 0;
+    for (int i = 1; i < pointSize; i++)
+    {
+        if (pPolarValues[pPolarOrder[i]] != pPolarValues[pPolarOrder[i - 1]])
+            index++;
+        pPolarID[pPolarOrder[i]] = index;
+    }
 
 }
 
-/*
-void Rendering::getPolarOrder(int monsterID, PointArray& pa, IntArray& pPolarID, DoubleArray& pPolarValues, IntArray& pPolarOrder)
+void Rendering::getPolarOrderByDCEL(int monsterID, PointArray& pa, PointArray& pb, PointArray& points, IntArray& pPolarID, DoubleArray& pPolarValues, IntArray& pPolarOrder)
 {
     Point pointMonster = monsters[monsterID].pos;
     Line line = Line(pointMonster.x, 1, -pointMonster.y);
-    int pointSize = pa.size();
+    int paSize = pa.size();
+    int pbSize = pb.size();
+    int pointSize = paSize + pbSize;
+    points.clear();
+    pPolarValues.clear();
 
-    for (int i = 0; i < pointSize; i++)
+    for (int i = 0; i < paSize; i++)
     {
         double angle = calPolar(pointMonster, pa[i]);
         angle -= HALF_PI;
@@ -812,9 +841,15 @@ void Rendering::getPolarOrder(int monsterID, PointArray& pa, IntArray& pPolarID,
             angle += DOUBLE_PI;
 
         pPolarValues.push_back(angle);
+        points.push_back(pa[i]);
 
-        Line temLine = Line(pa[i].x, 1, -pa[i].y);
-        dcel->addLine(temLine, i);
+    }
+
+    for (int i = 0; i < pbSize; i++)
+    {
+        double angle = eps / 100;
+        pPolarValues.push_back(angle);
+        points.push_back(pb[i]);
     }
 
     IntArray alreadyLines;
@@ -822,12 +857,17 @@ void Rendering::getPolarOrder(int monsterID, PointArray& pa, IntArray& pPolarID,
 
     IntArray flagLines;
     flagLines.clear();
-    for (int i = 0; i < pointSize; i++)
+    for (int i = 0; i < paSize; i++)
         flagLines.push_back(0);
 
     IntArray leftLines, rightLines;
     leftLines.clear();
     rightLines.clear();
+
+    for (int i = 0; i < pbSize; i++)
+    {
+        leftLines.push_back(paSize + i);
+    }
 
     int numAlready = alreadyLines.size();
     for (int i = 0; i < numAlready; i++)
@@ -844,7 +884,7 @@ void Rendering::getPolarOrder(int monsterID, PointArray& pa, IntArray& pPolarID,
         }
     }
 
-	for (int i = 0; i < pointSize; i++)
+    for (int i = 0; i < paSize; i++)
 	{
         if (flagLines[i] == 1) continue;
         if (fabs(pPolarValues[i] - PI) < 1.0)
@@ -858,25 +898,22 @@ void Rendering::getPolarOrder(int monsterID, PointArray& pa, IntArray& pPolarID,
             flagLines[i] = 1;
         }
     }
-
+    
     pPolarOrder.clear();
-    for (int i = 0; i < leftLines.size(); i++)
-        pPolarOrder.push_back(leftLines[i]);
-    for (int i = 0; i < rightLines.size(); i++)
-        pPolarOrder.push_back(rightLines[i]);
+    pPolarOrder.insert(pPolarOrder.end(), leftLines.begin(), leftLines.end());
+    pPolarOrder.insert(pPolarOrder.end(), rightLines.begin(), rightLines.end());
 
     int index = 0;
     pPolarID.resize(pointSize);
     pPolarID[pPolarOrder[0]] = 0;
     for (int i = 1; i < pointSize; i++)
     {
-        if (fabs(pPolarValues[pPolarOrder[i]] - pPolarValues[pPolarOrder[i - 1]]) > TOLERANCE)
+        if (pPolarValues[pPolarOrder[i]] != pPolarValues[pPolarOrder[i - 1]])
             index++;
         pPolarID[pPolarOrder[i]] = index;
     }
 
 }
-*/
 
 void Rendering::Test()
 {
