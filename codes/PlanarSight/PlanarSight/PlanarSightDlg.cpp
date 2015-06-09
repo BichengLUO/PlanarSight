@@ -92,6 +92,8 @@ ON_BN_CLICKED(IDC_SORTES_SEGMENTS, &CPlanarSightDlg::OnBnClickedSortesSegments)
 ON_BN_CLICKED(IDC_DUAL_GRAPH, &CPlanarSightDlg::OnBnClickedDualGraph)
 ON_BN_CLICKED(IDC_SHOW_3D_VIEW, &CPlanarSightDlg::OnBnClickedShow3dView)
 ON_BN_CLICKED(IDC_LINEAR_SET, &CPlanarSightDlg::OnBnClickedLinearSet)
+ON_BN_CLICKED(IDC_RADIO_STD_SORT, &CPlanarSightDlg::OnBnClickedRadioStdSort)
+ON_BN_CLICKED(IDC_RADIO_DCEL, &CPlanarSightDlg::OnBnClickedRadioDcel)
 END_MESSAGE_MAP()
 
 
@@ -140,7 +142,7 @@ BOOL CPlanarSightDlg::OnInitDialog()
 	m_pDisplay->startBtn = GetDlgItem(IDC_START_GAME);
 	m_pDisplay->endBtn = GetDlgItem(IDC_END_GAME);
 
-
+	((CButton*)GetDlgItem(IDC_RADIO_STD_SORT))->SetCheck(1);
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -388,4 +390,24 @@ void CPlanarSightDlg::OnBnClickedLinearSet()
 		m_pDisplay->rendering->showLinearSet = false;
 	else
 		m_pDisplay->rendering->showLinearSet = true;
+}
+
+
+void CPlanarSightDlg::OnBnClickedRadioStdSort()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	if (((CButton*)GetDlgItem(IDC_RADIO_STD_SORT))->GetCheck() == 1)
+		m_pDisplay->rendering->useDCELSort = false;
+	else
+		m_pDisplay->rendering->useDCELSort = true;
+}
+
+
+void CPlanarSightDlg::OnBnClickedRadioDcel()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	if (((CButton*)GetDlgItem(IDC_RADIO_STD_SORT))->GetCheck() == 1)
+		m_pDisplay->rendering->useDCELSort = false;
+	else
+		m_pDisplay->rendering->useDCELSort = true;
 }

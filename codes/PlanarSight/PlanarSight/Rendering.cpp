@@ -20,6 +20,7 @@ Rendering::Rendering()
 	showDualGraph = false;
 	show3DView = false;
 	showLinearSet = false;
+	useDCELSort = false;
 
 	gameStart = false;
 	player.x = 370;
@@ -137,10 +138,14 @@ void Rendering::process()
 			pPolarOrder.clear();
 
             
-			//将新的点加到原多边形上的点的集合当中去，并使用快排进行简单的极角序排列
-            getPolarOrder(monID, basePolygon->pointArray, newPointArray, sortedPointArray, pPolarID, pPolarValues, pPolarOrder);
-
-            //getPolarOrderByDCEL(monID, basePolygon->pointArray, newPointArray, sortedPointArray, pPolarID, pPolarValues, pPolarOrder);
+			if (useDCELSort)
+				getPolarOrderByDCEL(monID,
+				basePolygon->pointArray, newPointArray, sortedPointArray,
+				pPolarID, pPolarValues, pPolarOrder);
+			else
+				getPolarOrder(monID,
+				basePolygon->pointArray, newPointArray, sortedPointArray,
+				pPolarID, pPolarValues, pPolarOrder);
 
 			CPolygon cp = calcVisPolygon(monID, sortedPointArray, sortedSegmentArray, pPolarID, pPolarValues, pPolarOrder);
 			visPolygons.push_back(cp);

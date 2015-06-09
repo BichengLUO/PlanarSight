@@ -45,6 +45,7 @@ public:
 	bool showDualGraph;
 	bool show3DView;
 	bool showLinearSet;
+	bool useDCELSort;
 
 	bool gameStart;
 	bool moving;
