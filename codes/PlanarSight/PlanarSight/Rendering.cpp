@@ -3,6 +3,7 @@
 #include "Mesh2Graph.h"
 
 extern int wood_tex_id;
+extern int wood2_tex_id;
 extern int floor_tex_id;
 extern int visp_tex_id;
 
@@ -96,18 +97,22 @@ void Rendering::draw()
 
 	if (showDualGraph)
 	{
+		change2D();
 		drawDualGraphBackground();
 		if (drawOuterWall || drawInnerWall)
 			drawDualGraph(loopBuf, 1, 1, 0);
 		drawDualGraph(basePolygon->pointArray, 0, 0, 1);
 		for (int i = 0; i < monsterSize; i++)
 			drawDualGraph(monsters[i].pos, 0, 1, 1);
+		exit2D();
 	}
 
 	if (showLinearSet)
 	{
+		change2D();
 		drawLinearSetBackground();
 		drawLinearSet();
+		exit2D();
 	}
 }
 
@@ -184,10 +189,10 @@ void Rendering::drawPolygon3D(CPolygon& p)
 	if (loopSize == 0)
 		return;
 
-	drawLoop3D(p, 0);
+	drawLoop3D(p, 0, wood_tex_id);
 
 	for (int i = 1; i < loopSize; i++)
-		drawLoop3D(p, i);
+		drawLoop3D(p, i, wood2_tex_id);
 }
 
 void Rendering::drawVisPolygon(CPolygon& p)
@@ -239,7 +244,7 @@ void Rendering::drawLoop(CPolygon& p, int loopID)
 	glEnd();
 }
 
-void Rendering::drawLoop3D(CPolygon &p, int loopID)
+void Rendering::drawLoop3D(CPolygon &p, int loopID, int tex_id)
 {
 	int pointSize = p.loopArray[loopID].pointIDArray.size();
 	int index, next;
@@ -249,7 +254,7 @@ void Rendering::drawLoop3D(CPolygon &p, int loopID)
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
 	glEnable(GL_TEXTURE_2D);
 
-	glBindTexture(GL_TEXTURE_2D, wood_tex_id);
+	glBindTexture(GL_TEXTURE_2D, tex_id);
 	for (int i = 0; i < pointSize; i++)
 	{
 		index = p.loopArray[loopID].pointIDArray[i];
@@ -310,13 +315,13 @@ void Rendering::drawFloor()
 	{
 		glBegin(GL_POLYGON);
 		glNormal3d(0, 0, 1);
-		glVertex3d(i * size, j * size, 0);
+		glVertex3d(i * size, j * size, 1);
 		glTexCoord2d(1, 0);
-		glVertex3d(i * size, (j + 1) * size, 0);
+		glVertex3d(i * size, (j + 1) * size, 1);
 		glTexCoord2d(0, 0);
-		glVertex3d((i + 1) * size, (j + 1) * size, 0);
+		glVertex3d((i + 1) * size, (j + 1) * size, 1);
 		glTexCoord2d(0, 1);
-		glVertex3d((i + 1) * size, j * size, 0);
+		glVertex3d((i + 1) * size, j * size, 1);
 		glTexCoord2d(1, 1);
 		glEnd();
 	}
@@ -1254,4 +1259,40 @@ void Rendering::drawLinearSet()
 	glVertex2d(x, bottom);
 	glEnd();
 	
+}
+
+void Rendering::change2D()
+{
+	if (show3DView)
+	{
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		glOrtho(0, 750, 0, 630, -50, 50);
+
+		glDisable(GL_LIGHTING);
+		glDisable(GL_LIGHT0);
+
+		glDisable(GL_DEPTH_TEST);
+	}
+}
+
+void Rendering::exit2D()
+{
+	if (show3DView)
+	{
+		glMatrixMode(GL_MODELVIEW);
+		glPopMatrix();
+
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
+
+		glEnable(GL_LIGHTING);
+		glEnable(GL_LIGHT0);
+		glEnable(GL_DEPTH_TEST);
+	}
 }

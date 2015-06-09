@@ -62,7 +62,7 @@ public:
 	void drawVisPolygon(CPolygon& p);
 	void drawVisPolygon3D(CPolygon& p, double offset);
 	void drawLoop(CPolygon& p, int loopID);
-	void drawLoop3D(CPolygon &p, int loopID);
+	void drawLoop3D(CPolygon &p, int loopID, int tex_id);
 	void drawFloor();
 	void drawUnfinishedLoop(PointArray& pa);
 	void drawPoint(Point& p);
@@ -92,5 +92,8 @@ public:
 	void drawDualGraph(const Point &p, double rc, double gc, double bc);
 	void drawLinearSetBackground();
 	void drawLinearSet();
+
+	void change2D();
+	void exit2D();
 };
 
