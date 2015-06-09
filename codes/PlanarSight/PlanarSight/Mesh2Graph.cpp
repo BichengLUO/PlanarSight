@@ -31,6 +31,7 @@ Graph* mesh2Graph(const Mesh &mesh, const p2t::Point &p, int splitedEdgeLablesCo
 {
 	Graph *graph = new Graph(splitedEdgeLablesCount);
 	memset(polygonEdge, false, splitedEdgeLablesCount * sizeof(bool));
+	Point *temp = new Point[2 * splitedEdgeLablesCount];
 	Mesh::const_iterator it;
 	for (it = mesh.begin(); it != mesh.end(); ++it)
 	{
@@ -89,47 +90,30 @@ Graph* mesh2Graph(const Mesh &mesh, const p2t::Point &p, int splitedEdgeLablesCo
 			graph->addEdge((*it)->edges[0], (*it)->edges[1]);
 
 		pla[2 * (*it)->edges[0]] = p2->pointLabel;
-		if (p2->pointLabel == -1)
-		{
-			pla[2 * (*it)->edges[0]] = basePolygonPointsCount++;
-			new_pa.push_back(Point(p2->x, p2->y));
-		}
 		pla[2 * (*it)->edges[0] + 1] = p3->pointLabel;
-		if (p3->pointLabel == -1)
-		{
-			pla[2 * (*it)->edges[0] + 1] = basePolygonPointsCount++;
-			new_pa.push_back(Point(p3->x, p3->y));
-		}
+		temp[2 * (*it)->edges[0]] = Point(p2->x, p2->y);
+		temp[2 * (*it)->edges[0] + 1] = Point(p3->x, p3->y);
 		polygonEdge[(*it)->edges[0]] = (*it)->polygon_edge[0];
 
 		pla[2 * (*it)->edges[1]] = p3->pointLabel;
-		if (p3->pointLabel == -1)
-		{
-			pla[2 * (*it)->edges[1]] = basePolygonPointsCount++;
-			new_pa.push_back(Point(p3->x, p3->y));
-		}
 		pla[2 * (*it)->edges[1] + 1] = p1->pointLabel;
-		if (p1->pointLabel == -1)
-		{
-			pla[2 * (*it)->edges[1] + 1] = basePolygonPointsCount++;
-			new_pa.push_back(Point(p1->x, p1->y));
-		}
+		temp[2 * (*it)->edges[1]] = Point(p3->x, p3->y);
+		temp[2 * (*it)->edges[1] + 1] = Point(p1->x, p1->y);
 		polygonEdge[(*it)->edges[1]] = (*it)->polygon_edge[1];
 
 		pla[2 * (*it)->edges[2]] = p1->pointLabel;
-		if (p1->pointLabel == -1)
-		{
-			pla[2 * (*it)->edges[2]] = basePolygonPointsCount++;
-			new_pa.push_back(Point(p1->x, p1->y));
-		}
 		pla[2 * (*it)->edges[2] + 1] = p2->pointLabel;
-		if (p2->pointLabel == -1)
-		{
-			pla[2 * (*it)->edges[2] + 1] = basePolygonPointsCount++;
-			new_pa.push_back(Point(p2->x, p2->y));
-		}
+		temp[2 * (*it)->edges[2]] = Point(p1->x, p1->y);
+		temp[2 * (*it)->edges[2] + 1] = Point(p2->x, p2->y);
 		polygonEdge[(*it)->edges[2]] = (*it)->polygon_edge[2];
 	}
+	for (int i = 0; i < 2 * splitedEdgeLablesCount; i++)
+	if (pla[i] == -1)
+	{
+		pla[i] = basePolygonPointsCount++;
+		new_pa.push_back(temp[i]);
+	}
+	delete[] temp;
 	return graph;
 }
 
