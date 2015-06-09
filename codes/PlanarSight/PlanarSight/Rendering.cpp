@@ -136,7 +136,6 @@ void Rendering::process()
 			pPolarID.clear();
 			pPolarValues.clear();
 			pPolarOrder.clear();
-
             
 			if (useDCELSort)
 				getPolarOrderByDCEL(monID,
@@ -772,60 +771,42 @@ void Rendering::calcVisPolygon()
 
 void Rendering::getPolarOrder(int monsterID, PointArray& pa, PointArray& pb, PointArray& points, IntArray& pPolarID, DoubleArray& pPolarValues, IntArray& pPolarOrder)
 {
-	PolarArray polars;
-
-    points.clear();
-    points.insert(points.end(), pa.begin(), pa.end());
-
-    int pointSize = points.size();
-    for (int i = 0; i < pointSize; i++)
+	points.insert(points.end(), pa.begin(), pa.end());
+	points.insert(points.end(), pb.begin(), pb.end());
+	int pointSize = points.size();
+	PolarArray polar;
+	Polar p;
+	double angle;
+	int zeroNum = 0;
+	for (int i = 0; i < pointSize; i++)
 	{
-        double angle = calPolar(monsters[monsterID].pos, points[i]);
+		angle = calPolar(monsters[monsterID].pos, points[i]);
 		angle -= HALF_PI;
 		if (angle < 0)
 			angle += DOUBLE_PI;
+		/*if (angle == 0)
+		zeroNum++;*/
 
+		pPolarID.push_back(-1);
 		pPolarValues.push_back(angle);
 
-        Polar p;
 		p.id = i;
 		p.value = angle;
-        polars.push_back(p);
+		polar.push_back(p);
 	}
 
-    sort(polars.begin(), polars.end(), polarSortLess);
+	sort(polar.begin(), polar.end(), polarSortLess);
 
-    for (int i = 0; i < pb.size(); i++)
-    {
-        double angle = eps / 100;
-
-        pPolarValues.push_back(angle);
-        points.push_back(pb[i]);
-    }
-
-    pPolarOrder.clear();
-    for (int i = 0; i < pb.size(); i++)
-    {
-        pPolarOrder.push_back(pa.size() + i);
-    }
-
-    for (int i = 0; i < pointSize; i++)
+	int index = 0;
+	pPolarID[polar[0].id] = 0;
+	pPolarOrder.push_back(polar[0].id);
+	for (int i = 1; i < pointSize; i++)
 	{
-        pPolarOrder.push_back(polars[i].id);
-	}	
-
-    pointSize = points.size();
-
-    int index = 0;
-    pPolarID.resize(pointSize);
-    pPolarID[pPolarOrder[0]] = 0;
-    for (int i = 1; i < pointSize; i++)
-    {
-        if (pPolarValues[pPolarOrder[i]] != pPolarValues[pPolarOrder[i - 1]])
-            index++;
-        pPolarID[pPolarOrder[i]] = index;
-    }
-
+		if (polar[i].value != polar[i - 1].value)
+			index++;
+		pPolarID[polar[i].id] = index;
+		pPolarOrder.push_back(polar[i].id);
+	}
 }
 
 void Rendering::getPolarOrderByDCEL(int monsterID, PointArray& pa, PointArray& pb, PointArray& points, IntArray& pPolarID, DoubleArray& pPolarValues, IntArray& pPolarOrder)
