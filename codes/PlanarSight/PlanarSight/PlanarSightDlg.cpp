@@ -431,6 +431,8 @@ void CPlanarSightDlg::OnBnClickedButtonImportMap()
 	{
 		std::ifstream inputfile(dlg.GetPathName());
 		m_pDisplay->rendering->basePolygon->importFromFile(inputfile);
+		GetDlgItem(IDC_OUTER_WALLS)->EnableWindow(false);
+		GetDlgItem(IDC_INNER_WALLS)->EnableWindow(true);
 	}
 	else
 		return;

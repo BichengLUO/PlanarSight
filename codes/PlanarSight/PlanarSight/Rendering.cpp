@@ -7,6 +7,9 @@ extern int wood2_tex_id;
 extern int floor_tex_id;
 extern int visp_tex_id;
 
+float total_tm[4] = {0, 0, 0, 0};
+int process_count = 0;
+
 Rendering::Rendering()
 {
 	basePolygon = new CPolygon();
@@ -118,6 +121,10 @@ void Rendering::draw()
 
 void Rendering::process()
 {
+	LARGE_INTEGER BeginTime;
+	LARGE_INTEGER EndTime;
+	LARGE_INTEGER Frequency;
+
 	int monsterSize = monsters.size();
 	int monID;
 	if (gameStart && monsterSize > 0)
@@ -130,18 +137,30 @@ void Rendering::process()
 			clearSplitedMeshMemory();
 			p2t::Point p(monsters[monID].pos.x, monsters[monID].pos.y);
 			int selc = 1; //表示新剖分出来的边数
+
+			QueryPerformanceFrequency(&Frequency);
+			QueryPerformanceCounter(&BeginTime);
 			splitedMesh = insertPointToUpdateTriangles(initialMesh, p, &selc); //生成新的三角剖分网格
+			QueryPerformanceCounter(&EndTime);
+			float tm1 = (float)(EndTime.QuadPart - BeginTime.QuadPart) / Frequency.QuadPart;
 
 			//清空上次的排序线段和顶点信息
 			sortedPointArray.clear();
 			sortedSegmentArray.clear();
 			PointArray newPointArray;
+
+			QueryPerformanceFrequency(&Frequency);
+			QueryPerformanceCounter(&BeginTime);
 			sortedSegmentArray = mesh2SegArray(splitedMesh, p, selc, basePolygon->pointArray.size(), newPointArray); //生成新的排序线段和顶点
+			QueryPerformanceCounter(&EndTime);
+			float tm2 = (float)(EndTime.QuadPart - BeginTime.QuadPart) / Frequency.QuadPart;
 
 			pPolarID.clear();
 			pPolarValues.clear();
 			pPolarOrder.clear();
             
+			QueryPerformanceFrequency(&Frequency);
+			QueryPerformanceCounter(&BeginTime);
 			if (useDCELSort)
 				getPolarOrderByDCEL(monID,
 				basePolygon->pointArray, newPointArray, sortedPointArray,
@@ -150,11 +169,29 @@ void Rendering::process()
 				getPolarOrder(monID,
 				basePolygon->pointArray, newPointArray, sortedPointArray,
 				pPolarID, pPolarValues, pPolarOrder);
+			QueryPerformanceCounter(&EndTime);
+			float tm3 = (float)(EndTime.QuadPart - BeginTime.QuadPart) / Frequency.QuadPart;
 
+			QueryPerformanceFrequency(&Frequency);
+			QueryPerformanceCounter(&BeginTime);
 			CPolygon cp = calcVisPolygon(monID, sortedPointArray, sortedSegmentArray, pPolarID, pPolarValues, pPolarOrder);
+			QueryPerformanceCounter(&EndTime);
+			float tm4 = (float)(EndTime.QuadPart - BeginTime.QuadPart) / Frequency.QuadPart;
+
 			visPolygons.push_back(cp);
+
+			total_tm[0] += tm1; 
+			total_tm[1] += tm2;
+			total_tm[2] += tm3;
+			total_tm[3] += tm4;
+			process_count++;
+
+			printf("MU: %.2f\tTS: %.2f\tAS: %.2f\tLS: %.2f\n",
+				(total_tm[0] / process_count) * 1000,
+				(total_tm[1] / process_count) * 1000,
+				(total_tm[2] / process_count) * 1000,
+				(total_tm[3] / process_count) * 1000);
 		}	
-		
 	}
 }
 
@@ -164,7 +201,7 @@ void Rendering::preprocess()
 	initialMesh = buildInitialMesh(*basePolygon);
     
     dcel = new DCEL();
-    dcel->initialize(basePolygon->pointArray);
+    //dcel->initialize(basePolygon->pointArray);
 
 	preprocessFinished = true;
 }

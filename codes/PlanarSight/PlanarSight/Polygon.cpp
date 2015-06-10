@@ -306,6 +306,11 @@ void CPolygon::importFromFile(std::ifstream &input)
 			loopArray.push_back(loop);
 		}
 	}
+	if (!loopCCWTest(0))
+		reverseLoop(0);
+	for (int i = 1; i < loopArray.size(); i++)
+	if (loopCCWTest(i))
+		reverseLoop(i);
 }
 
 void CPolygon::clear()
