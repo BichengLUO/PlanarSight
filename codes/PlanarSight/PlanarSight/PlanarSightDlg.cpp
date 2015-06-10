@@ -6,6 +6,7 @@
 #include "PlanarSight.h"
 #include "PlanarSightDlg.h"
 #include "afxdialogex.h"
+#include <fstream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -70,6 +71,8 @@ void CPlanarSightDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_DUAL_GRAPH, showDualGraph);
 	DDX_Control(pDX, IDC_SHOW_3D_VIEW, show3DView);
 	DDX_Control(pDX, IDC_LINEAR_SET, showLinearSet);
+	DDX_Control(pDX, IDC_BUTTON_IMPORT_MAP, importMapBtn);
+	DDX_Control(pDX, IDC_BUTTON_EXPORT_MAP, exportMapBtn);
 }
 
 BEGIN_MESSAGE_MAP(CPlanarSightDlg, CDialogEx)
@@ -94,6 +97,8 @@ ON_BN_CLICKED(IDC_SHOW_3D_VIEW, &CPlanarSightDlg::OnBnClickedShow3dView)
 ON_BN_CLICKED(IDC_LINEAR_SET, &CPlanarSightDlg::OnBnClickedLinearSet)
 ON_BN_CLICKED(IDC_RADIO_STD_SORT, &CPlanarSightDlg::OnBnClickedRadioStdSort)
 ON_BN_CLICKED(IDC_RADIO_DCEL, &CPlanarSightDlg::OnBnClickedRadioDcel)
+ON_BN_CLICKED(IDC_BUTTON_IMPORT_MAP, &CPlanarSightDlg::OnBnClickedButtonImportMap)
+ON_BN_CLICKED(IDC_BUTTON_EXPORT_MAP, &CPlanarSightDlg::OnBnClickedButtonExportMap)
 END_MESSAGE_MAP()
 
 
@@ -410,4 +415,42 @@ void CPlanarSightDlg::OnBnClickedRadioDcel()
 		m_pDisplay->rendering->useDCELSort = false;
 	else
 		m_pDisplay->rendering->useDCELSort = true;
+}
+
+
+void CPlanarSightDlg::OnBnClickedButtonImportMap()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	CFileDialog dlg(TRUE, //TRUE为OPEN对话框，FALSE为SAVE AS对话框
+		NULL,
+		NULL,
+		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+		(LPCTSTR)_TEXT("Text Files (*.txt)|*.txt|All Files (*.*)|*.*||"),
+		NULL);
+	if (dlg.DoModal() == IDOK)
+	{
+		std::ifstream inputfile(dlg.GetPathName());
+		m_pDisplay->rendering->basePolygon->importFromFile(inputfile);
+	}
+	else
+		return;
+}
+
+
+void CPlanarSightDlg::OnBnClickedButtonExportMap()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	CFileDialog dlg(FALSE, //TRUE为OPEN对话框，FALSE为SAVE AS对话框
+		(LPCTSTR)_TEXT("txt"),
+		NULL,
+		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+		(LPCTSTR)_TEXT("Text Files (*.txt)|*.txt|All Files (*.*)|*.*||"),
+		NULL);
+	if (dlg.DoModal() == IDOK)
+	{
+		std::ofstream outputfile(dlg.GetPathName());
+		m_pDisplay->rendering->basePolygon->exportToFile(outputfile);
+	}
+	else
+		return;
 }

@@ -1,4 +1,6 @@
 #include "Polygon.h"
+#include <string>
+#include <sstream>
 
 Loop::~Loop()
 {
@@ -261,6 +263,49 @@ bool CPolygon::edgePolygonIntersectionNormal(Point& p1, Point& p2, double& resul
 			return true;
 
 	return false;
+}
+
+void CPolygon::exportToFile(std::ofstream &output)
+{
+	for (int i = 0; i < pointArray.size(); i++)
+		output << "v " << pointArray[i].x << " " << pointArray[i].y << std::endl;
+
+	for (int i = 0; i < loopArray.size(); i++)
+	{
+		output << "l";
+		for (int j = 0; j < loopArray[i].pointIDArray.size(); j++)
+			output << " " << loopArray[i].pointIDArray[j];
+		output << std::endl;
+	}
+}
+
+void CPolygon::importFromFile(std::ifstream &input)
+{
+	clear();
+	std::string line;
+	while (std::getline(input, line))
+	{
+		std::istringstream iss(line);
+		if (line[0] == 'v')
+		{
+			double x, y;
+			char v;
+			iss >> v >> x >> y;
+			pointArray.push_back(Point(x, y));
+		}
+		if (line[0] == 'l')
+		{
+			Loop loop;
+			loop.polygon = this;
+			string token;
+			while (std::getline(iss, token, ' '))
+			{
+				if (token[0] != 'l')
+					loop.pointIDArray.push_back(atoi(token.c_str()));
+			}
+			loopArray.push_back(loop);
+		}
+	}
 }
 
 void CPolygon::clear()

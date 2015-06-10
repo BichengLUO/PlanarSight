@@ -2,6 +2,7 @@
 
 #pragma once
 #include "Point.h"
+#include <fstream>
 
 class CPolygon;
 
@@ -54,6 +55,8 @@ public:
 	bool edgeLoopIntersectionNormal(Point& a1, Point& a2, int loopID, double& result);
 	bool edgePolygonIntersectionNormal(Point& a1, Point& a2, double& result);
 	bool loopSelfIntersectionTest(PointArray& pa);
+	void exportToFile(std::ofstream &output);
+	void importFromFile(std::ifstream &input);
 	void clear();
 };
 typedef vector<CPolygon> PolygonArray;

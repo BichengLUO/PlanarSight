@@ -556,7 +556,7 @@ void Rendering::clear()
 	drawMonster = false;
 	preprocessFinished = false;
 
-    free(dcel);
+	delete dcel;
 }
 
 // 计算可见多边形
