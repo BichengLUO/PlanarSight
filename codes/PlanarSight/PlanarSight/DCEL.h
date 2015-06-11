@@ -20,8 +20,9 @@ typedef vector<Face*> FaceArray;
 typedef vector<Line> LineArray;
 
 static int vertexId = 0;
-static const double eps = 1e-6;
-static const double INF = 1e8;
+static const double eps = 1e-8;
+static const double bigEps = 1e-7 / 4;
+static const double INF = 1e6;
 
 class DCEL
 {

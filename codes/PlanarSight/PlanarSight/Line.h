@@ -35,6 +35,8 @@ public:
 
     bool isParallel(const Line &line);
 
+    bool isParallel(const Line &line, double tolerance);
+
     double getDistance(const Point &point);
 
     Point getIntersectionPoint(const Line &line);
@@ -44,7 +46,11 @@ public:
 
     bool isOnLine(const Point &point);
 
+    bool isOnLine(const Point &point, double tolerance);
+
     bool isIntersection(HalfEdge* edge);
+
+    bool isIntersection(HalfEdge* edge, double tolerance);
 
     void print();
 };
