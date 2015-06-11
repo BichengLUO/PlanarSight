@@ -143,11 +143,8 @@ void DCEL::splitFace(HalfEdge* edge, Vertex* v, int id)
     end->prev = left;
 }
 
-//int sss = 0;
 void DCEL::addLine(Line &line, int id)
 {
-    lines.push_back(line);
-
     // get the start intersection point and halfEdge
     // faces[0] is a magic face for usage
     Point startPoint = Point(INF, INF);
@@ -240,10 +237,10 @@ void DCEL::query(Line &line, IntArray& pPolarOrder, int &pPolarOrderNum)
     HalfEdge* startEdge = NULL;
     for (HalfEdge* e = faces[0]->edge; startEdge == NULL || e != faces[0]->edge; e = e->next)
     {
-        if (line.isIntersection(e) == true)
+        if (line.isIntersection(e, bigEps * 5) == true)
         {
             Point tem = line.getIntersection(e);
-            if (tem.x < startPoint.x || (fabs(tem.x - startPoint.x) < eps && tem.y < startPoint.y))
+            if (tem.x < startPoint.x || (fabs(tem.x - startPoint.x) < bigEps && tem.y < startPoint.y))
             {
                 startPoint = tem;
                 startEdge = e->twin;
@@ -251,17 +248,17 @@ void DCEL::query(Line &line, IntArray& pPolarOrder, int &pPolarOrderNum)
         }
         else
         {
-            if (line.isOnLine(e->origin->coordinate) == true)
+            if (line.isOnLine(e->origin->coordinate, bigEps) == true)
             {
                 Point tem = e->origin->coordinate;
-                if (tem.x < startPoint.x || (fabs(tem.x - startPoint.x) < eps && tem.y < startPoint.y))
+                if (tem.x < startPoint.x || (fabs(tem.x - startPoint.x) < bigEps && tem.y < startPoint.y))
                 {
                     startPoint = tem;
                     startEdge = e->twin->next;
                 }
             }
         }
-        if (startPoint.x < INF - INF * eps)
+        if (startPoint.x < INF - INF * bigEps)
             break;
     }
 
@@ -277,10 +274,10 @@ void DCEL::query(Line &line, IntArray& pPolarOrder, int &pPolarOrderNum)
         HalfEdge* endEdge;
 
         HalfEdge *e;
-        for (e = startEdge->next; line.isIntersection(e) == false && 
-            line.isOnLine(e->getDestination()->coordinate) == false; e = e->next);
+        for (e = startEdge->next; line.isIntersection(e, bigEps * 5) == false &&
+            line.isOnLine(e->getDestination()->coordinate, bigEps) == false; e = e->next);
         // cross through current face with a vertex
-        if (line.isOnLine(e->getDestination()->coordinate) == true)
+        if (line.isOnLine(e->getDestination()->coordinate, bigEps) == true)
         {
             endPoint = e->getDestination()->coordinate;
             for (endEdge = e->next; 1; endEdge = endEdge->twin->next)

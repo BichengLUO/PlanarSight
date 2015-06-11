@@ -202,7 +202,7 @@ void Rendering::preprocess()
 	initialMesh = buildInitialMesh(*basePolygon);
     
     dcel = new DCEL();
-    //dcel->initialize(basePolygon->pointArray);
+    dcel->initialize(basePolygon->pointArray);
 
 	preprocessFinished = true;
 }
@@ -848,17 +848,11 @@ void Rendering::getPolarOrder(int monsterID, PointArray& pa, PointArray& pb, Poi
 		pPolarID[polar[i].id] = index;
 		pPolarOrder.push_back(polar[i].id);
 	}
+
 }
 
 void Rendering::getPolarOrderByDCEL(int monsterID, PointArray& pa, PointArray& pb, PointArray& points, IntArray& pPolarID, DoubleArray& pPolarValues, IntArray& pPolarOrder)
 {
-    /*LARGE_INTEGER BeginTime;
-    LARGE_INTEGER EndTime;
-    LARGE_INTEGER Frequency;
-
-    QueryPerformanceFrequency(&Frequency);
-    QueryPerformanceCounter(&BeginTime);*/
-
     Point pointMonster = monsters[monsterID].pos;
     Line line = Line(pointMonster.x, 1, -pointMonster.y);
     int paSize = pa.size();
@@ -880,7 +874,7 @@ void Rendering::getPolarOrderByDCEL(int monsterID, PointArray& pa, PointArray& p
 
     for (int i = 0; i < pbSize; i++)
     {
-        double angle = eps / 100;
+        double angle = bigEps / 100;
         pPolarValues[paSize + i] = angle;
     }
 
@@ -946,9 +940,6 @@ void Rendering::getPolarOrderByDCEL(int monsterID, PointArray& pa, PointArray& p
         pPolarID[pPolarOrder[i]] = index;
     }
 
-    /*QueryPerformanceCounter(&EndTime);
-    double tm = (double)(EndTime.QuadPart - BeginTime.QuadPart) / Frequency.QuadPart;
-    printf("DCEL:  %.10lf\n", tm);*/
 }
 
 void Rendering::Test()
