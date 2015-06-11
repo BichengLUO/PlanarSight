@@ -6,12 +6,12 @@
 int main()
 {
 	int smooth = 1; //Smooth radius for each contour line
-	int space = 5; //The count of points between each sampling points
+	int space = 2; //The count of points between each sampling points
 
 	int map_width = 750; //Output map width
 	int map_height = 630; //Output map height
 
-	cv::Mat img = cv::imread("map_desat_wb2_inv_blur2_frame.png"); //Input binary image
+	cv::Mat img = cv::imread("text_map.png"); //Input binary image
 	std::ofstream file("map.txt", std::ofstream::out); //Output map file, v denodes vertex and l denodes loop
 
 	//Remove other color chanels

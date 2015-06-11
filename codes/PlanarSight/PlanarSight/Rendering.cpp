@@ -387,13 +387,13 @@ void Rendering::drawPoint(Point& p)
 
 void Rendering::drawPoint(Point& p, double size)
 {
-	int n = 100;
+	int n = 10;
 	double angle;
 	glBegin(GL_POLYGON);
 	for (int i = 0; i < n; i++)
 	{
 		angle = DOUBLE_PI * i / n;
-		glVertex2d(p.x + size * cos(angle), p.y + size * sin(angle));
+		glVertex2i((int)(p.x + size * cos(angle)), (int)(p.y + size * sin(angle)));
 	}
 	glEnd();
 }
