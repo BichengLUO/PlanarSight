@@ -1,9 +1,6 @@
 #include "Mesh2Graph.h"
 #include <Windows.h>
 
-double total_m2g_tm = 0;
-int m2g_count = 0;
-
 SegmentArray mesh2SegArray(const Mesh &mesh, const p2t::Point &p, int splitedEdgeLablesCount,
 	int basePolygonPointsCount, PointArray &new_pa)
 {
@@ -23,13 +20,6 @@ SegmentArray mesh2SegArray(const Mesh &mesh, const p2t::Point &p, int splitedEdg
 
 SegmentArray graph2SegArray(const Graph &graph, IntArray &pla, const bool *polygonEdge)
 {
-	LARGE_INTEGER BeginTime;
-	LARGE_INTEGER EndTime;
-	LARGE_INTEGER Frequency;
-
-	QueryPerformanceFrequency(&Frequency);
-	QueryPerformanceCounter(&BeginTime);
-
 	IntArray sortedEdgeLabels;
 	graph.topologicalSort(sortedEdgeLabels);
 	SegmentArray sOrder;
@@ -38,13 +28,6 @@ SegmentArray graph2SegArray(const Graph &graph, IntArray &pla, const bool *polyg
 		if (polygonEdge[sortedEdgeLabels[i]])
 			sOrder.push_back(Segment(pla[2 * sortedEdgeLabels[i]], pla[2 * sortedEdgeLabels[i] + 1]));
 	}
-
-	QueryPerformanceCounter(&EndTime);
-	double tm = (double)(EndTime.QuadPart - BeginTime.QuadPart) / Frequency.QuadPart;
-	total_m2g_tm += tm;
-
-	m2g_count++;
-	printf("%.2f\n", total_m2g_tm * 1000 / m2g_count);
 	return sOrder;
 }
 
