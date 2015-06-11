@@ -5,17 +5,25 @@
 
 int main()
 {
-	cv::Mat img = cv::imread("map_desat_wb2_inv_blur2_frame.png");
+	int smooth = 1; //Smooth radius for each contour line
+	int space = 5; //The count of points between each sampling points
+
+	int map_width = 750; //Output map width
+	int map_height = 630; //Output map height
+
+	cv::Mat img = cv::imread("map_desat_wb2_inv_blur2_frame.png"); //Input binary image
+	std::ofstream file("map.txt", std::ofstream::out); //Output map file, v denodes vertex and l denodes loop
+
+	//Remove other color chanels
 	cv::Mat gray;
 	cv::cvtColor(img, gray, CV_BGR2GRAY);
 
-	cv::Mat canny_output;
-	std::vector<std::vector<cv::Point> > contours;
-	std::vector<cv::Vec4i> hierarchy;
-	int smooth = 1;
 	int rows = gray.rows;
 	int cols = gray.cols;
+	std::vector<std::vector<cv::Point> > contours;
 	cv::Mat edge_points(rows, cols, gray.type());
+
+	//Extract precise contours image
 	for (int i = 0; i < rows; i++)
 	{
 		const uchar *gray_data = gray.ptr<uchar>(i);
@@ -43,6 +51,8 @@ int main()
 				edge_data[j] = 0;
 		}
 	}
+
+	//Make the contours loop for contours image
 	for (int i = 0; i < rows; i++)
 	{
 		uchar *edge_data = edge_points.ptr<uchar>(i);
@@ -78,7 +88,8 @@ int main()
 			}
 		}
 	}
-	int space = 5;
+
+	//Smooth the contours loop
 	std::vector<std::vector<cv::Point> > smooth_contours;
 	for (int i = 0; i < contours.size(); i++)
 	{
@@ -104,13 +115,12 @@ int main()
 			smooth_contours.push_back(smooth_contour);
 	}
 
-	std::ofstream file("D:\\map.txt", std::ofstream::out);
-
+	//Export contours to map file
 	for (int i = 1; i < smooth_contours.size(); i++)
 	for (int j = 0; j < smooth_contours[i].size(); j += space)
 		file << "v "
-		<< smooth_contours[i][j].x * (730.0 / gray.cols) + 10 << " "
-		<< (gray.rows - smooth_contours[i][j].y) * (610.0 / gray.rows) + 10 << std::endl;
+		<< smooth_contours[i][j].x * ((map_width - 20.0) / gray.cols) + 10.0 << " "
+		<< (gray.rows - smooth_contours[i][j].y) * ((map_height - 20.0)/ gray.rows) + 10.0 << std::endl;
 	int index = 0;
 	for (int i = 1; i < smooth_contours.size(); i++)
 	{
