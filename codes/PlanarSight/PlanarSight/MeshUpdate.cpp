@@ -438,7 +438,7 @@ int findEdgePointStands(p2t::Triangle &tri, const p2t::Point &p)
 		return 0;
 	if (p3->x == p1->x && p1->x == p.x)
 		return 1;
-	if (p1->x == p.x && p1->y == p.y)
+	if (POINT_EQUAL(*p1, p))
 	{
 		bool right = p2->x > p1->x && p3->x > p1->x;
 		bool ccw = p2t::Cross(*p2 - *p1, *p3 - *p1) > 0;
@@ -447,7 +447,7 @@ int findEdgePointStands(p2t::Triangle &tri, const p2t::Point &p)
 		else
 			return 1;
 	}
-	if (p2->x == p.x && p2->y == p.y)
+	if (POINT_EQUAL(*p2, p))
 	{
 		bool right = p1->x > p2->x && p3->x > p2->x;
 		bool ccw = p2t::Cross(*p1 - *p2, *p3 - *p2) > 0;
@@ -456,7 +456,7 @@ int findEdgePointStands(p2t::Triangle &tri, const p2t::Point &p)
 		else
 			return 0;
 	}
-	if (p3->x == p.x && p3->y == p.y)
+	if (POINT_EQUAL(*p3, p))
 	{
 		bool right = p1->x > p3->x && p2->x > p3->x;
 		bool ccw = p2t::Cross(*p1 - *p3, *p2 - *p3) > 0;
@@ -465,23 +465,62 @@ int findEdgePointStands(p2t::Triangle &tri, const p2t::Point &p)
 		else
 			return 0;
 	}
+	int result = 0;
+	int count = 0;
 	if ((p1->x < p.x && p2->x > p.x) || (p2->x < p.x && p1->x > p.x))
 	{
 		double ny = p1->y + (p2->y - p1->y) * ((p.x - p1->x) / (p2->x - p1->x));
 		if (((p1->y < ny && p2->y > ny) || (p2->y < ny && p1->y > ny)) && DOUBLE_EQUAL(ny, p.y))
-			return 2;
+		{
+			result += 2;
+			count++;
+		}
 	}
 	if ((p2->x < p.x && p3->x > p.x) || (p3->x < p.x && p2->x > p.x))
 	{
 		double ny = p2->y + (p3->y - p2->y) * ((p.x - p2->x) / (p3->x - p2->x));
 		if (((p2->y < ny && p3->y > ny) || (p3->y < ny && p2->y > ny)) && DOUBLE_EQUAL(ny, p.y))
-			return 0;
+		{
+			result += 0;
+			count++;
+		}
 	}
 	if ((p3->x < p.x && p1->x > p.x) || (p1->x < p.x && p3->x > p.x))
 	{
 		double ny = p3->y + (p1->y - p3->y) * ((p.x - p3->x) / (p1->x - p3->x));
 		if (((p3->y < ny && p1->y > ny) || (p1->y < ny && p3->y > ny)) && DOUBLE_EQUAL(ny, p.y))
+		{
+			result += 1;
+			count++;
+		}
+	}
+	if (count == 1) return result;
+	if (result == 3)
+	{
+		bool right = p2->x > p1->x && p3->x > p1->x;
+		bool ccw = p2t::Cross(*p2 - *p1, *p3 - *p1) > 0;
+		if (right ^ ccw)
+			return 2;
+		else
 			return 1;
+	}
+	if (result == 2)
+	{
+		bool right = p1->x > p2->x && p3->x > p2->x;
+		bool ccw = p2t::Cross(*p1 - *p2, *p3 - *p2) > 0;
+		if (right ^ ccw)
+			return 2;
+		else
+			return 0;
+	}
+	if (result == 1)
+	{
+		bool right = p1->x > p3->x && p2->x > p3->x;
+		bool ccw = p2t::Cross(*p1 - *p3, *p2 - *p3) > 0;
+		if (right ^ ccw)
+			return 1;
+		else
+			return 0;
 	}
 	return -1;
 }
