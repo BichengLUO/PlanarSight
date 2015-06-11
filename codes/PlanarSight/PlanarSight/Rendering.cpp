@@ -1242,10 +1242,10 @@ void Rendering::drawLinearSet()
 		if (pPolarID[i] > xRange)
 			xRange = pPolarID[i];
 	}
-	int xScale = (right - left) / (xRange + 1);
-	int yScale = (top - bottom) / (yRange + 1);
-	int xLeftVal;
-	int xRightVal;
+	double xScale = (right - left) / (double)(xRange + 1);
+	double yScale = (top - bottom) / (double)(yRange + 1);
+	double xLeftVal;
+	double xRightVal;
 	glColor3d(0.2, 0.8, 1);
 	glBegin(GL_LINES);
 	for (int i = 0; i < yRange; i++)
