@@ -138,29 +138,29 @@ void Rendering::process()
 			p2t::Point p(monsters[monID].pos.x, monsters[monID].pos.y);
 			int selc = 1; //表示新剖分出来的边数
 
-			QueryPerformanceFrequency(&Frequency);
-			QueryPerformanceCounter(&BeginTime);
+			//QueryPerformanceFrequency(&Frequency);
+			//QueryPerformanceCounter(&BeginTime);
 			splitedMesh = insertPointToUpdateTriangles(initialMesh, p, &selc); //生成新的三角剖分网格
-			QueryPerformanceCounter(&EndTime);
-			float tm1 = (float)(EndTime.QuadPart - BeginTime.QuadPart) / Frequency.QuadPart;
+			//QueryPerformanceCounter(&EndTime);
+			//float tm1 = (float)(EndTime.QuadPart - BeginTime.QuadPart) / Frequency.QuadPart;
 
 			//清空上次的排序线段和顶点信息
 			sortedPointArray.clear();
 			sortedSegmentArray.clear();
 			PointArray newPointArray;
 
-			QueryPerformanceFrequency(&Frequency);
-			QueryPerformanceCounter(&BeginTime);
+			//QueryPerformanceFrequency(&Frequency);
+			//QueryPerformanceCounter(&BeginTime);
 			sortedSegmentArray = mesh2SegArray(splitedMesh, p, selc, basePolygon->pointArray.size(), newPointArray); //生成新的排序线段和顶点
-			QueryPerformanceCounter(&EndTime);
-			float tm2 = (float)(EndTime.QuadPart - BeginTime.QuadPart) / Frequency.QuadPart;
+			//QueryPerformanceCounter(&EndTime);
+			//float tm2 = (float)(EndTime.QuadPart - BeginTime.QuadPart) / Frequency.QuadPart;
 
 			pPolarID.clear();
 			pPolarValues.clear();
 			pPolarOrder.clear();
             
-			QueryPerformanceFrequency(&Frequency);
-			QueryPerformanceCounter(&BeginTime);
+			//QueryPerformanceFrequency(&Frequency);
+			//QueryPerformanceCounter(&BeginTime);
 			if (useDCELSort)
 				getPolarOrderByDCEL(monID,
 				basePolygon->pointArray, newPointArray, sortedPointArray,
@@ -169,28 +169,29 @@ void Rendering::process()
 				getPolarOrder(monID,
 				basePolygon->pointArray, newPointArray, sortedPointArray,
 				pPolarID, pPolarValues, pPolarOrder);
-			QueryPerformanceCounter(&EndTime);
-			float tm3 = (float)(EndTime.QuadPart - BeginTime.QuadPart) / Frequency.QuadPart;
+			//QueryPerformanceCounter(&EndTime);
+			//float tm3 = (float)(EndTime.QuadPart - BeginTime.QuadPart) / Frequency.QuadPart;
 
-			QueryPerformanceFrequency(&Frequency);
-			QueryPerformanceCounter(&BeginTime);
+			//QueryPerformanceFrequency(&Frequency);
+			//QueryPerformanceCounter(&BeginTime);
 			CPolygon cp = calcVisPolygon(monID, sortedPointArray, sortedSegmentArray, pPolarID, pPolarValues, pPolarOrder);
-			QueryPerformanceCounter(&EndTime);
-			float tm4 = (float)(EndTime.QuadPart - BeginTime.QuadPart) / Frequency.QuadPart;
+			//QueryPerformanceCounter(&EndTime);
+			//float tm4 = (float)(EndTime.QuadPart - BeginTime.QuadPart) / Frequency.QuadPart;
 
 			visPolygons.push_back(cp);
-
+			/*
 			total_tm[0] += tm1; 
 			total_tm[1] += tm2;
 			total_tm[2] += tm3;
 			total_tm[3] += tm4;
 			process_count++;
 
-			/*printf("MU: %.2f\tTS: %.2f\tAS: %.2f\tLS: %.2f\n",
+			printf("MU: %.2f\tTS: %.2f\tAS: %.2f\tLS: %.2f\n",
 				(total_tm[0] / process_count) * 1000,
 				(total_tm[1] / process_count) * 1000,
 				(total_tm[2] / process_count) * 1000,
-				(total_tm[3] / process_count) * 1000);*/
+				(total_tm[3] / process_count) * 1000);
+				*/
 		}	
 	}
 }
@@ -387,13 +388,13 @@ void Rendering::drawPoint(Point& p)
 
 void Rendering::drawPoint(Point& p, double size)
 {
-	int n = 100;
+	int n = 10;
 	double angle;
 	glBegin(GL_POLYGON);
 	for (int i = 0; i < n; i++)
 	{
 		angle = DOUBLE_PI * i / n;
-		glVertex2d(p.x + size * cos(angle), p.y + size * sin(angle));
+		glVertex2i((int)(p.x + size * cos(angle)), (int)(p.y + size * sin(angle)));
 	}
 	glEnd();
 }
@@ -592,6 +593,7 @@ void Rendering::clear()
 	drawInnerWall = false;
 	drawMonster = false;
 	preprocessFinished = false;
+
     dcel->deleteAll();
 }
 
@@ -825,8 +827,6 @@ void Rendering::getPolarOrder(int monsterID, PointArray& pa, PointArray& pb, Poi
 		angle -= HALF_PI;
 		if (angle < 0)
 			angle += DOUBLE_PI;
-		/*if (angle == 0)
-		zeroNum++;*/
 
 		pPolarID.push_back(-1);
 		pPolarValues.push_back(angle);
@@ -852,6 +852,13 @@ void Rendering::getPolarOrder(int monsterID, PointArray& pa, PointArray& pb, Poi
 
 void Rendering::getPolarOrderByDCEL(int monsterID, PointArray& pa, PointArray& pb, PointArray& points, IntArray& pPolarID, DoubleArray& pPolarValues, IntArray& pPolarOrder)
 {
+    /*LARGE_INTEGER BeginTime;
+    LARGE_INTEGER EndTime;
+    LARGE_INTEGER Frequency;
+
+    QueryPerformanceFrequency(&Frequency);
+    QueryPerformanceCounter(&BeginTime);*/
+
     Point pointMonster = monsters[monsterID].pos;
     Line line = Line(pointMonster.x, 1, -pointMonster.y);
     int paSize = pa.size();
@@ -911,7 +918,7 @@ void Rendering::getPolarOrderByDCEL(int monsterID, PointArray& pa, PointArray& p
     }
 
     for (int i = 0; i < paSize; i++)
-	{
+    {
         if (flagLines[i] == 1) continue;
         if (fabs(pPolarValues[i] - PI) < 1.0)
         {
@@ -924,7 +931,7 @@ void Rendering::getPolarOrderByDCEL(int monsterID, PointArray& pa, PointArray& p
             flagLines[i] = 1;
         }
     }
-    
+
     pPolarOrder.clear();
     pPolarOrder.insert(pPolarOrder.end(), leftLines.begin(), leftLines.end());
     pPolarOrder.insert(pPolarOrder.end(), rightLines.begin(), rightLines.end());
@@ -938,6 +945,10 @@ void Rendering::getPolarOrderByDCEL(int monsterID, PointArray& pa, PointArray& p
             index++;
         pPolarID[pPolarOrder[i]] = index;
     }
+
+    /*QueryPerformanceCounter(&EndTime);
+    double tm = (double)(EndTime.QuadPart - BeginTime.QuadPart) / Frequency.QuadPart;
+    printf("DCEL:  %.10lf\n", tm);*/
 }
 
 void Rendering::Test()
@@ -1238,10 +1249,10 @@ void Rendering::drawLinearSet()
 		if (pPolarID[i] > xRange)
 			xRange = pPolarID[i];
 	}
-	int xScale = (right - left) / (xRange + 1);
-	int yScale = (top - bottom) / (yRange + 1);
-	int xLeftVal;
-	int xRightVal;
+	double xScale = (right - left) / (double)(xRange + 1);
+	double yScale = (top - bottom) / (double)(yRange + 1);
+	double xLeftVal;
+	double xRightVal;
 	glColor3d(0.2, 0.8, 1);
 	glBegin(GL_LINES);
 	for (int i = 0; i < yRange; i++)

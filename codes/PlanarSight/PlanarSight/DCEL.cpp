@@ -143,7 +143,7 @@ void DCEL::splitFace(HalfEdge* edge, Vertex* v, int id)
     end->prev = left;
 }
 
-int sss = 0;
+//int sss = 0;
 void DCEL::addLine(Line &line, int id)
 {
     lines.push_back(line);
