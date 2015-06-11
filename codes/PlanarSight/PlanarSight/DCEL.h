@@ -56,7 +56,9 @@ public :
     void addLine(Line &line, int id);
     
     // only return the order of all the lines intersected with this line
-    void query(Line &line, IntArray &pPolarOrder);
+    void query(Line &line, IntArray &pPolarOrder, int &pPolarOrderNum);
+
+    void deleteAll();
 
     void print();
 

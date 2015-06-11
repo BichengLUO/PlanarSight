@@ -143,6 +143,7 @@ void DCEL::splitFace(HalfEdge* edge, Vertex* v, int id)
     end->prev = left;
 }
 
+int sss = 0;
 void DCEL::addLine(Line &line, int id)
 {
     lines.push_back(line);
@@ -231,10 +232,8 @@ void DCEL::addLine(Line &line, int id)
     }
 }
 
-void DCEL::query(Line &line, IntArray& pPolarOrder)
+void DCEL::query(Line &line, IntArray& pPolarOrder, int &pPolarOrderNum)
 {
-    pPolarOrder.clear();
-
     // get the start intersection point and halfEdge
     // faces[0] is a magic face for usage
     Point startPoint = Point(INF, INF);
@@ -259,11 +258,11 @@ void DCEL::query(Line &line, IntArray& pPolarOrder)
                 {
                     startPoint = tem;
                     startEdge = e->twin->next;
-                    //printf("BoundaryCount: %d, point:(%.10lf, %.10lf)\n", e->origin->getCountIncident(), e->origin->coordinate.x, e->origin->coordinate.y);
                 }
             }
         }
-
+        if (startPoint.x < INF - INF * eps)
+            break;
     }
 
     if (startEdge == NULL)
@@ -297,7 +296,7 @@ void DCEL::query(Line &line, IntArray& pPolarOrder)
             {
                 if (temE->id >= 0)
                 {
-                    pPolarOrder.push_back(temE->id);
+                    pPolarOrder[pPolarOrderNum++] = temE->id;
                 }
                 temE = temE->twin->next;
             }
@@ -313,7 +312,7 @@ void DCEL::query(Line &line, IntArray& pPolarOrder)
 
             if (e->id >= 0)
             {
-                pPolarOrder.push_back(e->id);
+                pPolarOrder[pPolarOrderNum++] = e->id;
             }
 
             startPoint = endPoint;
@@ -325,6 +324,16 @@ void DCEL::query(Line &line, IntArray& pPolarOrder)
             break;
     }
 
+}
+
+void DCEL::deleteAll()
+{
+    for (int i = 0; i < vertexs.size(); i++)
+        vertexs.clear();
+    for (int i = 0; i < edges.size(); i++)
+        edges.clear();
+    for (int i = 0; i < faces.size(); i++)
+        faces.clear();
 }
 
 void DCEL::print()

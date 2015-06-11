@@ -186,11 +186,11 @@ void Rendering::process()
 			total_tm[3] += tm4;
 			process_count++;
 
-			printf("MU: %.2f\tTS: %.2f\tAS: %.2f\tLS: %.2f\n",
+			/*printf("MU: %.2f\tTS: %.2f\tAS: %.2f\tLS: %.2f\n",
 				(total_tm[0] / process_count) * 1000,
 				(total_tm[1] / process_count) * 1000,
 				(total_tm[2] / process_count) * 1000,
-				(total_tm[3] / process_count) * 1000);
+				(total_tm[3] / process_count) * 1000);*/
 		}	
 	}
 }
@@ -592,8 +592,7 @@ void Rendering::clear()
 	drawInnerWall = false;
 	drawMonster = false;
 	preprocessFinished = false;
-
-	delete dcel;
+    dcel->deleteAll();
 }
 
 // 计算可见多边形
@@ -858,8 +857,9 @@ void Rendering::getPolarOrderByDCEL(int monsterID, PointArray& pa, PointArray& p
     int paSize = pa.size();
     int pbSize = pb.size();
     int pointSize = paSize + pbSize;
-    points.clear();
-    pPolarValues.clear();
+    points.insert(points.end(), pa.begin(), pa.end());
+    points.insert(points.end(), pb.begin(), pb.end());
+    pPolarValues.resize(pointSize);
 
     for (int i = 0; i < paSize; i++)
     {
@@ -868,25 +868,24 @@ void Rendering::getPolarOrderByDCEL(int monsterID, PointArray& pa, PointArray& p
         if (angle < 0)
             angle += DOUBLE_PI;
 
-        pPolarValues.push_back(angle);
-        points.push_back(pa[i]);
-
+        pPolarValues[i] = angle;
     }
 
     for (int i = 0; i < pbSize; i++)
     {
         double angle = eps / 100;
-        pPolarValues.push_back(angle);
-        points.push_back(pb[i]);
+        pPolarValues[paSize + i] = angle;
     }
 
     IntArray alreadyLines;
-    dcel->query(line, alreadyLines);
+    alreadyLines.resize(paSize + 10);
+    int numAlreadyLines = 0;
+    dcel->query(line, alreadyLines, numAlreadyLines);
 
     IntArray flagLines;
-    flagLines.clear();
+    flagLines.resize(paSize);
     for (int i = 0; i < paSize; i++)
-        flagLines.push_back(0);
+        flagLines[i] = 0;
 
     IntArray leftLines, rightLines;
     leftLines.clear();
@@ -897,8 +896,7 @@ void Rendering::getPolarOrderByDCEL(int monsterID, PointArray& pa, PointArray& p
         leftLines.push_back(paSize + i);
     }
 
-    int numAlready = alreadyLines.size();
-    for (int i = 0; i < numAlready; i++)
+    for (int i = 0; i < numAlreadyLines; i++)
     {
         int id = alreadyLines[i];
         flagLines[id] = 1;
@@ -940,7 +938,6 @@ void Rendering::getPolarOrderByDCEL(int monsterID, PointArray& pa, PointArray& p
             index++;
         pPolarID[pPolarOrder[i]] = index;
     }
-
 }
 
 void Rendering::Test()

@@ -44,7 +44,7 @@ SegmentArray graph2SegArray(const Graph &graph, IntArray &pla, const bool *polyg
 	total_m2g_tm += tm;
 
 	m2g_count++;
-	printf("%.2f\n", total_m2g_tm * 1000 / m2g_count);
+	//printf("%.2f\n", total_m2g_tm * 1000 / m2g_count);
 	return sOrder;
 }
 
