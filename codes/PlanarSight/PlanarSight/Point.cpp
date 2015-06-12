@@ -75,6 +75,10 @@ double calAngle(Vector& v1, Vector& v2)
 {
 	double d = v1 * v2;
 	d = d * (1 / v1.length() / v2.length());
+	if (d > 1)
+		d = 1;
+	else if (d < -1)
+		d = -1;
 	d = acos(d);
 	return d;
 }

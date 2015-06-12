@@ -30,9 +30,10 @@ public:
 
 	CPolygon* basePolygon;
 	PolygonArray visPolygons;
+	PolygonArray playerVisPolygon;
 	PointArray loopBuf;
 	MonsterArray monsters;
-	Point player;
+	Player player;
 	static int playerSpeed;
 	bool drawOuterWall;
 	bool drawInnerWall;
@@ -50,6 +51,7 @@ public:
 	bool gameStart;
 	bool moving;
 	bool preprocessFinished;
+	bool gameOver;
 
 public:
 	Rendering();

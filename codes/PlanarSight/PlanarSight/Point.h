@@ -2,6 +2,7 @@
 
 #pragma once
 #include <vector>
+#include <deque>
 #include <stdlib.h>
 #include <time.h>
 using namespace std;

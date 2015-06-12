@@ -27,11 +27,12 @@ Rendering::Rendering()
 	useDCELSort = false;
 
 	gameStart = false;
-	player.x = 370;
-	player.y = 310;
+	player.init(Point(370, 310));
 	moving = false;
 	preprocessFinished = false;
 	dcel = NULL;
+
+	gameOver = false;
 
 	srand((unsigned)time(0));
 }
@@ -78,22 +79,34 @@ void Rendering::draw()
 		int size = visPolygons.size();
 		for (int i = 0; i < size; i++)
 		{
+			if (monsters[i].visible)
+			{
+				if (show3DView)
+					drawVisPolygon3D(visPolygons[i], i / (double)size);
+				else
+					drawVisPolygon(visPolygons[i]);
+			}
+			
+		}
+
+		if (playerVisPolygon.size() > 0)
+		{
 			if (show3DView)
-				drawVisPolygon3D(visPolygons[i], i / (double)size);
+				drawVisPolygon3D(playerVisPolygon[0], 0);
 			else
-				drawVisPolygon(visPolygons[i]);
+				drawVisPolygon(playerVisPolygon[0]);
 		}
 	}
 
 	if (show3DView)
 	{
 		drawMonsters3D(monsters);
-		drawPlayer3D(player);
+		drawPlayer3D(player.pos);
 	}
 	else
 	{
 		drawMonsters(monsters);
-		drawPlayer(player);
+		drawPlayer(player.pos);
 	}	
 
 	if (showSortedSegment)
@@ -127,6 +140,47 @@ void Rendering::process()
 	LARGE_INTEGER Frequency;
 
 	int monsterSize = monsters.size();
+	if (gameStart && monsterSize > 0)
+	{
+		for (int i = 0; i < monsterSize; i++)
+		{
+			if (monsters[i].hunt && (monsters[i].pos - player.pos).length() <= 10)
+			{
+				gameOver = true;
+				gameStart = false;
+				monsters[i].walkDirection = monsters[i].walkDirection + PI;
+				monsters[i].viewDirection = monsters[i].walkDirection;
+				monsters[i].hunt = false;
+			}
+		}
+			
+	}
+
+	if (gameStart)
+	{
+		clearSplitedMeshMemory();
+		p2t::Point p(player.pos.x, player.pos.y);
+		int selc = 1;
+		splitedMesh = insertPointToUpdateTriangles(initialMesh, p, &selc);
+
+		sortedPointArray.clear();
+		sortedSegmentArray.clear();
+		PointArray newPointArray;
+		sortedSegmentArray = mesh2SegArray(splitedMesh, p, selc, basePolygon->pointArray.size(), newPointArray);
+
+		pPolarID.clear();
+		pPolarValues.clear();
+		pPolarOrder.clear();
+
+		getPolarOrder(-1,
+			basePolygon->pointArray, newPointArray, sortedPointArray,
+			pPolarID, pPolarValues, pPolarOrder);
+		CPolygon cp = calcVisPolygon(-1, sortedPointArray, sortedSegmentArray, pPolarID, pPolarValues, pPolarOrder);
+		
+		playerVisPolygon.clear();
+		playerVisPolygon.push_back(cp);
+	}
+
 	int monID;
 	if (gameStart && monsterSize > 0)
 	{
@@ -195,6 +249,7 @@ void Rendering::process()
 				*/
 		}	
 	}
+
 }
 
 void Rendering::preprocess()
@@ -471,7 +526,10 @@ void Rendering::drawMonsters(MonsterArray& ma)
 	int pointSize = ma.size();
 	glColor3d(0, 1, 1);
 	for (int i = 0; i < pointSize; i++)
-		drawPoint(ma[i].pos, 5);
+	{
+		if (ma[i].visible)
+			drawPoint(ma[i].pos, 5);
+	}
 }
 
 void Rendering::drawMonsters3D(MonsterArray& ma)
@@ -485,19 +543,19 @@ void Rendering::drawMonsters3D(MonsterArray& ma)
 void Rendering::drawPlayer(Point& p)
 {
 	glColor3d(1, 1, 0);
-	drawPoint(player, 7);
+	drawPoint(player.pos, 7);
 }
 
 void Rendering::drawPlayer3D(Point& p)
 {
 	glColor3d(1, 1, 0);
-	drawPoint3D(player, 7);
+	drawPoint3D(player.pos, 7);
 }
 
 void Rendering::playerWalk(int keyFlag)
 {
 	cout << keyFlag << endl;
-	Point p = player;
+	Point p = player.pos;
 	switch (keyFlag)
 	{
 	case 'A':
@@ -515,14 +573,15 @@ void Rendering::playerWalk(int keyFlag)
 	}
 
 	if (basePolygon->pointInPolygonTest(p))
-		player = p;
+		player.pos = p;
 }
 
 bool Rendering::playerMoveTo(Point& p)
 {
 	if (basePolygon->pointInPolygonTest(p))
 	{
-		player = p;
+		player.calcDirection(p);
+		player.pos = p;
 		return true;
 	}
 	else
@@ -536,8 +595,21 @@ void Rendering::monsterWalk(int monsterID)
 	double rd = randomDouble();
 	double angleNew = mPtr->walkDirection - mPtr->range + 2 * mPtr->range * rd;
 	double angle = angleNew * 0.3 + mPtr->walkDirection * 0.7;
+
+	if (visPolygons[monsterID].pointInPolygonTest(player.pos))
+	{
+		angle = calPolar(monsters[monsterID].pos, player.pos);
+		mPtr->speed = 2;
+		mPtr->hunt = true;
+	}
+	else
+	{
+		mPtr->speed = 0.8;
+		mPtr->hunt = false;
+	}
+
 	double turn;
-	Vector direction(Monster::speed * cos(angle), Monster::speed * sin(angle));
+	Vector direction(mPtr->speed * cos(angle), mPtr->speed * sin(angle));
 	Point p = mPtr->pos + direction;
 	if (basePolygon->pointInPolygonTest(p))
 	{
@@ -579,6 +651,13 @@ void Rendering::monsterWalk(int monsterID)
 		mPtr->viewDirection -= DOUBLE_PI;
 	else if (mPtr->viewDirection < 0)
 		mPtr->viewDirection += DOUBLE_PI;
+
+	if (playerVisPolygon[0].pointInPolygonTest(mPtr->pos))
+		mPtr->visible = true;
+	else if ((mPtr->pos - player.pos).length() < 30)
+		mPtr->visible = true;
+	else
+		mPtr->visible = false;
 }
 
 void Rendering::clear()
@@ -611,6 +690,21 @@ void Rendering::clear()
 // pPolarOrder：存储一组关于pa中点的索引，按pa中点的极角序排放
 CPolygon Rendering::calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& sOrder, IntArray& pPolarID, DoubleArray& pPolarVal, IntArray& pPolarOrder)
 {
+	Point center;
+	double rangeMin, rangeMax;
+	if (monsterID == -1)
+	{
+		center = player.pos;
+		rangeMin = player.direction - player.range - HALF_PI;
+		rangeMax = player.direction + player.range - HALF_PI;
+	}
+	else
+	{
+		center = monsters[monsterID].pos;
+		rangeMin = monsters[monsterID].viewDirection - monsters[monsterID].range - HALF_PI;
+		rangeMax = monsters[monsterID].viewDirection + monsters[monsterID].range - HALF_PI;
+	}
+
 	int zeroNum = 0;							//极角为0的点的数量
 	int pointSize = pa.size();
 	int maxPolarID = 0;
@@ -671,9 +765,14 @@ CPolygon Rendering::calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& 
 			x = ds.findSetMax(x);
 		}
 	}
+	for (int i = 0; i < xSize - 1; i++)
+	{
+		if (vis[i] == -1)
+			vis[i] = vis[i + 1];
+	}	
+	if (vis[vis.size() - 1] == -1)
+		vis[vis.size() - 1] = vis[vis.size() - 2];
 
-	double rangeMin = monsters[monsterID].viewDirection - monsters[monsterID].range - HALF_PI;
-	double rangeMax = monsters[monsterID].viewDirection + monsters[monsterID].range - HALF_PI;
 	if (rangeMin < 0)
 		rangeMin += DOUBLE_PI;
 	if (rangeMax < 0)
@@ -715,10 +814,10 @@ CPolygon Rendering::calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& 
 	int xFlag;
 	int preY, curY;
 	double polar;
-	pointBuf.push_back(monsters[monsterID].pos);
+	pointBuf.push_back(center);
 
 	//计算可视范围左边界与线段集的交点
-	calcLineLineIntersection(pLeft, monsters[monsterID].pos, rangeMin + HALF_PI, pa[sOrder[rangeLeftY].aID], pa[sOrder[rangeLeftY].bID]);
+	calcLineLineIntersection(pLeft, center, rangeMin + HALF_PI, pa[sOrder[rangeLeftY].aID], pa[sOrder[rangeLeftY].bID]);
 	pointBuf.push_back(pLeft);
 	preY = rangeLeftY;
 
@@ -737,7 +836,7 @@ CPolygon Rendering::calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& 
 			if (curY > preY)
 			{
 				polar = pPolarVal[sOrder[preY].bID];
-				calcLineLineIntersection(pMid, monsters[monsterID].pos, polar + HALF_PI, pa[sOrder[curY].aID], pa[sOrder[curY].bID]);
+				calcLineLineIntersection(pMid, center, polar + HALF_PI, pa[sOrder[curY].aID], pa[sOrder[curY].bID]);
 				pointBuf.push_back(pa[sOrder[preY].bID]);
 				pointBuf.push_back(pMid);
 			}
@@ -745,7 +844,7 @@ CPolygon Rendering::calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& 
 			else if (curY < preY)
 			{
 				polar = pPolarVal[sOrder[curY].aID];
-				calcLineLineIntersection(pMid, monsters[monsterID].pos, polar + HALF_PI, pa[sOrder[preY].aID], pa[sOrder[preY].bID]);
+				calcLineLineIntersection(pMid, center, polar + HALF_PI, pa[sOrder[preY].aID], pa[sOrder[preY].bID]);
 				pointBuf.push_back(pMid);
 				pointBuf.push_back(pa[sOrder[curY].aID]);
 			}
@@ -756,10 +855,10 @@ CPolygon Rendering::calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& 
 	}
 
 	//计算可视范围右边界与线段集的交点
-	calcLineLineIntersection(pRight, monsters[monsterID].pos, rangeMax + HALF_PI, pa[sOrder[rangeRightY].aID], pa[sOrder[rangeRightY].bID]);
+	calcLineLineIntersection(pRight, center, rangeMax + HALF_PI, pa[sOrder[rangeRightY].aID], pa[sOrder[rangeRightY].bID]);
 	pointBuf.push_back(pRight);
 
-	if (monsterID == monsters.size() - 1)
+	if (monsterID != -1 && monsterID == monsters.size() - 1)
 	{
 		xLeft = rangeLeft;
 		xRight = rangeRight;
@@ -820,6 +919,12 @@ void Rendering::calcVisPolygon()
 
 void Rendering::getPolarOrder(int monsterID, PointArray& pa, PointArray& pb, PointArray& points, IntArray& pPolarID, DoubleArray& pPolarValues, IntArray& pPolarOrder)
 {
+	Point center;
+	if (monsterID == -1)
+		center = player.pos;
+	else
+		center = monsters[monsterID].pos;
+
 	points.insert(points.end(), pa.begin(), pa.end());
 	points.insert(points.end(), pb.begin(), pb.end());
 	int pointSize = points.size();
@@ -829,7 +934,7 @@ void Rendering::getPolarOrder(int monsterID, PointArray& pa, PointArray& pb, Poi
 	int zeroNum = 0;
 	for (int i = 0; i < pointSize; i++)
 	{
-		angle = calPolar(monsters[monsterID].pos, points[i]);
+		angle = calPolar(center, points[i]);
 		angle -= HALF_PI;
 		if (angle < 0)
 			angle += DOUBLE_PI;

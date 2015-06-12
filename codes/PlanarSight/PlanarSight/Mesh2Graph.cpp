@@ -29,6 +29,7 @@ SegmentArray graph2SegArray(const Graph &graph, IntArray &pla, const bool *polyg
 			sOrder.push_back(Segment(pla[2 * sortedEdgeLabels[i]], pla[2 * sortedEdgeLabels[i] + 1]));
 	}
 
+	int s = sOrder.size();
 	return sOrder;
 }
 
