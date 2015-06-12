@@ -126,7 +126,7 @@ Graph* mesh2Graph(const Mesh &mesh, const p2t::Point &p, int splitedEdgeLablesCo
 	}
 
 	for (int i = 0; i < 2 * splitedEdgeLablesCount; i++)
-	if (pla[i] == -1)
+	if (polygonEdge[i / 2] && pla[i] == -1)
 	{
 		pla[i] = basePolygonPointsCount++;
 		new_pa.push_back(temp[i]);
