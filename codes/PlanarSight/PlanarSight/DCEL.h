@@ -34,13 +34,8 @@ public :
     LineArray lines;
 
 public :
-    DCEL(){
-        vertexs.clear();
-        edges.clear();
-        faces.clear();
-        lines.clear();
-    }
-    ~DCEL(){}
+    DCEL(){}
+	~DCEL();
 
     // build the rectangle boundary
     void preInitialize(const PointArray &points);

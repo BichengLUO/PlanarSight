@@ -31,6 +31,7 @@ Rendering::Rendering()
 	player.y = 310;
 	moving = false;
 	preprocessFinished = false;
+	dcel = NULL;
 
 	srand((unsigned)time(0));
 }
@@ -201,6 +202,7 @@ void Rendering::preprocess()
 	clearInitialMeshMemory(initialMesh);
 	initialMesh = buildInitialMesh(*basePolygon);
     
+	delete dcel;
     dcel = new DCEL();
     dcel->initialize(basePolygon->pointArray);
 
@@ -594,7 +596,7 @@ void Rendering::clear()
 	drawMonster = false;
 	preprocessFinished = false;
 
-    dcel->deleteAll();
+	delete dcel;
 }
 
 // 计算可见多边形

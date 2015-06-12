@@ -325,12 +325,20 @@ void DCEL::query(Line &line, IntArray& pPolarOrder, int &pPolarOrderNum)
 
 void DCEL::deleteAll()
 {
-    for (int i = 0; i < vertexs.size(); i++)
-        vertexs.clear();
-    for (int i = 0; i < edges.size(); i++)
-        edges.clear();
-    for (int i = 0; i < faces.size(); i++)
-        faces.clear();
+	for (int i = 0; i < vertexs.size(); i++)
+		delete vertexs[i];
+	for (int i = 0; i < edges.size(); i++)
+		delete edges[i];
+	for (int i = 0; i < faces.size(); i++)
+		delete faces[i];
+	vertexs.clear();
+	edges.clear();
+	faces.clear();
+}
+
+DCEL::~DCEL()
+{
+	deleteAll();
 }
 
 void DCEL::print()
