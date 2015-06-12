@@ -44,9 +44,14 @@ Graph* mesh2Graph(const Mesh &mesh, const p2t::Point &p, int splitedEdgeLablesCo
 	Mesh::const_iterator it;
 	for (it = mesh.begin(); it != mesh.end(); ++it)
 	{
+		bool unlabeled_edge = false;
 		for (int i = 0; i < 3; i++)
 		if ((*it)->edges[i] == -1)
-			continue;
+		{
+			unlabeled_edge = true;
+			break;
+		}
+		if (unlabeled_edge) continue;
 		const p2t::Point *p1 = (*it)->GetPoint(0);
 		const p2t::Point *p2 = (*it)->GetPoint(1);
 		const p2t::Point *p3 = (*it)->GetPoint(2);

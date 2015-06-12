@@ -162,7 +162,7 @@ void Rendering::process()
             
 			//QueryPerformanceFrequency(&Frequency);
 			//QueryPerformanceCounter(&BeginTime);
-			if (useDCELSort)
+			if (useDCELSort && dcel != NULL)
 				getPolarOrderByDCEL(monID,
 				basePolygon->pointArray, newPointArray, sortedPointArray,
 				pPolarID, pPolarValues, pPolarOrder);
@@ -202,9 +202,12 @@ void Rendering::preprocess()
 	clearInitialMeshMemory(initialMesh);
 	initialMesh = buildInitialMesh(*basePolygon);
     
-	delete dcel;
-    dcel = new DCEL();
-    dcel->initialize(basePolygon->pointArray);
+	if (useDCELSort)
+	{
+		delete dcel;
+		dcel = new DCEL();
+		dcel->initialize(basePolygon->pointArray);
+	}
 
 	preprocessFinished = true;
 }
@@ -597,6 +600,7 @@ void Rendering::clear()
 	preprocessFinished = false;
 
 	delete dcel;
+	dcel = NULL;
 }
 
 // 计算可见多边形
