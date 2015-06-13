@@ -685,7 +685,6 @@ void Rendering::clear()
 		visPolygons[i].clear();
 	playerVisPolygon.clear();
 	visPolygons.clear();
-	playerVisPolygon.clear();
 	loopBuf.clear();
 	monsters.clear();
 	clearInitialMeshMemory(initialMesh);
