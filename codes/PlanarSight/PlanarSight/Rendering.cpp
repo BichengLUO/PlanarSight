@@ -332,13 +332,21 @@ void Rendering::drawLoop(CPolygon& p, int loopID)
 {
 	int pointSize = p.loopArray[loopID].pointIDArray.size();
 	int index;
+
 	glLineWidth(1.0);
-	glBegin(GL_LINE_LOOP);
+	glBegin(GL_LINE_STRIP);
 	for (int i = 0; i < pointSize; i++)
 	{
 		index = p.loopArray[loopID].pointIDArray[i];
 		glVertex2d(p.pointArray[index].x, p.pointArray[index].y);
 	}
+	glEnd();
+
+	glBegin(GL_LINES);
+	index = p.loopArray[loopID].pointIDArray[pointSize - 1];
+	glVertex2d(p.pointArray[index].x, p.pointArray[index].y);
+	index = p.loopArray[loopID].pointIDArray[0];
+	glVertex2d(p.pointArray[index].x, p.pointArray[index].y);
 	glEnd();
 }
 
@@ -667,6 +675,7 @@ void Rendering::clear()
 	for (int i = 0; i < visSize; i++)
 		visPolygons[i].clear();
 	visPolygons.clear();
+	playerVisPolygon.clear();
 	loopBuf.clear();
 	monsters.clear();
 	clearInitialMeshMemory(initialMesh);

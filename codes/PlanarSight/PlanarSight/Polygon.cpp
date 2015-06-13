@@ -66,10 +66,27 @@ bool CPolygon::addInnerLoop(PointArray& pa)
 
 bool CPolygon::pointInLoopTest(Point& p, int loopID)
 {
+	Point p1, p2;
 	Loop* lPtr;
 	lPtr = &(loopArray[loopID]);
 	int pointSize = lPtr->pointIDArray.size();
-	Vector v1, v2;
+	int i;
+	int j = pointSize - 1;
+	bool oddNodes = false;
+
+	for (i = 0; i < pointSize; i++)
+	{
+		p1 = pointArray[lPtr->pointIDArray[i]];
+		p2 = pointArray[lPtr->pointIDArray[j]];
+		if ((p1.y < p.y && p2.y >= p.y || p2.y < p.y && p1.y >= p.y) && (p1.x <= p.x || p2.x <= p.x))
+		{
+			oddNodes ^= (p1.x + (p.y - p1.y) / (p2.y - p1.y) * (p2.x - p1.x) < p.x);
+		}
+		j = i;
+	}
+	return oddNodes;
+
+	/*Vector v1, v2;
 	double angle;
 	double direction;
 	double sum = 0;
@@ -97,7 +114,7 @@ bool CPolygon::pointInLoopTest(Point& p, int loopID)
 	if (equalZero(sum))
 		return false;
 	else
-		return true;
+		return true;*/
 }
 
 bool CPolygon::pointInPolygonTest(Point& p)
