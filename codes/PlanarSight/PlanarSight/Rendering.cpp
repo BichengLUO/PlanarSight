@@ -263,8 +263,17 @@ void Rendering::preprocess()
 		dcel = new DCEL();
 		dcel->initialize(basePolygon->pointArray);
 	}
-
+	randomPlacePlayer();
 	preprocessFinished = true;
+}
+
+void Rendering::randomPlacePlayer()
+{
+	while (!basePolygon->pointInPolygonTest(player.pos))
+	{
+		player.pos.x = rand() % 740;
+		player.pos.y = rand() % 620;
+	}
 }
 
 void Rendering::drawPolygon(CPolygon& p)
@@ -666,6 +675,7 @@ void Rendering::clear()
 	int visSize = visPolygons.size();
 	for (int i = 0; i < visSize; i++)
 		visPolygons[i].clear();
+	playerVisPolygon.clear();
 	visPolygons.clear();
 	loopBuf.clear();
 	monsters.clear();

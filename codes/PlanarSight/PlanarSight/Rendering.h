@@ -59,6 +59,7 @@ public:
 	void draw();
 	void process();
 	void preprocess();
+	void randomPlacePlayer();
 	void drawPolygon(CPolygon& p);
 	void drawPolygon3D(CPolygon& p);
 	void drawVisPolygon(CPolygon& p);

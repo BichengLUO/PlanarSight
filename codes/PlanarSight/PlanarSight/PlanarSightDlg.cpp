@@ -433,6 +433,8 @@ void CPlanarSightDlg::OnBnClickedButtonImportMap()
 		m_pDisplay->rendering->basePolygon->importFromFile(inputfile);
 		GetDlgItem(IDC_OUTER_WALLS)->EnableWindow(false);
 		GetDlgItem(IDC_INNER_WALLS)->EnableWindow(true);
+		GetDlgItem(IDC_MONSTERS)->EnableWindow(true);
+		GetDlgItem(IDC_START_GAME)->EnableWindow(true);
 	}
 	else
 		return;
