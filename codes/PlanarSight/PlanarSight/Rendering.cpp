@@ -877,7 +877,8 @@ CPolygon Rendering::calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& 
 	calcLineLineIntersection(pRight, center, rangeMax + HALF_PI, pa[sOrder[rangeRightY].aID], pa[sOrder[rangeRightY].bID]);
 	pointBuf.push_back(pRight);
 
-	if (monsterID != -1 && monsterID == monsters.size() - 1)
+	if ((monsterID == -1 && monsters.size() == 0) ||
+		monsterID == monsters.size() - 1)
 	{
 		xLeft = rangeLeft;
 		xRight = rangeRight;
