@@ -264,6 +264,7 @@ void Rendering::preprocess()
 		dcel->initialize(basePolygon->pointArray);
 	}
 	randomPlacePlayer();
+	basePolygon->exportToFile(std::ofstream("temp_map.txt", std::ofstream::out));
 	preprocessFinished = true;
 }
 
