@@ -600,6 +600,9 @@ bool Rendering::playerMoveTo(Point& p)
 	{
 		player.calcDirection(p);
 		player.pos = p;
+		//给玩家位置增加一个细微扰动，防止退化情况
+		player.pos.x += ((rand() % 11) - 5) / 100.0;
+		player.pos.y += ((rand() % 11) - 5) / 100.0;
 		return true;
 	}
 	else
