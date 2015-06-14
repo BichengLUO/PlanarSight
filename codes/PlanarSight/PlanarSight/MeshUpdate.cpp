@@ -271,6 +271,7 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p, int *se
 				int edge = findEdgePointStands(*next_tri, *next_p);
 				nextTriangleCandidate = next_tri->neighbors_[edge];
 			}
+			int valid_count = 0;
 			for (int i = 0; i < 4; i++)
 			{
 				if (t[i] != NULL)
@@ -323,8 +324,14 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p, int *se
 					{
 						splitedMesh.push_back(t[i]);
 						splitedMeshTrianglesMemory.push_back(t[i]);
+						valid_count++;
 					}
 				}
+			}
+			if (valid_count == 1)
+			{
+				splitedMesh.pop_back();
+				next_tri->mark_to_be_splited = false;
 			}
 			for (int i = 0; i < 2; i++)
 				ot[i] = t[i];
