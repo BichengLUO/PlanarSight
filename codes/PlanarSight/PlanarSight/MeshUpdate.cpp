@@ -271,6 +271,7 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p, int *se
 				int edge = findEdgePointStands(*next_tri, *next_p);
 				nextTriangleCandidate = next_tri->neighbors_[edge];
 			}
+			int valid_count = 0;
 			for (int i = 0; i < 4; i++)
 			{
 				if (t[i] != NULL)
@@ -323,8 +324,14 @@ Mesh insertPointToUpdateTriangles(const Mesh &mesh, const p2t::Point &p, int *se
 					{
 						splitedMesh.push_back(t[i]);
 						splitedMeshTrianglesMemory.push_back(t[i]);
+						valid_count++;
 					}
 				}
+			}
+			if (valid_count == 1)
+			{
+				splitedMesh.pop_back();
+				next_tri->mark_to_be_splited = false;
 			}
 			for (int i = 0; i < 2; i++)
 				ot[i] = t[i];
@@ -432,12 +439,6 @@ int findEdgePointStands(p2t::Triangle &tri, const p2t::Point &p)
 	const p2t::Point *p2 = tri.GetPoint(1);
 	const p2t::Point *p3 = tri.GetPoint(2);
 
-	if (p1->x == p2->x && p1->x == p.x)
-		return 2;
-	if (p2->x == p3->x && p2->x == p.x)
-		return 0;
-	if (p3->x == p1->x && p1->x == p.x)
-		return 1;
 	if (POINT_EQUAL(*p1, p))
 	{
 		bool right = p2->x > p1->x && p3->x > p1->x;
@@ -525,7 +526,7 @@ int findEdgePointStands(p2t::Triangle &tri, const p2t::Point &p)
 	return -1;
 }
 
-void rayIntersectTriangle(p2t::Triangle &tri, const p2t::Point &p, p2t::Point *p1p2, p2t::Point *p2p3, p2t::Point *p3p1)
+void rayIntersectTriangle(p2t::Triangle &tri, p2t::Point &p, p2t::Point *p1p2, p2t::Point *p2p3, p2t::Point *p3p1)
 {
 	const p2t::Point *p1 = tri.GetPoint(0);
 	const p2t::Point *p2 = tri.GetPoint(1);
@@ -533,23 +534,17 @@ void rayIntersectTriangle(p2t::Triangle &tri, const p2t::Point &p, p2t::Point *p
 
 	if (p1->x == p2->x && p1->x == p.x)
 	{
-		p1p2->x = p.x;
-		p1p2->y = p1->y > p2->y ? p1->y : p2->y;
-		p1p2->pointLabel = p1->y > p2->y ? p1->pointLabel : p2->pointLabel;
+		p.y = p1->y > p2->y ? p1->y : p2->y;
 		return;
 	}
 	if (p2->x == p3->x && p2->x == p.x)
 	{
-		p2p3->x = p.x;
-		p2p3->y = p2->y > p3->y ? p2->y : p3->y;
-		p2p3->pointLabel = p2->y > p3->y ? p2->pointLabel : p3->pointLabel;
+		p.y = p2->y > p3->y ? p2->y : p3->y;
 		return;
 	}
 	if (p3->x == p1->x && p1->x == p.x)
 	{
-		p3p1->x = p.x;
-		p3p1->y = p3->y > p1->y ? p3->y : p1->y;
-		p3p1->pointLabel = p3->y > p1->y ? p3->pointLabel : p1->pointLabel;
+		p.y = p3->y > p1->y ? p3->y : p1->y;
 		return;
 	}
 	if ((p1->x <= p.x && p2->x > p.x) || (p2->x < p.x && p1->x >= p.x))

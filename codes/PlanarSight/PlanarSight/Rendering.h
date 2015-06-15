@@ -46,6 +46,7 @@ public:
 	bool showDualGraph;
 	bool show3DView;
 	bool showLinearSet;
+	bool showAllMonsters;
 	bool useDCELSort;
 
 	bool gameStart;
@@ -57,8 +58,10 @@ public:
 	Rendering();
 	~Rendering();
 	void draw();
+	void showPolygonInfo();
 	void process();
 	void preprocess();
+	void randomPlacePlayer();
 	void drawPolygon(CPolygon& p);
 	void drawPolygon3D(CPolygon& p);
 	void drawVisPolygon(CPolygon& p);

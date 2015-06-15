@@ -7,8 +7,7 @@ extern int wood2_tex_id;
 extern int floor_tex_id;
 extern int visp_tex_id;
 
-float total_tm[4] = {0, 0, 0, 0};
-int process_count = 0;
+float process_tm = 0;
 
 Rendering::Rendering()
 {
@@ -24,6 +23,7 @@ Rendering::Rendering()
 	showDualGraph = false;
 	show3DView = false;
 	showLinearSet = false;
+	showAllMonsters = false;
 	useDCELSort = false;
 
 	gameStart = false;
@@ -79,7 +79,7 @@ void Rendering::draw()
 		int size = visPolygons.size();
 		for (int i = 0; i < size; i++)
 		{
-			if (monsters[i].visible)
+			if (monsters[i].visible || showAllMonsters)
 			{
 				if (show3DView)
 					drawVisPolygon3D(visPolygons[i], i / (double)size);
@@ -121,6 +121,7 @@ void Rendering::draw()
 		drawDualGraph(basePolygon->pointArray, 0, 0, 1);
 		for (int i = 0; i < monsterSize; i++)
 			drawDualGraph(monsters[i].pos, 0, 1, 1);
+		drawDualGraph(player.pos, 1, 0, 0);
 		exit2D();
 	}
 
@@ -131,6 +132,24 @@ void Rendering::draw()
 		drawLinearSet();
 		exit2D();
 	}
+	change2D();
+	showPolygonInfo();
+	exit2D();
+}
+
+void Rendering::showPolygonInfo()
+{
+	
+	glColor3d(1, 1, 1);
+	char info[100];
+	sprintf(info, "Vertices: %d Loops: %d", basePolygon->pointArray.size(), basePolygon->loopArray.size());
+	glRasterPos2d(10, 600);
+	for (int i = 0; i < strlen(info); i++)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, info[i]);
+	sprintf(info, "Processing Time: %.2fms", process_tm);
+	glRasterPos2d(10, 580);
+	for (int i = 0; i < strlen(info); i++)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, info[i]);
 }
 
 void Rendering::process()
@@ -138,6 +157,9 @@ void Rendering::process()
 	LARGE_INTEGER BeginTime;
 	LARGE_INTEGER EndTime;
 	LARGE_INTEGER Frequency;
+
+	QueryPerformanceFrequency(&Frequency);
+	QueryPerformanceCounter(&BeginTime);
 
 	int monsterSize = monsters.size();
 	if (gameStart && monsterSize > 0)
@@ -193,29 +215,19 @@ void Rendering::process()
 			p2t::Point p(monsters[monID].pos.x, monsters[monID].pos.y);
 			int selc = 1; //表示新剖分出来的边数
 
-			//QueryPerformanceFrequency(&Frequency);
-			//QueryPerformanceCounter(&BeginTime);
 			splitedMesh = insertPointToUpdateTriangles(initialMesh, p, &selc); //生成新的三角剖分网格
-			//QueryPerformanceCounter(&EndTime);
-			//float tm1 = (float)(EndTime.QuadPart - BeginTime.QuadPart) / Frequency.QuadPart;
 
 			//清空上次的排序线段和顶点信息
 			sortedPointArray.clear();
 			sortedSegmentArray.clear();
 			PointArray newPointArray;
 
-			//QueryPerformanceFrequency(&Frequency);
-			//QueryPerformanceCounter(&BeginTime);
 			sortedSegmentArray = mesh2SegArray(splitedMesh, p, selc, basePolygon->pointArray.size(), newPointArray); //生成新的排序线段和顶点
-			//QueryPerformanceCounter(&EndTime);
-			//float tm2 = (float)(EndTime.QuadPart - BeginTime.QuadPart) / Frequency.QuadPart;
 
 			pPolarID.clear();
 			pPolarValues.clear();
 			pPolarOrder.clear();
             
-			//QueryPerformanceFrequency(&Frequency);
-			//QueryPerformanceCounter(&BeginTime);
 			if (useDCELSort && dcel != NULL)
 				getPolarOrderByDCEL(monID,
 				basePolygon->pointArray, newPointArray, sortedPointArray,
@@ -224,32 +236,14 @@ void Rendering::process()
 				getPolarOrder(monID,
 				basePolygon->pointArray, newPointArray, sortedPointArray,
 				pPolarID, pPolarValues, pPolarOrder);
-			//QueryPerformanceCounter(&EndTime);
-			//float tm3 = (float)(EndTime.QuadPart - BeginTime.QuadPart) / Frequency.QuadPart;
 
-			//QueryPerformanceFrequency(&Frequency);
-			//QueryPerformanceCounter(&BeginTime);
 			CPolygon cp = calcVisPolygon(monID, sortedPointArray, sortedSegmentArray, pPolarID, pPolarValues, pPolarOrder);
-			//QueryPerformanceCounter(&EndTime);
-			//float tm4 = (float)(EndTime.QuadPart - BeginTime.QuadPart) / Frequency.QuadPart;
 
 			visPolygons.push_back(cp);
-			/*
-			total_tm[0] += tm1; 
-			total_tm[1] += tm2;
-			total_tm[2] += tm3;
-			total_tm[3] += tm4;
-			process_count++;
-
-			printf("MU: %.2f\tTS: %.2f\tAS: %.2f\tLS: %.2f\n",
-				(total_tm[0] / process_count) * 1000,
-				(total_tm[1] / process_count) * 1000,
-				(total_tm[2] / process_count) * 1000,
-				(total_tm[3] / process_count) * 1000);
-				*/
 		}	
 	}
-
+	QueryPerformanceCounter(&EndTime);
+	process_tm = ((float)(EndTime.QuadPart - BeginTime.QuadPart) / Frequency.QuadPart) * 1000;
 }
 
 void Rendering::preprocess()
@@ -263,8 +257,18 @@ void Rendering::preprocess()
 		dcel = new DCEL();
 		dcel->initialize(basePolygon->pointArray);
 	}
-
+	randomPlacePlayer();
+	basePolygon->exportToFile(std::ofstream("temp_map.txt", std::ofstream::out));
 	preprocessFinished = true;
+}
+
+void Rendering::randomPlacePlayer()
+{
+	while (!basePolygon->pointInPolygonTest(player.pos))
+	{
+		player.pos.x = rand() % 740;
+		player.pos.y = rand() % 620;
+	}
 }
 
 void Rendering::drawPolygon(CPolygon& p)
@@ -332,13 +336,21 @@ void Rendering::drawLoop(CPolygon& p, int loopID)
 {
 	int pointSize = p.loopArray[loopID].pointIDArray.size();
 	int index;
+
 	glLineWidth(1.0);
-	glBegin(GL_LINE_LOOP);
+	glBegin(GL_LINE_STRIP);
 	for (int i = 0; i < pointSize; i++)
 	{
 		index = p.loopArray[loopID].pointIDArray[i];
 		glVertex2d(p.pointArray[index].x, p.pointArray[index].y);
 	}
+	glEnd();
+
+	glBegin(GL_LINES);
+	index = p.loopArray[loopID].pointIDArray[pointSize - 1];
+	glVertex2d(p.pointArray[index].x, p.pointArray[index].y);
+	index = p.loopArray[loopID].pointIDArray[0];
+	glVertex2d(p.pointArray[index].x, p.pointArray[index].y);
 	glEnd();
 }
 
@@ -527,7 +539,7 @@ void Rendering::drawMonsters(MonsterArray& ma)
 	glColor3d(0, 1, 1);
 	for (int i = 0; i < pointSize; i++)
 	{
-		if (ma[i].visible)
+		if (ma[i].visible || showAllMonsters)
 			drawPoint(ma[i].pos, 5);
 	}
 }
@@ -582,6 +594,9 @@ bool Rendering::playerMoveTo(Point& p)
 	{
 		player.calcDirection(p);
 		player.pos = p;
+		//给玩家位置增加一个细微扰动，防止退化情况
+		player.pos.x += ((rand() % 11) - 5) / 100.0;
+		player.pos.y += ((rand() % 11) - 5) / 100.0;
 		return true;
 	}
 	else
@@ -666,6 +681,7 @@ void Rendering::clear()
 	int visSize = visPolygons.size();
 	for (int i = 0; i < visSize; i++)
 		visPolygons[i].clear();
+	playerVisPolygon.clear();
 	visPolygons.clear();
 	loopBuf.clear();
 	monsters.clear();
@@ -858,7 +874,8 @@ CPolygon Rendering::calcVisPolygon(int monsterID, PointArray& pa, SegmentArray& 
 	calcLineLineIntersection(pRight, center, rangeMax + HALF_PI, pa[sOrder[rangeRightY].aID], pa[sOrder[rangeRightY].bID]);
 	pointBuf.push_back(pRight);
 
-	if (monsterID != -1 && monsterID == monsters.size() - 1)
+	if ((monsterID == -1 && monsters.size() == 0) ||
+		monsterID == monsters.size() - 1)
 	{
 		xLeft = rangeLeft;
 		xRight = rangeRight;
@@ -962,7 +979,6 @@ void Rendering::getPolarOrder(int monsterID, PointArray& pa, PointArray& pb, Poi
 
 }
 
-//DCEL
 void Rendering::getPolarOrderByDCEL(int monsterID, PointArray& pa, PointArray& pb, PointArray& points, IntArray& pPolarID, DoubleArray& pPolarValues, IntArray& pPolarOrder)
 {
     Point pointMonster = monsters[monsterID].pos;
@@ -1231,7 +1247,7 @@ void Rendering::drawDualGraphBackground()
 	glVertex2d(10, 10 + height / 5.0);
 	glEnd();
 
-	glColor3d(0.0, 0.0, 0.0);
+	glColor4d(0.0, 0.0, 0.0, 0.5);
 	glBegin(GL_POLYGON);
 	glVertex2d(10, 10);
 	glVertex2d(10 + width / 5.0, 10);
@@ -1305,7 +1321,7 @@ void Rendering::drawLinearSetBackground()
 	glVertex2d(730, 10 + height / 5.0);
 	glEnd();
 
-	glColor3d(0.0, 0.0, 0.0);
+	glColor4d(0.0, 0.0, 0.0, 0.5);
 	glBegin(GL_POLYGON);
 	glVertex2d(730, 10);
 	glVertex2d(730 - width / 5.0, 10);

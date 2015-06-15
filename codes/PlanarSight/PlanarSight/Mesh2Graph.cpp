@@ -94,18 +94,18 @@ Graph* mesh2Graph(const Mesh &mesh, const p2t::Point &p, int splitedEdgeLablesCo
 			graph->addEdge((*it)->edges[2], (*it)->edges[0], nodeMemPoolIndex++);
 		}
 		//l21,l31,l12,l13,l32,l23
-		if (sign1 == 0 && sign2 > 0)
-			graph->addEdge((*it)->edges[2], (*it)->edges[1], nodeMemPoolIndex++);
-		if (sign2 == 0 && sign1 > 0)
-			graph->addEdge((*it)->edges[2], (*it)->edges[0], nodeMemPoolIndex++);
-		if (sign3 == 0 && sign1 > 0)
-			graph->addEdge((*it)->edges[1], (*it)->edges[0], nodeMemPoolIndex++);
-		if (sign1 == 0 && sign3 > 0)
+		if (sign1 == 0 && sign2 < 0)
 			graph->addEdge((*it)->edges[1], (*it)->edges[2], nodeMemPoolIndex++);
-		if (sign2 == 0 && sign3 > 0)
+		if (sign2 == 0 && sign1 < 0)
 			graph->addEdge((*it)->edges[0], (*it)->edges[2], nodeMemPoolIndex++);
-		if (sign3 == 0 && sign2 > 0)
+		if (sign3 == 0 && sign1 < 0)
 			graph->addEdge((*it)->edges[0], (*it)->edges[1], nodeMemPoolIndex++);
+		if (sign1 == 0 && sign3 < 0)
+			graph->addEdge((*it)->edges[2], (*it)->edges[1], nodeMemPoolIndex++);
+		if (sign2 == 0 && sign3 < 0)
+			graph->addEdge((*it)->edges[2], (*it)->edges[0], nodeMemPoolIndex++);
+		if (sign3 == 0 && sign2 < 0)
+			graph->addEdge((*it)->edges[1], (*it)->edges[0], nodeMemPoolIndex++);
 
 		pla[2 * (*it)->edges[0]] = p2->pointLabel;
 		pla[2 * (*it)->edges[0] + 1] = p3->pointLabel;
