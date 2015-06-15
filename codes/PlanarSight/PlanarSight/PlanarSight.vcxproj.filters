@@ -203,6 +203,9 @@
     <ClCompile Include="Vertex.cpp">
       <Filter>源文件\DCEL</Filter>
     </ClCompile>
+    <ClCompile Include="Rendering.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PlanarSight.rc">
