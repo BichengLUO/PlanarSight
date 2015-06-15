@@ -437,6 +437,7 @@ void CPlanarSightDlg::OnBnClickedButtonImportMap()
 		GetDlgItem(IDC_INNER_WALLS)->EnableWindow(true);
 		GetDlgItem(IDC_MONSTERS)->EnableWindow(true);
 		GetDlgItem(IDC_START_GAME)->EnableWindow(true);
+		GetDlgItem(IDC_END_GAME)->EnableWindow(false);
 	}
 	else
 		return;

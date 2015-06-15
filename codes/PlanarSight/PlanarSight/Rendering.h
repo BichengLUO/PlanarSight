@@ -57,6 +57,7 @@ public:
 	Rendering();
 	~Rendering();
 	void draw();
+	void showPolygonInfo();
 	void process();
 	void preprocess();
 	void randomPlacePlayer();
