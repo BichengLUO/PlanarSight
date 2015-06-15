@@ -962,6 +962,7 @@ void Rendering::getPolarOrder(int monsterID, PointArray& pa, PointArray& pb, Poi
 
 }
 
+//DCEL
 void Rendering::getPolarOrderByDCEL(int monsterID, PointArray& pa, PointArray& pb, PointArray& points, IntArray& pPolarID, DoubleArray& pPolarValues, IntArray& pPolarOrder)
 {
     Point pointMonster = monsters[monsterID].pos;
