@@ -1,15 +1,8 @@
 #include "Line.h"
 
-bool Line::isParallel(const Line &line)
-{
-    if (fabs(a * line.b - b * line.a) < eps)
-        return true;
-    else return false;
-}
-
 bool Line::isParallel(const Line &line, double tolerance)
 {
-    if (fabs(a * line.b - b * line.a) < tolerance)
+    if (a * line.b - b * line.a == 0)
         return true;
     else return false;
 }
@@ -18,7 +11,8 @@ double Line::getDistance(const Point &point)
 {
     double d = a * point.x + b * point.y + c;
     double m = sqrt(a * a + b * b);
-    return fabs(d) / m;
+    double ans = fabs(d) / m;
+    return ans;
 }
 
 Point Line::getIntersectionPoint(const Line &line)
@@ -37,30 +31,9 @@ Point Line::getIntersection(HalfEdge* edge)
     return Line::getIntersectionPoint(line);
 }
 
-bool Line::isOnLine(const Point &point)
-{
-    return getDistance(point) < eps;
-}
-
 bool Line::isOnLine(const Point &point, double tolerance)
 {
     return getDistance(point) < tolerance;
-}
-
-bool Line::isIntersection(HalfEdge* edge)
-{
-    Point p1 = edge->origin->coordinate;
-    Point p2 = edge->twin->origin->coordinate;
-    Line line = Line(p1, p2);
-    if (isParallel(line) == true)
-        return false;
-
-    Point po = getIntersectionPoint(line);
-    double xmin = min(p1.x, p2.x);
-    double xmax = max(p1.x, p2.x);
-    double ymin = min(p1.y, p2.y);
-    double ymax = max(p1.y, p2.y);
-    return (xmin + eps< po.x && po.x < xmax - eps) || (ymin + eps < po.y && po.y < ymax - eps);
 }
 
 bool Line::isIntersection(HalfEdge* edge, double tolerance)
@@ -76,7 +49,15 @@ bool Line::isIntersection(HalfEdge* edge, double tolerance)
     double xmax = max(p1.x, p2.x);
     double ymin = min(p1.y, p2.y);
     double ymax = max(p1.y, p2.y);
-    return (xmin + tolerance< po.x && po.x < xmax - tolerance) || (ymin + tolerance < po.y && po.y < ymax - tolerance);
+    if (xmax - xmin < fabs(xmax + xmin) / 2.0 * tolerance)
+    {
+        return ymin + tolerance < po.y && po.y < ymax - tolerance;
+    }
+    else if (ymax - ymin < fabs(ymax + ymin) / 2.0 * tolerance)
+    {
+        return xmin + tolerance < po.x && po.x < xmax - tolerance;
+    }
+    return (xmin + tolerance< po.x && po.x < xmax - tolerance) && (ymin + tolerance < po.y && po.y < ymax - tolerance);
 }
 
 void Line::print()
