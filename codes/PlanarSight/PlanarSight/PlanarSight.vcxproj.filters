@@ -149,9 +149,6 @@
     <ClCompile Include="OpenGL.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Point.cpp">
       <Filter>源文件\Math2d</Filter>
     </ClCompile>
