@@ -23,6 +23,7 @@ Rendering::Rendering()
 	showDualGraph = false;
 	show3DView = false;
 	showLinearSet = false;
+	showAllMonsters = false;
 	useDCELSort = false;
 
 	gameStart = false;
@@ -78,7 +79,7 @@ void Rendering::draw()
 		int size = visPolygons.size();
 		for (int i = 0; i < size; i++)
 		{
-			if (monsters[i].visible)
+			if (monsters[i].visible || showAllMonsters)
 			{
 				if (show3DView)
 					drawVisPolygon3D(visPolygons[i], i / (double)size);
@@ -120,6 +121,7 @@ void Rendering::draw()
 		drawDualGraph(basePolygon->pointArray, 0, 0, 1);
 		for (int i = 0; i < monsterSize; i++)
 			drawDualGraph(monsters[i].pos, 0, 1, 1);
+		drawDualGraph(player.pos, 1, 0, 0);
 		exit2D();
 	}
 
@@ -537,7 +539,7 @@ void Rendering::drawMonsters(MonsterArray& ma)
 	glColor3d(0, 1, 1);
 	for (int i = 0; i < pointSize; i++)
 	{
-		if (ma[i].visible)
+		if (ma[i].visible || showAllMonsters)
 			drawPoint(ma[i].pos, 5);
 	}
 }

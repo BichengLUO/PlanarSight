@@ -73,6 +73,7 @@ void CPlanarSightDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LINEAR_SET, showLinearSet);
 	DDX_Control(pDX, IDC_BUTTON_IMPORT_MAP, importMapBtn);
 	DDX_Control(pDX, IDC_BUTTON_EXPORT_MAP, exportMapBtn);
+	DDX_Control(pDX, IDC_CHECK_SHOW_ALL_MONSTERS, showAllMonstersBtn);
 }
 
 BEGIN_MESSAGE_MAP(CPlanarSightDlg, CDialogEx)
@@ -99,6 +100,7 @@ ON_BN_CLICKED(IDC_RADIO_STD_SORT, &CPlanarSightDlg::OnBnClickedRadioStdSort)
 ON_BN_CLICKED(IDC_RADIO_DCEL, &CPlanarSightDlg::OnBnClickedRadioDcel)
 ON_BN_CLICKED(IDC_BUTTON_IMPORT_MAP, &CPlanarSightDlg::OnBnClickedButtonImportMap)
 ON_BN_CLICKED(IDC_BUTTON_EXPORT_MAP, &CPlanarSightDlg::OnBnClickedButtonExportMap)
+ON_BN_CLICKED(IDC_CHECK_SHOW_ALL_MONSTERS, &CPlanarSightDlg::OnBnClickedCheckShowAllMonsters)
 END_MESSAGE_MAP()
 
 
@@ -460,4 +462,14 @@ void CPlanarSightDlg::OnBnClickedButtonExportMap()
 	}
 	else
 		return;
+}
+
+
+void CPlanarSightDlg::OnBnClickedCheckShowAllMonsters()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	if (showAllMonstersBtn.GetCheck() == 0)
+		m_pDisplay->rendering->showAllMonsters = false;
+	else
+		m_pDisplay->rendering->showAllMonsters = true;
 }
